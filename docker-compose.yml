@@ -1,0 +1,18 @@
+version: "3"
+services:
+
+  postgres:
+    image: postgres:14
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=pass
+      - listen_addresses='*'
+    ports:
+      - 5432:5432
+
+  wait:
+    image: dadarek/wait-for-dependencies
+    depends_on:
+      - postgres
+    command: postgres:5432
