@@ -1,36 +1,32 @@
 package iam
 
 type (
-	UserID         string
-	GroupID        string
-	AccessPolicyID string
-	AccessType     int
+	UserID string
 )
 
-const (
-	AccessTypeRead = iota
-	AccessTypeCreate
-	AccessTypeDelete
-	AccessTypeUpdate
-)
-
-type User interface {
-	GetID() UserID
-	GetName() string
-	GetPolicies() []AccessPolicy
-	GetGroups() []Group
+type User struct {
+	id       UserID
+	name     string
+	policies []ResourceAccessPolicy
+	groups   []Group
 }
 
-type Group interface {
-	GetID() GroupID
-	GetName() string
-	GetPolicies() []AccessPolicy
-	GetUsers() []User
+func NewUser(id UserID, name string, policies []ResourceAccessPolicy, groups []Group) *User {
+	return &User{id: id, name: name, policies: policies, groups: groups}
 }
 
-type AccessPolicy interface {
-	GetID() AccessPolicyID
-	GetName() string
-	GetResource() []Resource
-	GetAccess() []AccessType
+func (u User) Id() UserID {
+	return u.id
+}
+
+func (u User) Name() string {
+	return u.name
+}
+
+func (u User) Policies() []ResourceAccessPolicy {
+	return u.policies
+}
+
+func (u User) Groups() []Group {
+	return u.groups
 }
