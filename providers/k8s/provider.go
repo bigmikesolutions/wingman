@@ -1,23 +1,27 @@
 package k8s
 
 import (
-	"context"
 	"flag"
 	"path/filepath"
 
+	"github.com/bigmikesolutions/wingman/pkg/iam"
+
 	"github.com/pkg/errors"
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 )
 
-type Cluster struct {
+const (
+	ProviderName iam.ProviderID = "k8s"
+)
+
+type Provider struct {
 	client *kubernetes.Clientset
 }
 
-func NewCluster() (*Cluster, error) {
+func NewProvider() (iam.ResourceProvider, error) {
 	var k8sCfgPath *string
 	if home := homedir.HomeDir(); home != "" {
 		k8sCfgPath = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
@@ -33,11 +37,25 @@ func NewCluster() (*Cluster, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "couldn't create k8s client")
 	}
-	return &Cluster{
+	return &Provider{
 		client: client,
 	}, nil
 }
 
-func (c *Cluster) GetPods(ctx context.Context, namespace string, opt metav1.ListOptions) (*v1.PodList, error) {
-	return c.client.CoreV1().Pods(namespace).List(ctx, opt)
+func (c *Provider) Provide(req *iam.GetResourceRequest) (iam.Resource, error) {
+	if len(req.Path) == 0 {
+		return nil, errors.New("path is required")
+	}
+	switch req.Path[0] {
+	case "pods":
+		pods, err := c.client.CoreV1().Pods("default").List(req.Ctx, metav1.ListOptions{})
+		if err != nil {
+			return nil, err
+		}
+		return ResourcePods{
+			pods:   pods,
+			client: c.client,
+		}, nil
+	}
+	return nil, errors.Errorf("not implemented resource: %s", req.Path[0])
 }

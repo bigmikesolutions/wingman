@@ -1,12 +1,16 @@
 package iam
 
 type (
-	ResourceID string
+	ResourceID   string
+	ResourceType string
+	ProviderID   string
 )
 
 type Resource interface {
 	GetID() ResourceID
+	GetType() ResourceType
+	GetProviderID() ProviderID
 	GetName() string
-	GetType() string
 	Execute(action ResourceAction) error
+	GetInfo() interface{}
 }

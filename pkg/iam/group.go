@@ -8,7 +8,7 @@ type Group struct {
 	id       GroupID
 	name     string
 	policies []ResourceAccessPolicy
-	users    []User
+	users    []User `gorm:"many2many:user_groups;"`
 }
 
 func NewGroup(id GroupID, name string, policies []ResourceAccessPolicy, users []User) *Group {

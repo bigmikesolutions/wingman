@@ -8,7 +8,7 @@ type User struct {
 	id       UserID
 	name     string
 	policies []ResourceAccessPolicy
-	groups   []Group
+	groups   []Group `gorm:"many2many:user_groups;"`
 }
 
 func NewUser(id UserID, name string, policies []ResourceAccessPolicy, groups []Group) *User {

@@ -1,6 +1,14 @@
 version: "3"
 services:
 
+  vault:
+    image: vault
+    environment:
+      - VAULT_DEV_ROOT_TOKEN_ID=root
+      - VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200
+    ports:
+      - 8200:8200
+
   postgres:
     image: postgres:14
     environment:
@@ -14,5 +22,6 @@ services:
   wait:
     image: dadarek/wait-for-dependencies
     depends_on:
+      - vault
       - postgres
-    command: postgres:5432
+    command: vault:8200 postgres:5432
