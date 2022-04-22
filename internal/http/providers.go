@@ -45,6 +45,7 @@ func (c *ProviderCtrl) getProviderResource(w http.ResponseWriter, r *http.Reques
 			Ctx:    r.Context(),
 			Path:   resourcePath,
 			Params: r.Header,
+			Query:  r.URL.Query(),
 		})
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)

@@ -15,6 +15,7 @@ type GetResourceRequest struct {
 	Path   []string
 	Params map[string][]string
 	Ctx    context.Context
+	Query  map[string][]string
 }
 
 type ResourceProvider interface {

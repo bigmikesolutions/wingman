@@ -13,10 +13,6 @@ import (
 	"k8s.io/client-go/util/homedir"
 )
 
-const (
-	ProviderName iam.ProviderID = "k8s"
-)
-
 type Provider struct {
 	client *kubernetes.Clientset
 }
@@ -48,7 +44,8 @@ func (c *Provider) Provide(req *iam.GetResourceRequest) (iam.Resource, error) {
 	}
 	switch req.Path[0] {
 	case "pods":
-		pods, err := c.client.CoreV1().Pods("default").List(req.Ctx, metav1.ListOptions{})
+		pods, err := c.client.CoreV1().Pods(GetRequestNamespace(req)).
+			List(req.Ctx, metav1.ListOptions{})
 		if err != nil {
 			return nil, err
 		}
