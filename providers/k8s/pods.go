@@ -3,34 +3,27 @@ package k8s
 import (
 	"time"
 
-	"github.com/bigmikesolutions/wingman/pkg/iam"
+	"github.com/bigmikesolutions/wingman/pkg/provider"
+
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )
-
-type PodInfo struct {
-	Name     string        `json:"name"`
-	Ready    string        `json:"ready"`
-	Status   string        `json:"status"`
-	Restarts int           `json:"restarts"`
-	Age      time.Duration `json:"age"`
-}
 
 type ResourcePods struct {
 	pods   *v1.PodList
 	client *kubernetes.Clientset
 }
 
-func (p ResourcePods) GetID() iam.ResourceID {
+func (p ResourcePods) GetID() provider.ResourceID {
 	return ""
 }
 
-func (p ResourcePods) GetType() iam.ResourceType {
-	return iam.ResourceType(p.pods.Kind)
+func (p ResourcePods) GetType() provider.ResourceType {
+	return provider.ResourceType(p.pods.Kind)
 }
 
-func (p ResourcePods) GetProviderID() iam.ProviderID {
+func (p ResourcePods) GetProviderID() provider.ProviderID {
 	return ProviderName
 }
 
@@ -38,7 +31,7 @@ func (p ResourcePods) GetName() string {
 	return ""
 }
 
-func (p ResourcePods) Execute(action iam.ResourceAction) error {
+func (p ResourcePods) Execute(action provider.ResourceAction) error {
 	// TODO implement
 	return errors.New("not implemented")
 }

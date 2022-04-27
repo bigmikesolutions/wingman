@@ -1,9 +1,12 @@
 package k8s
 
-import "github.com/bigmikesolutions/wingman/pkg/iam"
+import (
+	"github.com/bigmikesolutions/wingman/pkg/provider"
+)
 
 const (
-	ProviderName iam.ProviderID = "k8s"
+	ProviderName     provider.ProviderID = "k8s"
+	PodsResourceType                     = "pods"
 )
 
 var AliasNamespace = []string{"ns", "namespace"}

@@ -3,6 +3,8 @@ package providers
 import (
 	"sync"
 
+	"github.com/bigmikesolutions/wingman/pkg/provider"
+
 	"github.com/bigmikesolutions/wingman/pkg/iam"
 	"github.com/bigmikesolutions/wingman/providers/k8s"
 	"github.com/pkg/errors"
@@ -12,27 +14,27 @@ type ProviderFactory = func() (iam.ResourceProvider, error)
 
 type Providers struct {
 	mux            sync.RWMutex
-	providersList  []iam.ProviderID
-	providers      map[iam.ProviderID]ProviderFactory
-	providersCache map[iam.ProviderID]iam.ResourceProvider
+	providersList  []provider.ProviderID
+	providers      map[provider.ProviderID]ProviderFactory
+	providersCache map[provider.ProviderID]iam.ResourceProvider
 }
 
 func NewProviders() *Providers {
-	providers := map[iam.ProviderID]ProviderFactory{
+	providers := map[provider.ProviderID]ProviderFactory{
 		k8s.ProviderName: k8s.NewProvider,
 	}
-	providersList := make([]iam.ProviderID, 0)
+	providersList := make([]provider.ProviderID, 0)
 	for id := range providers {
 		providersList = append(providersList, id)
 	}
 	return &Providers{
-		providersCache: make(map[iam.ProviderID]iam.ResourceProvider),
+		providersCache: make(map[provider.ProviderID]iam.ResourceProvider),
 		providers:      providers,
 		providersList:  providersList,
 	}
 }
 
-func (p Providers) Find(id iam.ProviderID) (iam.ResourceProvider, error) {
+func (p Providers) Find(id provider.ProviderID) (iam.ResourceProvider, error) {
 	// check cache
 	p.mux.RLock()
 	provider, _ := p.providersCache[id]
@@ -56,6 +58,6 @@ func (p Providers) Find(id iam.ProviderID) (iam.ResourceProvider, error) {
 	return provider, nil
 }
 
-func (p Providers) List() []iam.ProviderID {
+func (p Providers) List() []provider.ProviderID {
 	return p.providersList
 }

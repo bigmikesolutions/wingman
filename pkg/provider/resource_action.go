@@ -1,9 +1,11 @@
-package iam
+package provider
 
-import "context"
+import (
+	"context"
+)
 
 type ResourceAction interface {
-	GetResourceAccessSession() ResourceAccessSession
+	// GetResourceAccessSession() iam.ResourceAccessSession
 	GetActionParams() map[string]interface{}
 	GetContext() context.Context
 }

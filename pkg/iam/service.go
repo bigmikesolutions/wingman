@@ -1,6 +1,8 @@
 package iam
 
-import "context"
+import (
+	"context"
+)
 
 type AuthService interface {
 	SignIn(login string, pass []byte) (UserSession, error)
@@ -16,13 +18,4 @@ type GetResourceRequest struct {
 	Params map[string][]string
 	Ctx    context.Context
 	Query  map[string][]string
-}
-
-type ResourceProvider interface {
-	Provide(req *GetResourceRequest) (Resource, error)
-}
-
-type ProviderPlugins interface {
-	List() []ProviderID
-	Find(id ProviderID) (ResourceProvider, error)
 }

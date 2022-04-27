@@ -1,5 +1,7 @@
 package iam
 
+import "github.com/bigmikesolutions/wingman/pkg/provider"
+
 type (
 	UserID string
 )
@@ -7,11 +9,11 @@ type (
 type User struct {
 	id       UserID
 	name     string
-	policies []ResourceAccessPolicy
+	policies []provider.ResourceAccessPolicy
 	groups   []Group `gorm:"many2many:user_groups;"`
 }
 
-func NewUser(id UserID, name string, policies []ResourceAccessPolicy, groups []Group) *User {
+func NewUser(id UserID, name string, policies []provider.ResourceAccessPolicy, groups []Group) *User {
 	return &User{id: id, name: name, policies: policies, groups: groups}
 }
 
@@ -23,7 +25,7 @@ func (u User) Name() string {
 	return u.name
 }
 
-func (u User) Policies() []ResourceAccessPolicy {
+func (u User) Policies() []provider.ResourceAccessPolicy {
 	return u.policies
 }
 

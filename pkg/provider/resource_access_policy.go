@@ -1,4 +1,4 @@
-package iam
+package provider
 
 type (
 	AccessPolicyID string

@@ -1,6 +1,10 @@
 package iam
 
-import "time"
+import (
+	"time"
+
+	"github.com/bigmikesolutions/wingman/pkg/provider"
+)
 
 type (
 	ResourceAccessSessionID string
@@ -8,13 +12,13 @@ type (
 
 type ResourceAccessSession struct {
 	id             ResourceAccessSessionID
-	resource       Resource
+	resource       provider.Resource
 	userSession    UserSession
-	accessTypes    []AccessType
+	accessTypes    []provider.AccessType
 	expirationDate time.Time
 }
 
-func NewResourceAccessSession(id ResourceAccessSessionID, resource Resource, userSession UserSession, expirationDate time.Time, accessTypes ...AccessType) *ResourceAccessSession {
+func NewResourceAccessSession(id ResourceAccessSessionID, resource provider.Resource, userSession UserSession, expirationDate time.Time, accessTypes ...provider.AccessType) *ResourceAccessSession {
 	return &ResourceAccessSession{id: id, resource: resource, userSession: userSession, accessTypes: accessTypes, expirationDate: expirationDate}
 }
 
@@ -22,7 +26,7 @@ func (r ResourceAccessSession) Id() ResourceAccessSessionID {
 	return r.id
 }
 
-func (r ResourceAccessSession) Resource() Resource {
+func (r ResourceAccessSession) Resource() provider.Resource {
 	return r.resource
 }
 
@@ -30,7 +34,7 @@ func (r ResourceAccessSession) UserSession() UserSession {
 	return r.userSession
 }
 
-func (r ResourceAccessSession) AccessTypes() []AccessType {
+func (r ResourceAccessSession) AccessTypes() []provider.AccessType {
 	return r.accessTypes
 }
 
