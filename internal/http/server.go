@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/bigmikesolutions/wingman/pkg/iam"
+
 	"github.com/bigmikesolutions/wingman/pkg/provider"
 
 	"github.com/bigmikesolutions/wingman/providers/k8s"
@@ -33,7 +35,15 @@ func NewRouter() (http.Handler, error) {
 			return nil, err
 		}
 	}
-	cqrs := cqrs.NewCQRS(*cqrsCfg)
+	authSvc := iam.InMemoryAuthService{Users: nil}
+	cqrs := cqrs.NewCQRS(
+		cqrs.NewInMemoryCommandBus(*cqrsCfg),
+		iam.NewAuthQueryBus(
+			cqrs.NewInMemoryQueryBus(*cqrsCfg),
+			authSvc,
+		),
+		cqrs.NewInMemoryEventBus(*cqrsCfg),
+	)
 
 	providerCtrl := ProviderCtrl{
 		path: "/providers",

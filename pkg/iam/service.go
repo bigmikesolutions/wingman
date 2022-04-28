@@ -5,17 +5,21 @@ import (
 )
 
 type AuthService interface {
-	SignIn(login string, pass []byte) (UserSession, error)
-	IsValid(s UserSession) (bool, error)
+	IsValid(ctx context.Context, s UserSession) (bool, error)
+}
+
+type UserService interface {
+	SignIn(ctx context.Context, login string, pass []byte) (UserSession, error)
 }
 
 type AccessService interface {
-	AccessResource(req UserEnvironmentAccessRequest) (UserEnvironmentSession, error)
+	AccessResource(ctx context.Context, req UserEnvironmentAccessRequest) (UserEnvironmentSession, error)
 }
 
-type GetResourceRequest struct {
-	Path   []string
-	Params map[string][]string
-	Ctx    context.Context
-	Query  map[string][]string
+type InMemoryAuthService struct {
+	Users map[string]User
+}
+
+func (i InMemoryAuthService) IsValid(ctx context.Context, s UserSession) (bool, error) {
+	return true, nil
 }
