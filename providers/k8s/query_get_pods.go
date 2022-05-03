@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
+	"github.com/bigmikesolutions/wingman/pkg/actions"
+
 	"github.com/pkg/errors"
 
 	"github.com/bigmikesolutions/wingman/pkg/iam/access"
-
-	"github.com/bigmikesolutions/wingman/providers/actions"
 
 	v1 "k8s.io/api/core/v1"
 
@@ -50,7 +50,7 @@ func (h PodsQueryHandler) Handle(ctx context.Context, q cqrs.Query) (interface{}
 	queryBus := cqrs.GetQueryBus(ctx)
 	if queryBus == nil {
 		return nil, errors.New("query bus not found in context")
-	} else if noAccessErr := actions.HasResourceAccess(
+	} else if noAccessErr := actions.AuthorizeUserResourceAccess(
 		ctx,
 		queryBus,
 		ProviderName,

@@ -41,7 +41,7 @@ func (a ResourceAccessPolicy) AccessTypes() []AccessType {
 	return a.accessTypes
 }
 
-func VerifyHasAccessRight(accessTypes []AccessType, requiredAccess AccessType) error {
+func ContainsAccessRight(accessTypes []AccessType, requiredAccess AccessType) error {
 	for _, access := range accessTypes {
 		if access == requiredAccess {
 			return nil

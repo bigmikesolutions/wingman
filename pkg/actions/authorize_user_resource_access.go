@@ -11,7 +11,7 @@ import (
 	"github.com/bigmikesolutions/wingman/pkg/provider"
 )
 
-func HasResourceAccess(
+func AuthorizeUserResourceAccess(
 	ctx context.Context,
 	queryBus cqrs.QueryBus,
 	providerID provider.ProviderID,
@@ -41,11 +41,11 @@ func HasResourceAccess(
 		return err
 	}
 	userAccessRights := result.(access.QueryGetUserAccessPolicyResult)
-	if noAccessErr := access.VerifyHasAccessRight(userAccessRights.AccessTypes, requiredAccess); noAccessErr != nil {
+	if noAccessErr := access.ContainsAccessRight(userAccessRights.AccessTypes, requiredAccess); noAccessErr != nil {
 		return noAccessErr
 	}
 	for _, addReqAccess := range additionalRequiredAccesses {
-		if noAccessErr := access.VerifyHasAccessRight(userAccessRights.AccessTypes, addReqAccess); noAccessErr != nil {
+		if noAccessErr := access.ContainsAccessRight(userAccessRights.AccessTypes, addReqAccess); noAccessErr != nil {
 			return noAccessErr
 		}
 	}
