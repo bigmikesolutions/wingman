@@ -1,11 +1,11 @@
-package iam
+package identity
 
 import "context"
 
 type ctx string
 
 const (
-	contextUserSession ctx = "iam_user_session"
+	contextUserSession ctx = "identity_user_session"
 )
 
 func SetUserSession(ctx context.Context, userSession UserSession) context.Context {

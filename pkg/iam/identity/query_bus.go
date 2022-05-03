@@ -1,4 +1,4 @@
-package iam
+package identity
 
 import (
 	"context"
@@ -21,13 +21,13 @@ func NewAuthQueryBus(queries cqrs.QueryBus, authSvc AuthService) cqrs.QueryBus {
 func (b AuthQueryBus) ExecuteQuery(ctx context.Context, q cqrs.Query) (interface{}, error) {
 	userSession := GetUserSession(ctx)
 	if userSession == nil {
-		return nil, newUnauthenticatedError("user session missing")
+		return nil, NewUnauthenticatedError("user session missing")
 	}
 	valid, err := b.authSvc.IsValid(ctx, *userSession)
 	if err != nil {
-		return nil, newUnauthenticatedErrorDetails(err, "couldn't validate user session")
+		return nil, NewUnauthenticatedErrorDetails(err, "couldn't validate user session")
 	} else if !valid {
-		return nil, newUnauthenticatedError("user session invalid")
+		return nil, NewUnauthenticatedError("user session invalid")
 	}
 	return b.queries.ExecuteQuery(ctx, q)
 }

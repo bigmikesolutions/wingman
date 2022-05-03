@@ -1,15 +1,19 @@
-package iam
+package identity
 
 import "github.com/pkg/errors"
 
 type UnauthenticatedError struct{ err error }
 
-func newUnauthenticatedError(reason string) error {
+func NewUnauthenticatedError(reason string) error {
 	return &UnauthenticatedError{errors.Errorf("unauthenticated user: %s", reason)}
 }
 
-func newUnauthenticatedErrorDetails(err error, reason string) error {
+func NewUnauthenticatedErrorDetails(err error, reason string) error {
 	return &UnauthenticatedError{errors.Wrapf(err, "unauthenticated user: %s", reason)}
+}
+
+func NewUserSessionNotFoundError(details string) error {
+	return &UnauthenticatedError{errors.Errorf("user session not found - %s", details)}
 }
 
 func (e *UnauthenticatedError) Error() string {

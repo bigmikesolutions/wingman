@@ -4,6 +4,12 @@ import (
 	"context"
 	"time"
 
+	"github.com/pkg/errors"
+
+	"github.com/bigmikesolutions/wingman/pkg/iam/access"
+
+	"github.com/bigmikesolutions/wingman/providers/actions"
+
 	v1 "k8s.io/api/core/v1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -41,7 +47,20 @@ func (h PodsQueryHandler) GetType() cqrs.QueryType {
 }
 
 func (h PodsQueryHandler) Handle(ctx context.Context, q cqrs.Query) (interface{}, error) {
-	query := q.(*provider.ProviderGetResourceQuery)
+	queryBus := cqrs.GetQueryBus(ctx)
+	if queryBus == nil {
+		return nil, errors.New("query bus not found in context")
+	} else if noAccessErr := actions.HasResourceAccess(
+		ctx,
+		queryBus,
+		ProviderName,
+		PodsResourceType,
+		nil,
+		access.AccessTypeRead,
+	); noAccessErr != nil {
+		return nil, noAccessErr
+	}
+	query := q.(*provider.QueryGetResource)
 	pods, err := h.client.CoreV1().
 		Pods(GetNamespace(query.Query)).
 		List(ctx, metav1.ListOptions{})

@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/bigmikesolutions/wingman/pkg/iam"
+	"github.com/bigmikesolutions/wingman/pkg/iam/identity"
 
 	"github.com/bigmikesolutions/wingman/pkg/provider"
 
@@ -35,10 +35,10 @@ func NewRouter() (http.Handler, error) {
 			return nil, err
 		}
 	}
-	authSvc := iam.InMemoryAuthService{Users: nil}
+	authSvc := identity.InMemoryAuthService{Users: nil}
 	cqrs := cqrs.NewCQRS(
 		cqrs.NewInMemoryCommandBus(*cqrsCfg),
-		iam.NewAuthQueryBus(
+		identity.NewAuthQueryBus(
 			cqrs.NewInMemoryQueryBus(*cqrsCfg),
 			authSvc,
 		),

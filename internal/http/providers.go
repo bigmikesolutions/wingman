@@ -37,7 +37,7 @@ func (c *ProviderCtrl) ServeHTTP(writer http.ResponseWriter, request *http.Reque
 }
 
 func (c *ProviderCtrl) getProviderResource(w http.ResponseWriter, r *http.Request, providerID provider.ProviderID, resourcePath ...string) {
-	result, err := c.cqrs.ExecuteQuery(r.Context(), &provider.ProviderGetResourceQuery{
+	result, err := c.cqrs.ExecuteQuery(r.Context(), &provider.QueryGetResource{
 		ProviderID: providerID,
 		Path:       resourcePath,
 		Params:     r.Header,

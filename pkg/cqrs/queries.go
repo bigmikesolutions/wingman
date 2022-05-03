@@ -6,7 +6,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-type QueryType = string
+type (
+	QueryType = string
+)
 
 type Query interface {
 	GetType() QueryType
@@ -37,7 +39,8 @@ func (b InMemoryQueryBus) ExecuteQuery(ctx context.Context, q Query) (interface{
 			return nil, NewHandlerTypeMismatchError(errors.Errorf("query handler type mismatch - expected: %s, got: %s",
 				handler.GetType(), q.GetType()))
 		}
-		return handler.Handle(ctx, q)
+		queryCtx := SetQueryBus(ctx, b)
+		return handler.Handle(queryCtx, q)
 	}
 	return nil, NewMissingHandlerError(errors.Errorf("handler for query not found: %s", q.GetType()))
 }

@@ -2,12 +2,10 @@ package iam
 
 import (
 	"net/http"
-
-	"github.com/bigmikesolutions/wingman/pkg/iam"
 )
 
 type HttpAuthCtrl struct {
-	iam iam.AuthService
+	iam identity.AuthService
 }
 
 func (c *HttpAuthCtrl) AuthUser(w http.ResponseWriter, r *http.Request) {
