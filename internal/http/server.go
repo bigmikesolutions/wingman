@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/bigmikesolutions/wingman/internal/mock"
+
 	"github.com/bigmikesolutions/wingman/pkg/iam/identity"
 
 	"github.com/bigmikesolutions/wingman/pkg/provider"
@@ -35,7 +37,9 @@ func NewRouter() (http.Handler, error) {
 			return nil, err
 		}
 	}
-	authSvc := identity.InMemoryAuthService{Users: nil}
+	mock.Setup(cqrsCfg, r)
+	authSvc := mock.InMemoryAuthService{Users: nil}
+
 	cqrs := cqrs.NewCQRS(
 		cqrs.NewInMemoryCommandBus(*cqrsCfg),
 		identity.NewAuthQueryBus(
