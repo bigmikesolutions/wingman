@@ -11,7 +11,7 @@ type AuthQueryBus struct {
 	authSvc AuthService
 }
 
-func NewAuthQueryBus(queries cqrs.QueryBus, authSvc AuthService) cqrs.QueryBus {
+func NewAuthQueryBus(queries cqrs.QueryBus, authSvc AuthService) *AuthQueryBus {
 	return &AuthQueryBus{
 		queries: queries,
 		authSvc: authSvc,

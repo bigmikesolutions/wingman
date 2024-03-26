@@ -2,4 +2,4 @@ package provider
 
 import "github.com/bigmikesolutions/wingman/pkg/cqrs"
 
-type ProviderFactory = func(*cqrs.Config) error
+type Factory = func() (cqrs.Config, error)

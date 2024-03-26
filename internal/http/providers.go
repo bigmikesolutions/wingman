@@ -28,7 +28,7 @@ func (c *ProviderCtrl) ServeHTTP(writer http.ResponseWriter, request *http.Reque
 		if reqPath[0] == "" {
 			c.list(writer, request)
 		} else {
-			c.getProviderResource(writer, request, provider.ProviderID(reqPath[0]), reqPath[1:]...)
+			c.getProviderResource(writer, request, provider.ID(reqPath[0]), reqPath[1:]...)
 		}
 
 	default:
@@ -36,7 +36,7 @@ func (c *ProviderCtrl) ServeHTTP(writer http.ResponseWriter, request *http.Reque
 	}
 }
 
-func (c *ProviderCtrl) getProviderResource(w http.ResponseWriter, r *http.Request, providerID provider.ProviderID, resourcePath ...string) {
+func (c *ProviderCtrl) getProviderResource(w http.ResponseWriter, r *http.Request, providerID provider.ID, resourcePath ...string) {
 	result, err := c.cqrs.ExecuteQuery(r.Context(), &provider.QueryGetResource{
 		ProviderID: providerID,
 		Path:       resourcePath,

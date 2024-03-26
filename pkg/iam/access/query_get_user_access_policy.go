@@ -11,9 +11,9 @@ const (
 )
 
 type QueryGetUserResourceAccessRights struct {
-	ProviderID   provider.ProviderID
+	ProviderID   provider.ID
 	ResourceType provider.ResourceType
-	ResourceID   *provider.ResourceID
+	ResourceID   provider.ResourceID
 	UserID       identity.UserID
 }
 
@@ -22,9 +22,9 @@ func (c QueryGetUserResourceAccessRights) GetType() cqrs.QueryType {
 }
 
 type QueryGetUserAccessPolicyResult struct {
-	ProviderID   provider.ProviderID
+	ProviderID   provider.ID
 	ResourceType provider.ResourceType
-	ResourceID   *provider.ResourceID
+	ResourceID   provider.ResourceID
 	UserID       identity.UserID
 	AccessTypes  []AccessType
 }

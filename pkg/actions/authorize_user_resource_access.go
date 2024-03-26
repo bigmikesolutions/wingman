@@ -14,17 +14,17 @@ import (
 func AuthorizeUserResourceAccess(
 	ctx context.Context,
 	queryBus cqrs.QueryBus,
-	providerID provider.ProviderID,
+	providerID provider.ID,
 	resourceType provider.ResourceType,
-	resourceID *provider.ResourceID,
+	resourceID provider.ResourceID,
 	requiredAccess access.AccessType,
 	additionalRequiredAccesses ...access.AccessType,
 ) error {
 	userSession := identity.GetUserSession(ctx)
 	if userSession == nil {
 		resourceIDValue := ""
-		if resourceID != nil {
-			resourceIDValue = string(*resourceID)
+		if resourceID != "" {
+			resourceIDValue = string(resourceID)
 		}
 		return identity.NewUserSessionNotFoundError(
 			fmt.Sprintf("provider id: %s, resource type: %s, resource id: %s",

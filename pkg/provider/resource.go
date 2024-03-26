@@ -3,13 +3,13 @@ package provider
 type (
 	ResourceID   string
 	ResourceType string
-	ProviderID   string
+	ID           string
 )
 
 type Resource interface {
 	GetID() ResourceID
 	GetType() ResourceType
-	GetProviderID() ProviderID
+	GetProviderID() ID
 	GetName() string
 	Execute(action ResourceAction) error
 	GetInfo() interface{}

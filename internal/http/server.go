@@ -4,13 +4,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/bigmikesolutions/wingman/internal/mock"
+	mock2 "github.com/bigmikesolutions/wingman/test/mock"
+
+	"github.com/bigmikesolutions/wingman/pkg/cqrs/inmemory"
 
 	"github.com/bigmikesolutions/wingman/pkg/iam/identity"
 
 	"github.com/bigmikesolutions/wingman/pkg/provider"
-
-	"github.com/bigmikesolutions/wingman/providers/k8s"
 
 	"github.com/bigmikesolutions/wingman/pkg/cqrs"
 
@@ -18,11 +18,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-var providers = []provider.ProviderFactory{
-	k8s.NewProvider,
-}
-
-func NewRouter() (http.Handler, error) {
+func NewRouter(providers ...provider.Factory) (http.Handler, error) {
 	r := chi.NewRouter()
 	// A good base middleware stack
 	r.Use(middleware.RequestID)
@@ -32,21 +28,28 @@ func NewRouter() (http.Handler, error) {
 	r.Use(middleware.Timeout(60 * time.Second))
 
 	cqrsCfg := cqrs.NewConfig()
-	for _, provider := range providers {
-		if err := provider(cqrsCfg); err != nil {
+	for _, prov := range providers {
+		provCfg, err := prov()
+		if err != nil {
+			return nil, err
+		}
+
+		cqrsCfg, err = cqrs.Merge(cqrsCfg, provCfg)
+		if err != nil {
 			return nil, err
 		}
 	}
-	mock.Setup(cqrsCfg, r)
-	authSvc := mock.InMemoryAuthService{Users: nil}
+
+	mock2.Setup(&cqrsCfg, r)
+	authSvc := mock2.InMemoryAuthService{Users: nil}
 
 	cqrs := cqrs.NewCQRS(
-		cqrs.NewInMemoryCommandBus(*cqrsCfg),
+		inmemory.NewCommandBus(cqrsCfg),
 		identity.NewAuthQueryBus(
-			cqrs.NewInMemoryQueryBus(*cqrsCfg),
+			inmemory.NewQueryBus(cqrsCfg),
 			authSvc,
 		),
-		cqrs.NewInMemoryEventBus(*cqrsCfg),
+		inmemory.NewEventBus(cqrsCfg),
 	)
 
 	providerCtrl := ProviderCtrl{

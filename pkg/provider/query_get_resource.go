@@ -12,7 +12,7 @@ const (
 )
 
 type QueryGetResource struct {
-	ProviderID ProviderID
+	ProviderID ID
 	Path       []string
 	Params     map[string][]string
 	Query      map[string][]string
@@ -22,6 +22,6 @@ func (c QueryGetResource) GetType() cqrs.QueryType {
 	return GetProviderGetResourceQueryType(c.ProviderID, c.Path...)
 }
 
-func GetProviderGetResourceQueryType(providerID ProviderID, path ...string) cqrs.QueryType {
+func GetProviderGetResourceQueryType(providerID ID, path ...string) cqrs.QueryType {
 	return fmt.Sprintf("%s.%s.%s", providerID, strings.Join(path, "."), QueryTypeGetResource)
 }
