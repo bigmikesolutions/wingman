@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option go_package = "github/bigmikesolutions/wingman/providers/k8s/proto";
+
+package wingman.providers.k8s.v1;
+
+
+service K8sProvider {
+  rpc GetPods (GetPodsRequest) returns (GetPodsResponse);
+}
+
+
+message GetPodsRequest {
+  string namespace = 1;
+  string name = 2;
+}
+
+
+message GetPodsResponse {
+  string namespace = 1;
+  string name = 2;
+}
+
