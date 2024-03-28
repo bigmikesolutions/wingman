@@ -16,6 +16,13 @@ type ProviderCtrl struct {
 	cqrs *cqrs.CQRS
 }
 
+func NewController(path string, cqrs *cqrs.CQRS) *ProviderCtrl {
+	return &ProviderCtrl{
+		path: path,
+		cqrs: cqrs,
+	}
+}
+
 func (c *ProviderCtrl) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	reqPath := strings.Split(
 		strings.TrimRight(

@@ -3,21 +3,57 @@ package test
 import (
 	"net/http/httptest"
 	"testing"
+	"time"
 
-	wingman "github.com/bigmikesolutions/wingman/internal/http"
+	"github.com/go-chi/chi/v5/middleware"
+
+	"github.com/bigmikesolutions/wingman/pkg"
+	"github.com/bigmikesolutions/wingman/pkg/cqrs"
+	"github.com/bigmikesolutions/wingman/pkg/cqrs/inmemory"
+	"github.com/bigmikesolutions/wingman/pkg/iam/identity"
+
+	"github.com/bigmikesolutions/wingman/test/mock"
+
+	"github.com/go-chi/chi/v5"
+
+	wingmanHttp "github.com/bigmikesolutions/wingman/internal/http"
 	"github.com/stretchr/testify/require"
 )
+
+const rootPath = "/providers"
 
 type ApiStage struct {
 	server *httptest.Server
 }
 
 func NewApiStage(t *testing.T) *ApiStage {
-	handler, err := wingman.NewRouter()
+	cqrsCfg, err := pkg.NewCqrsConfig()
 	require.Nil(t, err, "failed to create router")
-	svr := httptest.NewServer(handler)
+
+	authSvc := mock.InMemoryAuthService{Users: nil}
+	cqrs := cqrs.NewCQRS(
+		inmemory.NewCommandBus(cqrsCfg),
+		identity.NewAuthQueryBus(
+			inmemory.NewQueryBus(cqrsCfg),
+			authSvc,
+		),
+		inmemory.NewEventBus(cqrsCfg),
+	)
+
+	r := chi.NewRouter()
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.Timeout(60 * time.Second))
+	r.Use(mock.MockUser)
+	r.Mount(rootPath, wingmanHttp.NewController(
+		rootPath,
+		cqrs,
+	))
+
 	return &ApiStage{
-		server: svr,
+		server: httptest.NewServer(r),
 	}
 }
 
