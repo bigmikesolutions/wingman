@@ -1,6 +1,6 @@
 package provider
 
-import "github.com/bigmikesolutions/wingman/pkg/provider"
+import "github.com/bigmikesolutions/wingman/core/provider"
 
 const (
 	ProviderName          provider.ID = "mockProvider"

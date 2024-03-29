@@ -3,7 +3,7 @@ package identity
 import (
 	"context"
 
-	"github.com/bigmikesolutions/wingman/pkg/cqrs"
+	"github.com/bigmikesolutions/wingman/core/cqrs"
 )
 
 type AuthQueryBus struct {

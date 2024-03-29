@@ -1,6 +1,6 @@
 package access
 
-import "github.com/bigmikesolutions/wingman/pkg/provider"
+import "github.com/bigmikesolutions/wingman/core/provider"
 
 type (
 	AccessPolicyID string

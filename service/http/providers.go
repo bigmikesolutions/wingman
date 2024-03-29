@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/bigmikesolutions/wingman/pkg/cqrs"
+	"github.com/bigmikesolutions/wingman/core/cqrs"
 
-	"github.com/bigmikesolutions/wingman/pkg/provider"
+	"github.com/bigmikesolutions/wingman/core/provider"
 )
 
 type ProviderCtrl struct {

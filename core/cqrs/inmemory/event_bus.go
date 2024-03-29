@@ -3,7 +3,7 @@ package inmemory
 import (
 	"context"
 
-	"github.com/bigmikesolutions/wingman/pkg/cqrs"
+	"github.com/bigmikesolutions/wingman/core/cqrs"
 	"github.com/pkg/errors"
 )
 

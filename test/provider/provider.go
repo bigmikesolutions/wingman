@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"github.com/bigmikesolutions/wingman/pkg/cqrs"
+	"github.com/bigmikesolutions/wingman/core/cqrs"
 )
 
 type Provider struct{}

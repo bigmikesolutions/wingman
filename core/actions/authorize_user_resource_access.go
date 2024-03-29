@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bigmikesolutions/wingman/pkg/iam/access"
-	"github.com/bigmikesolutions/wingman/pkg/iam/identity"
+	"github.com/bigmikesolutions/wingman/core/iam/access"
+	"github.com/bigmikesolutions/wingman/core/iam/identity"
 
-	"github.com/bigmikesolutions/wingman/pkg/cqrs"
-	"github.com/bigmikesolutions/wingman/pkg/provider"
+	"github.com/bigmikesolutions/wingman/core/cqrs"
+	"github.com/bigmikesolutions/wingman/core/provider"
 )
 
 func AuthorizeUserResourceAccess(

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/bigmikesolutions/wingman/pkg/iam/identity"
+	"github.com/bigmikesolutions/wingman/core/iam/identity"
 )
 
 var MockUserSession = identity.NewUserSession(

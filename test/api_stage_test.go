@@ -7,16 +7,16 @@ import (
 
 	"github.com/go-chi/chi/v5/middleware"
 
-	"github.com/bigmikesolutions/wingman/pkg"
-	"github.com/bigmikesolutions/wingman/pkg/cqrs"
-	"github.com/bigmikesolutions/wingman/pkg/cqrs/inmemory"
-	"github.com/bigmikesolutions/wingman/pkg/iam/identity"
+	"github.com/bigmikesolutions/wingman/core"
+	"github.com/bigmikesolutions/wingman/core/cqrs"
+	"github.com/bigmikesolutions/wingman/core/cqrs/inmemory"
+	"github.com/bigmikesolutions/wingman/core/iam/identity"
 
 	"github.com/bigmikesolutions/wingman/test/mock"
 
 	"github.com/go-chi/chi/v5"
 
-	wingmanHttp "github.com/bigmikesolutions/wingman/internal/http"
+	wingmanHttp "github.com/bigmikesolutions/wingman/service/http"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,7 +27,7 @@ type ApiStage struct {
 }
 
 func NewApiStage(t *testing.T) *ApiStage {
-	cqrsCfg, err := pkg.NewCqrsConfig()
+	cqrsCfg, err := core.NewCqrsConfig()
 	require.Nil(t, err, "failed to create router")
 
 	authSvc := mock.InMemoryAuthService{Users: nil}

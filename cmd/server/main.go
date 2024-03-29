@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	svc "github.com/bigmikesolutions/wingman/internal/http"
+	svc "github.com/bigmikesolutions/wingman/service/http"
 )
 
 func main() {

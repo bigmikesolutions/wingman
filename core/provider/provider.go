@@ -1,5 +1,5 @@
 package provider
 
-import "github.com/bigmikesolutions/wingman/pkg/cqrs"
+import "github.com/bigmikesolutions/wingman/core/cqrs"
 
 type Factory = func() (cqrs.Config, error)

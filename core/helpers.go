@@ -1,8 +1,8 @@
-package pkg
+package core
 
 import (
-	"github.com/bigmikesolutions/wingman/pkg/cqrs"
-	"github.com/bigmikesolutions/wingman/pkg/provider"
+	"github.com/bigmikesolutions/wingman/core/cqrs"
+	"github.com/bigmikesolutions/wingman/core/provider"
 )
 
 func NewCqrsConfig(providers ...provider.Factory) (cqrs.Config, error) {

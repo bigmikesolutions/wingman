@@ -1,7 +1,7 @@
 package mock
 
 import (
-	"github.com/bigmikesolutions/wingman/pkg/cqrs"
+	"github.com/bigmikesolutions/wingman/core/cqrs"
 	"github.com/go-chi/chi/v5"
 )
 
