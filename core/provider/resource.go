@@ -7,9 +7,9 @@ type (
 )
 
 type Resource interface {
+	GetProviderID() ID
 	GetID() ResourceID
 	GetType() ResourceType
-	GetProviderID() ID
 	GetName() string
 	Execute(action ResourceAction) error
 	GetInfo() interface{}

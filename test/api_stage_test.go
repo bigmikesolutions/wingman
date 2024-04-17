@@ -5,9 +5,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bigmikesolutions/wingman/service"
+
+	servicehttp "github.com/bigmikesolutions/wingman/service/http"
+
 	"github.com/go-chi/chi/v5/middleware"
 
-	"github.com/bigmikesolutions/wingman/core"
 	"github.com/bigmikesolutions/wingman/core/cqrs"
 	"github.com/bigmikesolutions/wingman/core/cqrs/inmemory"
 	"github.com/bigmikesolutions/wingman/core/iam/identity"
@@ -16,7 +19,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	wingmanHttp "github.com/bigmikesolutions/wingman/service/http"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,7 +29,7 @@ type ApiStage struct {
 }
 
 func NewApiStage(t *testing.T) *ApiStage {
-	cqrsCfg, err := core.NewCqrsConfig()
+	cqrsCfg, err := service.NewHttpCqrs()
 	require.Nil(t, err, "failed to create router")
 
 	authSvc := mock.InMemoryAuthService{Users: nil}
@@ -47,7 +49,7 @@ func NewApiStage(t *testing.T) *ApiStage {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
 	r.Use(mock.MockUser)
-	r.Mount(rootPath, wingmanHttp.NewController(
+	r.Mount(rootPath, servicehttp.NewController(
 		rootPath,
 		cqrs,
 	))
