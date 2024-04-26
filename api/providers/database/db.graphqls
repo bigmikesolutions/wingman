@@ -1,0 +1,19 @@
+extend schema @link(url: "https://specs.apollo.dev/federation/v2.1", import: ["@key", "@shareable"])
+extend schema @link(url: "../../wingman/shared.graphqls")
+extend schema @link(url: "../../wingman/env.graphqls")
+
+extend type Environment {
+    database(id: String!): Database @goField(forceResolver: true)
+}
+
+type Database @key (fields: "id") {
+    id: String!
+    driver: DriverType
+}
+
+enum DriverType {
+    POSTGRES
+    MYSQL
+}
+
+

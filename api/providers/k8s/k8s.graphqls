@@ -1,0 +1,19 @@
+extend schema @link(url: "https://specs.apollo.dev/federation/v2.1", import: ["@key", "@shareable"])
+extend schema @link(url: "../../wingman/shared.graphqls")
+extend schema @link(url: "../../wingman/env.graphqls")
+
+extend type Environment {
+    k8s(id: String!): Cluster @goField(forceResolver: true)
+}
+
+type Cluster @key (fields: "id") {
+    id: String!
+
+    pod(namespace:String, id: ID): Pod  @goField(forceResolver: true)
+    pods(namespace:String, first:Int=0): [Pod!] @goField(forceResolver: true)
+}
+
+type Pod @key (fields: "id") {
+    id: ID!
+}
+

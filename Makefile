@@ -12,17 +12,12 @@ default: build test
 lint:
 	@golangci-lint run ./...
 
-build: generate build-api build-grpc
+build: generate build-api
 
 build-api:
 	@CGO_ENABLED=0 go build -o bin/api \
 		-ldflags "-X github.com/bigmikesolutions/wingman/pkg/build.Version=${VER}" \
 		./cmd/api
-
-build-grpc:
-	@CGO_ENABLED=0 go build -o bin/grpc \
-		-ldflags "-X github.com/bigmikesolutions/wingman/pkg/build.Version=${VER}" \
-		./cmd/grpc
 
 install-gqlgen:
 	@go get -d "github.com/99designs/gqlgen"
@@ -40,9 +35,6 @@ test:
 	@go test -short -race -count=1 -v ./...
 
 local-run-api: build-api
-	@./bin/api
-
-local-run-grpc: build-grpc
 	@./bin/api
 
 local-docker: local-docker-stop local-docker-start
