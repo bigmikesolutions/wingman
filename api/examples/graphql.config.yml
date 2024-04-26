@@ -1,0 +1,16 @@
+schema:
+    - "../wingman/shared.graphqls"
+    - "../wingman/env.graphqls"
+    - "../wingman/wingman.graphqls"
+    - "../providers/k8s/k8s.graphqls"
+    - "../providers/database/db.graphqls"
+extensions:
+  endpoints:
+    wingman:
+      url: http://localhost:8445/graphql
+      headers:
+        user-agent: wingman-client
+        X-A10n-Client-Id: wingman-tests
+        X-A10n-Issuer: wingman
+        X-A10n-Scope: https://graph.wingman.com/scope-read
+      introspect: false

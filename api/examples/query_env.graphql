@@ -1,0 +1,13 @@
+query {
+    environment(id: "test") {
+        k8s(id: "k8s-test-cluster") {
+            pods(first: 10) {
+                id
+            }
+        }
+        database(id: "test-postgres") {
+            id
+            driver
+        }
+    }
+}
