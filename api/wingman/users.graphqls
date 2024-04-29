@@ -1,8 +1,16 @@
 extend schema @link(url: "https://specs.apollo.dev/federation/v2.1", import: ["@key", "@shareable"])
 
 type User @key (fields: "id") {
-    id: String!
+    id: UserID!
+
     email: String!
     firstName: String
     lastName: String
+
+    roles: [UserRole!]
+    active: Boolean
+
+    description: String
+    createdAt: Time!
+    modifiedAt: Time
 }

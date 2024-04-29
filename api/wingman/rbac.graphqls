@@ -1,0 +1,61 @@
+extend schema @link(url: "https://specs.apollo.dev/federation/v2.1", import: ["@key", "@shareable"])
+
+scalar UserRoleID
+scalar UserRoleBindingID
+
+enum AccessType {
+    Read
+    Write
+}
+
+type UserRole @key (fields: "id"){
+    id: UserRoleID!
+
+    envID: EnvironmentID!
+    groupID: ResourceGroupID!
+    accessTypes: [AccessType!]!
+
+    description: String
+    createdAt: Time!
+    modifiedAt: Time
+}
+
+type UserRoleBinding @key (fields: "id") {
+    id: UserRoleBindingID
+    userID: UserID!
+    roleIDs: [UserRoleID!]!
+
+    description: String
+    createdAt: Time!
+    modifiedAt: Time
+}
+
+input NewUserRoleBindingData {
+    userID: UserID!
+    roleIDs: [UserRoleID!]!
+    description: String
+}
+
+input AddUserRoleBindingInput {
+    mutationID: String
+    bindings: [NewUserRoleBindingData!]!
+}
+
+type AddUserRoleBindingPayload {
+    mutationID: ID
+    bindings: [UserRoleBinding!]!
+    error: AddUserRoleBindingOutputError
+}
+
+type AddUserRoleBindingOutputError {
+    code: AddUserRoleBindingClientErrorCode!
+    message: String
+}
+
+enum AddUserRoleBindingClientErrorCode {
+    INVALID_INPUT
+    USER_NOT_FOUND
+    USER_ROLE_NOT_FOUND
+    PROVIDER_ERROR
+    GENERIC_ERROR
+}

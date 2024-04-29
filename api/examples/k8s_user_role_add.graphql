@@ -1,0 +1,13 @@
+mutation {
+    addK8sUserRole(input: {
+        mutationID: "test"
+        userRoles: [
+            {
+                description: "read-only access to a single pod"
+                accessType: Read
+                namespaces: ["default"]
+                pods: ["only-single-pod"]
+            }
+        ]
+    })
+}

@@ -1,0 +1,22 @@
+query {
+    environment(id: "test") {
+        k8s(id: "k8s-test-cluster") {
+            namespace(name: "default") {
+                name
+                pods(first: 10) {
+                    id
+                }
+            }
+            namespace(name: "kube-system") {
+                name
+                pods(first: 10) {
+                    id
+                }
+            }
+        }
+        database(id: "test-postgres") {
+            id
+            driver
+        }
+    }
+}

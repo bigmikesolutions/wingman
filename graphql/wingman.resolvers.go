@@ -12,6 +12,11 @@ import (
 	"github.com/bigmikesolutions/wingman/graphql/model"
 )
 
+// AddUserRoleBinding is the resolver for the addUserRoleBinding field.
+func (r *mutationResolver) AddUserRoleBinding(ctx context.Context, input model.AddUserRoleBindingInput) (*model.AddUserRoleBindingPayload, error) {
+	panic(fmt.Errorf("not implemented: AddUserRoleBinding - addUserRoleBinding"))
+}
+
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
 	panic(fmt.Errorf("not implemented: User - user"))
@@ -22,7 +27,11 @@ func (r *queryResolver) Environment(ctx context.Context, id string) (*model.Envi
 	panic(fmt.Errorf("not implemented: Environment - environment"))
 }
 
+// Mutation returns generated.MutationResolver implementation.
+func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

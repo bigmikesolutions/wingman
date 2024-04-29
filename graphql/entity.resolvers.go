@@ -37,6 +37,16 @@ func (r *entityResolver) FindUserByID(ctx context.Context, id string) (*model.Us
 	panic(fmt.Errorf("not implemented: FindUserByID - findUserByID"))
 }
 
+// FindUserRoleByID is the resolver for the findUserRoleByID field.
+func (r *entityResolver) FindUserRoleByID(ctx context.Context, id string) (*model.UserRole, error) {
+	panic(fmt.Errorf("not implemented: FindUserRoleByID - findUserRoleByID"))
+}
+
+// FindUserRoleBindingByID is the resolver for the findUserRoleBindingByID field.
+func (r *entityResolver) FindUserRoleBindingByID(ctx context.Context, id *string) (*model.UserRoleBinding, error) {
+	panic(fmt.Errorf("not implemented: FindUserRoleBindingByID - findUserRoleBindingByID"))
+}
+
 // Entity returns generated.EntityResolver implementation.
 func (r *Resolver) Entity() generated.EntityResolver { return &entityResolver{r} }
 

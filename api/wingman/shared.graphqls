@@ -5,7 +5,10 @@ An RFC 3339 (https://www.rfc-editor.org/rfc/rfc3339) compliant date-time string.
 """
 scalar Time
 
-scalar EnvironmentID
+scalar UserID
+
+scalar ResourceID
+scalar ResourceGroupID
 
 directive @goModel(model: String, models: [String!]) on OBJECT
     | INPUT_OBJECT
@@ -15,4 +18,7 @@ directive @goModel(model: String, models: [String!]) on OBJECT
     | UNION
 
 directive @goField(forceResolver: Boolean, name: String, omittable: Boolean) on INPUT_FIELD_DEFINITION
+    | FIELD_DEFINITION
+
+directive @goTag(key: String!, value: String) on INPUT_FIELD_DEFINITION
     | FIELD_DEFINITION

@@ -4,3 +4,7 @@ type Query {
     user(id: String!): User
     environment(id: EnvironmentID!): Environment
 }
+
+type Mutation {
+    addUserRoleBinding(input: AddUserRoleBindingInput!): AddUserRoleBindingPayload!
+}

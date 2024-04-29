@@ -1,6 +1,7 @@
 extend schema @link(url: "https://specs.apollo.dev/federation/v2.1", import: ["@key", "@shareable"])
 extend schema @link(url: "../../wingman/shared.graphqls")
 extend schema @link(url: "../../wingman/env.graphqls")
+extend schema @link(url: "../../wingman/rbac.graphqls")
 
 extend type Environment {
     k8s(id: String!): Cluster @goField(forceResolver: true)
@@ -9,11 +10,54 @@ extend type Environment {
 type Cluster @key (fields: "id") {
     id: String!
 
+    namespace(name:ID): Namespace
+}
+
+type Namespace @key (fields: "id") {
+    name: ID!
+
     pod(namespace:String, id: ID): Pod  @goField(forceResolver: true)
     pods(namespace:String, first:Int=0): [Pod!] @goField(forceResolver: true)
 }
 
 type Pod @key (fields: "id") {
     id: ID!
+    name: String!
+    namespace: String!
+    image: String!
+}
+
+input AddK8sUserRoleData {
+    accessType: AccessType!
+    description: String
+    namespaces: [String]
+    pods: [String]
+}
+
+input AddK8sUserRoleInput {
+    mutationID: String
+    userRoles: [AddK8sUserRoleData!]!
+}
+
+type AddK8sUserRolePayload {
+    mutationID: ID
+    error: AddK8sUserRoleError
+}
+
+type AddK8sUserRoleError {
+    code: AddK8sUserRoleClientErrorCode!
+    message: String
+}
+
+enum AddK8sUserRoleClientErrorCode {
+    INVALID_INPUT
+    USER_NOT_FOUND
+    USER_ROLE_NOT_FOUND
+    PROVIDER_ERROR
+    GENERIC_ERROR
+}
+
+type Mutation {
+    addK8sUserRole(input: AddK8sUserRoleInput!): AddK8sUserRolePayload!
 }
 
