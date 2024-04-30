@@ -1,22 +1,8 @@
 extend schema @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
 
-type Pod @key (fields: "id") {
-    id: ID!
-    name: String!
-    namespace: String!
-    image: String!
-}
-
-type K8sUserRole @key (fields: "id"){
-    id: UserRoleID!
-
-    accessType: AccessType!
+extend type UserRole {
     namespaces: [String]
     pods: [String]
-
-    description: String
-    createdAt: Time!
-    modifiedAt: Time
 }
 
 input AddK8sUserRole {
@@ -33,7 +19,7 @@ input AddK8sUserRoleInput {
 
 type AddK8sUserRolePayload {
     mutationID: ID
-    userRoles: [K8sUserRole]
+    userRoles: [UserRole]
     error: AddK8sUserRoleError
 }
 
