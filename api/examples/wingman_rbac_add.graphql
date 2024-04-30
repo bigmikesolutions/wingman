@@ -13,10 +13,18 @@ mutation {
         bindings {
             id
             userID
-            roleIDs
             description
             createdAt
             modifiedAt
+            userRoles {
+                id
+                accessType
+                description
+                createdAt
+                modifiedAt
+                pods
+                namespaces
+            }
         }
         error {
             code

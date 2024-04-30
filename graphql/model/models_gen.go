@@ -129,12 +129,12 @@ type UserRole struct {
 func (UserRole) IsEntity() {}
 
 type UserRoleBinding struct {
-	ID          *string    `json:"id,omitempty"`
-	UserID      string     `json:"userID"`
-	RoleIDs     []string   `json:"roleIDs"`
-	Description *string    `json:"description,omitempty"`
-	CreatedAt   time.Time  `json:"createdAt"`
-	ModifiedAt  *time.Time `json:"modifiedAt,omitempty"`
+	ID          *string     `json:"id,omitempty"`
+	UserID      string      `json:"userID"`
+	UserRoles   []*UserRole `json:"userRoles,omitempty"`
+	Description *string     `json:"description,omitempty"`
+	CreatedAt   time.Time   `json:"createdAt"`
+	ModifiedAt  *time.Time  `json:"modifiedAt,omitempty"`
 }
 
 func (UserRoleBinding) IsEntity() {}

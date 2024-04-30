@@ -4,7 +4,6 @@ extend schema @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@
 # for now as a simplification we want to use monolith
 
 type Query {
-    user(id: String!): User
     environment(id: EnvironmentID!): Environment
     user(id: UserID): User
 }

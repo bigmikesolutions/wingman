@@ -21,7 +21,7 @@ type UserRole @key (fields: "id"){
 type UserRoleBinding @key (fields: "id") {
     id: UserRoleBindingID
     userID: UserID!
-    roleIDs: [UserRoleID!]!
+    userRoles: [UserRole!] @goField(forceResolver: true)
 
     description: String
     createdAt: Time!

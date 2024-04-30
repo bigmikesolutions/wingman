@@ -46,6 +46,8 @@ type ResolverRoot interface {
 	Mutation() MutationResolver
 	Namespace() NamespaceResolver
 	Query() QueryResolver
+	User() UserResolver
+	UserRoleBinding() UserRoleBindingResolver
 }
 
 type DirectiveRoot struct {
@@ -125,7 +127,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Environment        func(childComplexity int, id string) int
-		User               func(childComplexity int, id string) int
+		User               func(childComplexity int, id *string) int
 		__resolve__service func(childComplexity int) int
 		__resolve_entities func(childComplexity int, representations []map[string]interface{}) int
 	}
@@ -157,8 +159,8 @@ type ComplexityRoot struct {
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
 		ModifiedAt  func(childComplexity int) int
-		RoleIDs     func(childComplexity int) int
 		UserID      func(childComplexity int) int
+		UserRoles   func(childComplexity int) int
 	}
 
 	_Service struct {
@@ -192,8 +194,14 @@ type NamespaceResolver interface {
 	Pods(ctx context.Context, obj *model.Namespace, namespace *string, first *int) ([]*model.Pod, error)
 }
 type QueryResolver interface {
-	User(ctx context.Context, id string) (*model.User, error)
 	Environment(ctx context.Context, id string) (*model.Environment, error)
+	User(ctx context.Context, id *string) (*model.User, error)
+}
+type UserResolver interface {
+	UserRoles(ctx context.Context, obj *model.User) ([]*model.UserRole, error)
+}
+type UserRoleBindingResolver interface {
+	UserRoles(ctx context.Context, obj *model.UserRoleBinding) ([]*model.UserRole, error)
 }
 
 type executableSchema struct {
@@ -571,7 +579,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.User(childComplexity, args["id"].(string)), true
+		return e.complexity.Query.User(childComplexity, args["id"].(*string)), true
 
 	case "Query._service":
 		if e.complexity.Query.__resolve__service == nil {
@@ -732,19 +740,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UserRoleBinding.ModifiedAt(childComplexity), true
 
-	case "UserRoleBinding.roleIDs":
-		if e.complexity.UserRoleBinding.RoleIDs == nil {
-			break
-		}
-
-		return e.complexity.UserRoleBinding.RoleIDs(childComplexity), true
-
 	case "UserRoleBinding.userID":
 		if e.complexity.UserRoleBinding.UserID == nil {
 			break
 		}
 
 		return e.complexity.UserRoleBinding.UserID(childComplexity), true
+
+	case "UserRoleBinding.userRoles":
+		if e.complexity.UserRoleBinding.UserRoles == nil {
+			break
+		}
+
+		return e.complexity.UserRoleBinding.UserRoles(childComplexity), true
 
 	case "_Service.sdl":
 		if e.complexity._Service.SDL == nil {
@@ -868,8 +876,8 @@ var sources = []*ast.Source{
 # for now as a simplification we want to use monolith
 
 type Query {
-    user(id: String!): User
     environment(id: EnvironmentID!): Environment
+    user(id: UserID): User
 }
 
 type Mutation {
@@ -916,7 +924,7 @@ type UserRole @key (fields: "id"){
 type UserRoleBinding @key (fields: "id") {
     id: UserRoleBindingID
     userID: UserID!
-    roleIDs: [UserRoleID!]!
+    userRoles: [UserRole!] @goField(forceResolver: true)
 
     description: String
     createdAt: Time!
@@ -1000,7 +1008,7 @@ type User @key (fields: "id") {
     modifiedAt: Time
 
     active: Boolean
-    userRoles: [UserRole!]
+    userRoles: [UserRole!] @goField(forceResolver: true)
 }
 `, BuiltIn: false},
 	{Name: "../../api/providers/k8s/k8s.graphqls", Input: `extend schema @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
@@ -1488,10 +1496,10 @@ func (ec *executionContext) field_Query_environment_args(ctx context.Context, ra
 func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 *string
 	if tmp, ok := rawArgs["id"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		arg0, err = ec.unmarshalOUserID2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1938,8 +1946,8 @@ func (ec *executionContext) fieldContext_AddUserRoleBindingPayload_bindings(ctx 
 				return ec.fieldContext_UserRoleBinding_id(ctx, field)
 			case "userID":
 				return ec.fieldContext_UserRoleBinding_userID(ctx, field)
-			case "roleIDs":
-				return ec.fieldContext_UserRoleBinding_roleIDs(ctx, field)
+			case "userRoles":
+				return ec.fieldContext_UserRoleBinding_userRoles(ctx, field)
 			case "description":
 				return ec.fieldContext_UserRoleBinding_description(ctx, field)
 			case "createdAt":
@@ -2658,8 +2666,8 @@ func (ec *executionContext) fieldContext_Entity_findUserRoleBindingByID(ctx cont
 				return ec.fieldContext_UserRoleBinding_id(ctx, field)
 			case "userID":
 				return ec.fieldContext_UserRoleBinding_userID(ctx, field)
-			case "roleIDs":
-				return ec.fieldContext_UserRoleBinding_roleIDs(ctx, field)
+			case "userRoles":
+				return ec.fieldContext_UserRoleBinding_userRoles(ctx, field)
 			case "description":
 				return ec.fieldContext_UserRoleBinding_description(ctx, field)
 			case "createdAt":
@@ -3395,75 +3403,6 @@ func (ec *executionContext) fieldContext_Pod_image(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_user(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().User(rctx, fc.Args["id"].(string))
-	})
-
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.User)
-	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			case "firstName":
-				return ec.fieldContext_User_firstName(ctx, field)
-			case "lastName":
-				return ec.fieldContext_User_lastName(ctx, field)
-			case "description":
-				return ec.fieldContext_User_description(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_User_createdAt(ctx, field)
-			case "modifiedAt":
-				return ec.fieldContext_User_modifiedAt(ctx, field)
-			case "active":
-				return ec.fieldContext_User_active(ctx, field)
-			case "userRoles":
-				return ec.fieldContext_User_userRoles(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_user_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Query_environment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_environment(ctx, field)
 	if err != nil {
@@ -3521,6 +3460,75 @@ func (ec *executionContext) fieldContext_Query_environment(ctx context.Context, 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_environment_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_user(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().User(rctx, fc.Args["id"].(*string))
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalOUser2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "description":
+				return ec.fieldContext_User_description(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "modifiedAt":
+				return ec.fieldContext_User_modifiedAt(ctx, field)
+			case "active":
+				return ec.fieldContext_User_active(ctx, field)
+			case "userRoles":
+				return ec.fieldContext_User_userRoles(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_user_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4074,7 +4082,7 @@ func (ec *executionContext) _User_userRoles(ctx context.Context, field graphql.C
 	}()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.UserRoles, nil
+		return ec.resolvers.User().UserRoles(rctx, obj)
 	})
 
 	if resTmp == nil {
@@ -4089,8 +4097,8 @@ func (ec *executionContext) fieldContext_User_userRoles(ctx context.Context, fie
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
@@ -4468,8 +4476,8 @@ func (ec *executionContext) fieldContext_UserRoleBinding_userID(ctx context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _UserRoleBinding_roleIDs(ctx context.Context, field graphql.CollectedField, obj *model.UserRoleBinding) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UserRoleBinding_roleIDs(ctx, field)
+func (ec *executionContext) _UserRoleBinding_userRoles(ctx context.Context, field graphql.CollectedField, obj *model.UserRoleBinding) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserRoleBinding_userRoles(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -4482,28 +4490,41 @@ func (ec *executionContext) _UserRoleBinding_roleIDs(ctx context.Context, field 
 	}()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.RoleIDs, nil
+		return ec.resolvers.UserRoleBinding().UserRoles(rctx, obj)
 	})
 
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.([]string)
+	res := resTmp.([]*model.UserRole)
 	fc.Result = res
-	return ec.marshalNUserRoleID2ᚕstringᚄ(ctx, field.Selections, res)
+	return ec.marshalOUserRole2ᚕᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐUserRoleᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_UserRoleBinding_roleIDs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_UserRoleBinding_userRoles(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UserRoleBinding",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type UserRoleID does not have child fields")
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_UserRole_id(ctx, field)
+			case "accessType":
+				return ec.fieldContext_UserRole_accessType(ctx, field)
+			case "description":
+				return ec.fieldContext_UserRole_description(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_UserRole_createdAt(ctx, field)
+			case "modifiedAt":
+				return ec.fieldContext_UserRole_modifiedAt(ctx, field)
+			case "namespaces":
+				return ec.fieldContext_UserRole_namespaces(ctx, field)
+			case "pods":
+				return ec.fieldContext_UserRole_pods(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserRole", field.Name)
 		},
 	}
 	return fc, nil
@@ -7406,25 +7427,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "user":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_user(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "environment":
 			field := field
 
@@ -7435,6 +7437,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_environment(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "user":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_user(ctx, field)
 				return res
 			}
 
@@ -7533,12 +7554,12 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 		case "id":
 			out.Values[i] = ec._User_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "email":
 			out.Values[i] = ec._User_email(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "firstName":
 			out.Values[i] = ec._User_firstName(ctx, field, obj)
@@ -7549,14 +7570,45 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 		case "createdAt":
 			out.Values[i] = ec._User_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "modifiedAt":
 			out.Values[i] = ec._User_modifiedAt(ctx, field, obj)
 		case "active":
 			out.Values[i] = ec._User_active(ctx, field, obj)
 		case "userRoles":
-			out.Values[i] = ec._User_userRoles(ctx, field, obj)
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_userRoles(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -7653,19 +7705,47 @@ func (ec *executionContext) _UserRoleBinding(ctx context.Context, sel ast.Select
 		case "userID":
 			out.Values[i] = ec._UserRoleBinding_userID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "roleIDs":
-			out.Values[i] = ec._UserRoleBinding_roleIDs(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
+		case "userRoles":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._UserRoleBinding_userRoles(ctx, field, obj)
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "description":
 			out.Values[i] = ec._UserRoleBinding_description(ctx, field, obj)
 		case "createdAt":
 			out.Values[i] = ec._UserRoleBinding_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "modifiedAt":
 			out.Values[i] = ec._UserRoleBinding_modifiedAt(ctx, field, obj)
@@ -9267,6 +9347,22 @@ func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋbigmikesolutionsᚋwi
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOUserID2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalString(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOUserID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalString(*v)
+	return res
 }
 
 func (ec *executionContext) marshalOUserRole2ᚕᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐUserRole(ctx context.Context, sel ast.SelectionSet, v []*model.UserRole) graphql.Marshaler {

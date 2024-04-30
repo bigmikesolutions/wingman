@@ -22,14 +22,14 @@ func (r *mutationResolver) AddK8sUserRole(ctx context.Context, input model.AddK8
 	panic(fmt.Errorf("not implemented: AddK8sUserRole - addK8sUserRole"))
 }
 
-// User is the resolver for the user field.
-func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
-}
-
 // Environment is the resolver for the environment field.
 func (r *queryResolver) Environment(ctx context.Context, id string) (*model.Environment, error) {
 	panic(fmt.Errorf("not implemented: Environment - environment"))
+}
+
+// User is the resolver for the user field.
+func (r *queryResolver) User(ctx context.Context, id *string) (*model.User, error) {
+	panic(fmt.Errorf("not implemented: User - user"))
 }
 
 // Mutation returns generated.MutationResolver implementation.

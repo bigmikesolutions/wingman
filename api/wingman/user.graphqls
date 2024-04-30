@@ -12,5 +12,5 @@ type User @key (fields: "id") {
     modifiedAt: Time
 
     active: Boolean
-    userRoles: [UserRole!]
+    userRoles: [UserRole!] @goField(forceResolver: true)
 }
