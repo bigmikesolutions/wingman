@@ -140,6 +140,46 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 				list[idx[i]] = entity
 				return nil
 			}
+		case "K8sUserRole":
+			resolverName, err := entityResolverNameForK8sUserRole(ctx, rep)
+			if err != nil {
+				return fmt.Errorf(`finding resolver for Entity "K8sUserRole": %w`, err)
+			}
+			switch resolverName {
+
+			case "findK8sUserRoleByID":
+				id0, err := ec.unmarshalNUserRoleID2string(ctx, rep["id"])
+				if err != nil {
+					return fmt.Errorf(`unmarshalling param 0 for findK8sUserRoleByID(): %w`, err)
+				}
+				entity, err := ec.resolvers.Entity().FindK8sUserRoleByID(ctx, id0)
+				if err != nil {
+					return fmt.Errorf(`resolving Entity "K8sUserRole": %w`, err)
+				}
+
+				list[idx[i]] = entity
+				return nil
+			}
+		case "Namespace":
+			resolverName, err := entityResolverNameForNamespace(ctx, rep)
+			if err != nil {
+				return fmt.Errorf(`finding resolver for Entity "Namespace": %w`, err)
+			}
+			switch resolverName {
+
+			case "findNamespaceByName":
+				id0, err := ec.unmarshalNID2string(ctx, rep["name"])
+				if err != nil {
+					return fmt.Errorf(`unmarshalling param 0 for findNamespaceByName(): %w`, err)
+				}
+				entity, err := ec.resolvers.Entity().FindNamespaceByName(ctx, id0)
+				if err != nil {
+					return fmt.Errorf(`resolving Entity "Namespace": %w`, err)
+				}
+
+				list[idx[i]] = entity
+				return nil
+			}
 		case "Pod":
 			resolverName, err := entityResolverNameForPod(ctx, rep)
 			if err != nil {
@@ -175,26 +215,6 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 				entity, err := ec.resolvers.Entity().FindUserByID(ctx, id0)
 				if err != nil {
 					return fmt.Errorf(`resolving Entity "User": %w`, err)
-				}
-
-				list[idx[i]] = entity
-				return nil
-			}
-		case "UserRole":
-			resolverName, err := entityResolverNameForUserRole(ctx, rep)
-			if err != nil {
-				return fmt.Errorf(`finding resolver for Entity "UserRole": %w`, err)
-			}
-			switch resolverName {
-
-			case "findUserRoleByID":
-				id0, err := ec.unmarshalNUserRoleID2string(ctx, rep["id"])
-				if err != nil {
-					return fmt.Errorf(`unmarshalling param 0 for findUserRoleByID(): %w`, err)
-				}
-				entity, err := ec.resolvers.Entity().FindUserRoleByID(ctx, id0)
-				if err != nil {
-					return fmt.Errorf(`resolving Entity "UserRole": %w`, err)
 				}
 
 				list[idx[i]] = entity
@@ -340,6 +360,40 @@ func entityResolverNameForEnvironment(ctx context.Context, rep map[string]interf
 	return "", fmt.Errorf("%w for Environment", ErrTypeNotFound)
 }
 
+func entityResolverNameForK8sUserRole(ctx context.Context, rep map[string]interface{}) (string, error) {
+	for {
+		var (
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
+		)
+		_ = val
+		m = rep
+		if _, ok = m["id"]; !ok {
+			break
+		}
+		return "findK8sUserRoleByID", nil
+	}
+	return "", fmt.Errorf("%w for K8sUserRole", ErrTypeNotFound)
+}
+
+func entityResolverNameForNamespace(ctx context.Context, rep map[string]interface{}) (string, error) {
+	for {
+		var (
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
+		)
+		_ = val
+		m = rep
+		if _, ok = m["name"]; !ok {
+			break
+		}
+		return "findNamespaceByName", nil
+	}
+	return "", fmt.Errorf("%w for Namespace", ErrTypeNotFound)
+}
+
 func entityResolverNameForPod(ctx context.Context, rep map[string]interface{}) (string, error) {
 	for {
 		var (
@@ -372,23 +426,6 @@ func entityResolverNameForUser(ctx context.Context, rep map[string]interface{}) 
 		return "findUserByID", nil
 	}
 	return "", fmt.Errorf("%w for User", ErrTypeNotFound)
-}
-
-func entityResolverNameForUserRole(ctx context.Context, rep map[string]interface{}) (string, error) {
-	for {
-		var (
-			m   map[string]interface{}
-			val interface{}
-			ok  bool
-		)
-		_ = val
-		m = rep
-		if _, ok = m["id"]; !ok {
-			break
-		}
-		return "findUserRoleByID", nil
-	}
-	return "", fmt.Errorf("%w for UserRole", ErrTypeNotFound)
 }
 
 func entityResolverNameForUserRoleBinding(ctx context.Context, rep map[string]interface{}) (string, error) {

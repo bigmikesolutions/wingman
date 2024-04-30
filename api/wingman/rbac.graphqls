@@ -1,4 +1,4 @@
-extend schema @link(url: "https://specs.apollo.dev/federation/v2.1", import: ["@key", "@shareable"])
+extend schema @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
 
 scalar UserRoleID
 scalar UserRoleBindingID
@@ -6,18 +6,6 @@ scalar UserRoleBindingID
 enum AccessType {
     Read
     Write
-}
-
-type UserRole @key (fields: "id"){
-    id: UserRoleID!
-
-    envID: EnvironmentID!
-    groupID: ResourceGroupID!
-    accessTypes: [AccessType!]!
-
-    description: String
-    createdAt: Time!
-    modifiedAt: Time
 }
 
 type UserRoleBinding @key (fields: "id") {

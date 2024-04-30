@@ -27,6 +27,16 @@ func (r *entityResolver) FindEnvironmentByID(ctx context.Context, id string) (*m
 	panic(fmt.Errorf("not implemented: FindEnvironmentByID - findEnvironmentByID"))
 }
 
+// FindK8sUserRoleByID is the resolver for the findK8sUserRoleByID field.
+func (r *entityResolver) FindK8sUserRoleByID(ctx context.Context, id string) (*model.K8sUserRole, error) {
+	panic(fmt.Errorf("not implemented: FindK8sUserRoleByID - findK8sUserRoleByID"))
+}
+
+// FindNamespaceByName is the resolver for the findNamespaceByName field.
+func (r *entityResolver) FindNamespaceByName(ctx context.Context, name string) (*model.Namespace, error) {
+	panic(fmt.Errorf("not implemented: FindNamespaceByName - findNamespaceByName"))
+}
+
 // FindPodByID is the resolver for the findPodByID field.
 func (r *entityResolver) FindPodByID(ctx context.Context, id string) (*model.Pod, error) {
 	panic(fmt.Errorf("not implemented: FindPodByID - findPodByID"))
@@ -35,11 +45,6 @@ func (r *entityResolver) FindPodByID(ctx context.Context, id string) (*model.Pod
 // FindUserByID is the resolver for the findUserByID field.
 func (r *entityResolver) FindUserByID(ctx context.Context, id string) (*model.User, error) {
 	panic(fmt.Errorf("not implemented: FindUserByID - findUserByID"))
-}
-
-// FindUserRoleByID is the resolver for the findUserRoleByID field.
-func (r *entityResolver) FindUserRoleByID(ctx context.Context, id string) (*model.UserRole, error) {
-	panic(fmt.Errorf("not implemented: FindUserRoleByID - findUserRoleByID"))
 }
 
 // FindUserRoleBindingByID is the resolver for the findUserRoleBindingByID field.

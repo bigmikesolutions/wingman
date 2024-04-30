@@ -12,14 +12,9 @@ import (
 	"github.com/bigmikesolutions/wingman/graphql/model"
 )
 
-// Pod is the resolver for the pod field.
-func (r *clusterResolver) Pod(ctx context.Context, obj *model.Cluster, namespace *string, id *string) (*model.Pod, error) {
-	panic(fmt.Errorf("not implemented: Pod - pod"))
-}
-
-// Pods is the resolver for the pods field.
-func (r *clusterResolver) Pods(ctx context.Context, obj *model.Cluster, namespace *string, first *int) ([]*model.Pod, error) {
-	panic(fmt.Errorf("not implemented: Pods - pods"))
+// Namespace is the resolver for the namespace field.
+func (r *clusterResolver) Namespace(ctx context.Context, obj *model.Cluster, name *string) (*model.Namespace, error) {
+	panic(fmt.Errorf("not implemented: Namespace - namespace"))
 }
 
 // K8s is the resolver for the k8s field.
@@ -27,7 +22,21 @@ func (r *environmentResolver) K8s(ctx context.Context, obj *model.Environment, i
 	panic(fmt.Errorf("not implemented: K8s - k8s"))
 }
 
+// Pod is the resolver for the pod field.
+func (r *namespaceResolver) Pod(ctx context.Context, obj *model.Namespace, namespace *string, id *string) (*model.Pod, error) {
+	panic(fmt.Errorf("not implemented: Pod - pod"))
+}
+
+// Pods is the resolver for the pods field.
+func (r *namespaceResolver) Pods(ctx context.Context, obj *model.Namespace, namespace *string, first *int) ([]*model.Pod, error) {
+	panic(fmt.Errorf("not implemented: Pods - pods"))
+}
+
 // Cluster returns generated.ClusterResolver implementation.
 func (r *Resolver) Cluster() generated.ClusterResolver { return &clusterResolver{r} }
 
+// Namespace returns generated.NamespaceResolver implementation.
+func (r *Resolver) Namespace() generated.NamespaceResolver { return &namespaceResolver{r} }
+
 type clusterResolver struct{ *Resolver }
+type namespaceResolver struct{ *Resolver }

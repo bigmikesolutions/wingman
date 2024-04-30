@@ -1,0 +1,52 @@
+extend schema @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
+
+type Pod @key (fields: "id") {
+    id: ID!
+    name: String!
+    namespace: String!
+    image: String!
+}
+
+type K8sUserRole @key (fields: "id"){
+    id: UserRoleID!
+
+    accessType: AccessType!
+    namespaces: [String]
+    pods: [String]
+
+    description: String
+    createdAt: Time!
+    modifiedAt: Time
+}
+
+input AddK8sUserRole {
+    accessType: AccessType!
+    description: String
+    namespaces: [String]
+    pods: [String]
+}
+
+input AddK8sUserRoleInput {
+    mutationID: String
+    userRoles: [AddK8sUserRole!]!
+}
+
+type AddK8sUserRolePayload {
+    mutationID: ID
+    userRoles: [K8sUserRole]
+    error: AddK8sUserRoleError
+}
+
+type AddK8sUserRoleError {
+    code: AddK8sUserRoleClientErrorCode!
+    message: String
+}
+
+enum AddK8sUserRoleClientErrorCode {
+    INVALID_INPUT
+    USER_NOT_FOUND
+    USER_ROLE_NOT_FOUND
+    PROVIDER_ERROR
+    GENERIC_ERROR
+}
+

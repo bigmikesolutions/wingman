@@ -1,0 +1,14 @@
+federation_version: 2
+subgraphs:
+  wingman:
+    routing_url: <DOWNSTREAM_WINGMAN_URL>
+    schema:
+      file: wingman/wingman.graphqls
+  k8s:
+    routing_url: <DOWNSTREAM_K8S_URL>
+    schema:
+      file: providers/k8s/k8s.graphqls
+  database:
+    routing_url: <DOWNSTREAM_DB_URL>
+    schema:
+      file: providers/database/db.graphqls

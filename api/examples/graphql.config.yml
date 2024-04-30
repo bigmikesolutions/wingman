@@ -1,10 +1,11 @@
 schema:
+    - "../wingman.graphqls"
     - "../wingman/shared.graphqls"
-    - "../wingman/wingman.graphqls"
     - "../wingman/env.graphqls"
     - "../wingman/user.graphqls"
     - "../wingman/rbac.graphqls"
     - "../providers/k8s/k8s.graphqls"
+    - "../providers/k8s/pod.graphqls"
     - "../providers/database/db.graphqls"
 extensions:
   endpoints:

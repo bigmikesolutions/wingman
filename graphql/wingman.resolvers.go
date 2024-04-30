@@ -17,6 +17,11 @@ func (r *mutationResolver) AddUserRoleBinding(ctx context.Context, input model.A
 	panic(fmt.Errorf("not implemented: AddUserRoleBinding - addUserRoleBinding"))
 }
 
+// AddK8sUserRole is the resolver for the addK8sUserRole field.
+func (r *mutationResolver) AddK8sUserRole(ctx context.Context, input model.AddK8sUserRoleInput) (*model.AddK8sUserRolePayload, error) {
+	panic(fmt.Errorf("not implemented: AddK8sUserRole - addK8sUserRole"))
+}
+
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
 	panic(fmt.Errorf("not implemented: User - user"))

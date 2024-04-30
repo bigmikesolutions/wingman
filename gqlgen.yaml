@@ -1,4 +1,5 @@
 schema:
+  - api/wingman.graphqls
   - api/wingman/*.graphqls
   - api/providers/k8s/*.graphqls
   - api/providers/database/*.graphqls
