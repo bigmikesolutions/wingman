@@ -17,3 +17,10 @@ type Namespace @key (fields: "name") {
     pod(namespace:String, id: ID): Pod  @goField(forceResolver: true)
     pods(namespace:String, first:Int=0): [Pod!] @goField(forceResolver: true)
 }
+
+type Pod @key (fields: "id") {
+    id: ID!
+    name: String!
+    namespace: String!
+    image: String!
+}

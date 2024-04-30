@@ -5,7 +5,7 @@ schema:
     - "../wingman/user.graphqls"
     - "../wingman/rbac.graphqls"
     - "../providers/k8s/k8s.graphqls"
-    - "../providers/k8s/pod.graphqls"
+    - "../providers/k8s/rbac.graphqls"
     - "../providers/database/db.graphqls"
 extensions:
   endpoints:

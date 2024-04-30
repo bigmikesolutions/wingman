@@ -9,5 +9,20 @@ mutation {
                 pods: ["only-single-pod"]
             }
         ]
-    })
+    }) {
+        mutationID
+        userRoles {
+            id
+            accessType
+            description
+            createdAt
+            modifiedAt
+            pods
+            namespaces
+        }
+        error {
+            code
+            message
+        }
+    }
 }

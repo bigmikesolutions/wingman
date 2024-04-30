@@ -8,6 +8,16 @@ enum AccessType {
     Write
 }
 
+type UserRole @key (fields: "id"){
+    id: UserRoleID!
+
+    accessType: AccessType!
+
+    description: String
+    createdAt: Time!
+    modifiedAt: Time
+}
+
 type UserRoleBinding @key (fields: "id") {
     id: UserRoleBindingID
     userID: UserID!

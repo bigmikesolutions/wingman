@@ -6,6 +6,7 @@ extend schema @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@
 type Query {
     user(id: String!): User
     environment(id: EnvironmentID!): Environment
+    user(id: UserID): User
 }
 
 type Mutation {

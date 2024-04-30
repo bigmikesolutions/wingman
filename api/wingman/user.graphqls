@@ -7,9 +7,10 @@ type User @key (fields: "id") {
     firstName: String
     lastName: String
 
-    active: Boolean
-
     description: String
     createdAt: Time!
     modifiedAt: Time
+
+    active: Boolean
+    userRoles: [UserRole!]
 }

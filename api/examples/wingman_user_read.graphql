@@ -1,0 +1,21 @@
+query {
+    user(id: "test-user") {
+        id
+        email
+        firstName
+        lastName
+        description
+        createdAt
+        modifiedAt
+        active
+        userRoles {
+            id
+            accessType
+            description
+            createdAt
+            modifiedAt
+            pods
+            namespaces
+        }
+    }
+}

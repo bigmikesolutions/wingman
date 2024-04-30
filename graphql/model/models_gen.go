@@ -28,7 +28,7 @@ type AddK8sUserRoleInput struct {
 
 type AddK8sUserRolePayload struct {
 	MutationID *string              `json:"mutationID,omitempty"`
-	UserRoles  []*K8sUserRole       `json:"userRoles,omitempty"`
+	UserRoles  []*UserRole          `json:"userRoles,omitempty"`
 	Error      *AddK8sUserRoleError `json:"error,omitempty"`
 }
 
@@ -73,18 +73,6 @@ type Environment struct {
 
 func (Environment) IsEntity() {}
 
-type K8sUserRole struct {
-	ID          string     `json:"id"`
-	AccessType  AccessType `json:"accessType"`
-	Namespaces  []*string  `json:"namespaces,omitempty"`
-	Pods        []*string  `json:"pods,omitempty"`
-	Description *string    `json:"description,omitempty"`
-	CreatedAt   time.Time  `json:"createdAt"`
-	ModifiedAt  *time.Time `json:"modifiedAt,omitempty"`
-}
-
-func (K8sUserRole) IsEntity() {}
-
 type Mutation struct {
 }
 
@@ -115,17 +103,30 @@ type Query struct {
 }
 
 type User struct {
-	ID          string     `json:"id"`
-	Email       string     `json:"email"`
-	FirstName   *string    `json:"firstName,omitempty"`
-	LastName    *string    `json:"lastName,omitempty"`
-	Active      *bool      `json:"active,omitempty"`
-	Description *string    `json:"description,omitempty"`
-	CreatedAt   time.Time  `json:"createdAt"`
-	ModifiedAt  *time.Time `json:"modifiedAt,omitempty"`
+	ID          string      `json:"id"`
+	Email       string      `json:"email"`
+	FirstName   *string     `json:"firstName,omitempty"`
+	LastName    *string     `json:"lastName,omitempty"`
+	Description *string     `json:"description,omitempty"`
+	CreatedAt   time.Time   `json:"createdAt"`
+	ModifiedAt  *time.Time  `json:"modifiedAt,omitempty"`
+	Active      *bool       `json:"active,omitempty"`
+	UserRoles   []*UserRole `json:"userRoles,omitempty"`
 }
 
 func (User) IsEntity() {}
+
+type UserRole struct {
+	ID          string     `json:"id"`
+	AccessType  AccessType `json:"accessType"`
+	Description *string    `json:"description,omitempty"`
+	CreatedAt   time.Time  `json:"createdAt"`
+	ModifiedAt  *time.Time `json:"modifiedAt,omitempty"`
+	Namespaces  []*string  `json:"namespaces,omitempty"`
+	Pods        []*string  `json:"pods,omitempty"`
+}
+
+func (UserRole) IsEntity() {}
 
 type UserRoleBinding struct {
 	ID          *string    `json:"id,omitempty"`
