@@ -317,8 +317,18 @@ func entityResolverNameForCluster(ctx context.Context, rep map[string]interface{
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["id"]; !ok {
+		val, ok = m["id"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findClusterByID", nil
@@ -334,8 +344,18 @@ func entityResolverNameForDatabase(ctx context.Context, rep map[string]interface
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["id"]; !ok {
+		val, ok = m["id"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findDatabaseByID", nil
@@ -351,8 +371,18 @@ func entityResolverNameForEnvironment(ctx context.Context, rep map[string]interf
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["id"]; !ok {
+		val, ok = m["id"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findEnvironmentByID", nil
@@ -368,8 +398,18 @@ func entityResolverNameForNamespace(ctx context.Context, rep map[string]interfac
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["name"]; !ok {
+		val, ok = m["name"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findNamespaceByName", nil
@@ -385,8 +425,18 @@ func entityResolverNameForPod(ctx context.Context, rep map[string]interface{}) (
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["id"]; !ok {
+		val, ok = m["id"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findPodByID", nil
@@ -402,8 +452,18 @@ func entityResolverNameForUser(ctx context.Context, rep map[string]interface{}) 
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["id"]; !ok {
+		val, ok = m["id"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findUserByID", nil
@@ -419,8 +479,18 @@ func entityResolverNameForUserRole(ctx context.Context, rep map[string]interface
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["id"]; !ok {
+		val, ok = m["id"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findUserRoleByID", nil
@@ -436,8 +506,18 @@ func entityResolverNameForUserRoleBinding(ctx context.Context, rep map[string]in
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["id"]; !ok {
+		val, ok = m["id"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findUserRoleBindingByID", nil

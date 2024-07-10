@@ -1,0 +1,38 @@
+query {
+    addUserRoleBinding(input: {
+        mutationID: "sampe-create-user-role"
+        bindings: [
+            {
+                userID: "michal",
+                roleIDs: ["k8s-pods-read-only"]
+                description: "needed because..."
+            }
+        ]
+    }) {
+        mutationID
+        bindings {
+            id
+            userID
+            description
+            createdAt
+            modifiedAt
+            userRoles {
+                id
+                accessType
+                description
+                createdAt
+                modifiedAt
+                pods {
+                    id
+                    name
+                    namespace
+                }
+                namespaces
+            }
+        }
+        error {
+            code
+            message
+        }
+    }
+}

@@ -14,7 +14,11 @@ query {
             description
             createdAt
             modifiedAt
-            pods
+            pods {
+                id
+                name
+                namespace
+            }
             namespaces
         }
     }

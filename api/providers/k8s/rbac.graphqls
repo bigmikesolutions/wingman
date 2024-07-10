@@ -1,11 +1,17 @@
 extend schema @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
+extend schema @link(url: "../../wingman/shared.graphqls")
+
+extend type Mutation {
+    addK8sUserRole(input: AddK8sUserRoleInput!): AddK8sUserRolePayload!
+}
 
 extend type UserRole {
     namespaces: [String]
-    pods: [String]
+    pods: [Pod!]
 }
 
 input AddK8sUserRole {
+    id: String
     accessType: AccessType!
     description: String
     namespaces: [String]
@@ -35,4 +41,5 @@ enum AddK8sUserRoleClientErrorCode {
     PROVIDER_ERROR
     GENERIC_ERROR
 }
+
 

@@ -1,5 +1,4 @@
 schema:
-    - "../wingman.graphqls"
     - "../wingman/shared.graphqls"
     - "../wingman/env.graphqls"
     - "../wingman/user.graphqls"

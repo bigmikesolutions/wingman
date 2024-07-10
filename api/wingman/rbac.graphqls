@@ -3,6 +3,10 @@ extend schema @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@
 scalar UserRoleID
 scalar UserRoleBindingID
 
+extend type Mutation {
+    addUserRoleBinding(input: AddUserRoleBindingInput!): AddUserRoleBindingPayload!
+}
+
 enum AccessType {
     Read
     Write

@@ -1,8 +1,9 @@
 mutation {
     addK8sUserRole(input: {
-        mutationID: "test"
+        mutationID: "sample-k8s-create-user-role"
         userRoles: [
             {
+                id: "k8s-pods-read-only"
                 description: "read-only access to a single pod"
                 accessType: Read
                 namespaces: ["default"]
@@ -17,8 +18,48 @@ mutation {
             description
             createdAt
             modifiedAt
-            pods
+            pods {
+                id
+                namespace
+                name
+            }
             namespaces
+        }
+        error {
+            code
+            message
+        }
+    }
+    addUserRoleBinding(input: {
+        mutationID: "sample-k8s-create-user-role-binding"
+        bindings: [
+            {
+                userID: "michal",
+                roleIDs: ["k8s-pods-read-only"]
+                description: "needed because..."
+            }
+        ]
+    }) {
+        mutationID
+        bindings {
+            id
+            userID
+            description
+            createdAt
+            modifiedAt
+            userRoles {
+                id
+                accessType
+                description
+                createdAt
+                modifiedAt
+                pods {
+                    id
+                    name
+                    namespace
+                }
+                namespaces
+            }
         }
         error {
             code

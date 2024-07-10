@@ -31,3 +31,9 @@ directive @withDeprecatedArgs(
     deprecatedArg: String @deprecated(reason: "Use `newArg`")
     newArg: String
 ) on FIELD
+
+
+schema {
+    query: Query
+    mutation: Mutation
+}

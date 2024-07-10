@@ -1,5 +1,9 @@
 extend schema @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
 
+extend type Query {
+    user(id: UserID): User
+}
+
 type User @key (fields: "id") {
     id: UserID!
 

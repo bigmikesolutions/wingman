@@ -10,6 +10,7 @@ import (
 )
 
 type AddK8sUserRole struct {
+	ID          *string    `json:"id,omitempty"`
 	AccessType  AccessType `json:"accessType"`
 	Description *string    `json:"description,omitempty"`
 	Namespaces  []*string  `json:"namespaces,omitempty"`
@@ -123,7 +124,7 @@ type UserRole struct {
 	CreatedAt   time.Time  `json:"createdAt"`
 	ModifiedAt  *time.Time `json:"modifiedAt,omitempty"`
 	Namespaces  []*string  `json:"namespaces,omitempty"`
-	Pods        []*string  `json:"pods,omitempty"`
+	Pods        []*Pod     `json:"pods,omitempty"`
 }
 
 func (UserRole) IsEntity() {}
