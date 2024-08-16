@@ -1,0 +1,7 @@
+type Query {
+    # empty extension point
+}
+
+type Mutation {
+    # empty extension point
+}
