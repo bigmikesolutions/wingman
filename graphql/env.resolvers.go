@@ -6,7 +6,6 @@ package graphql
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/bigmikesolutions/wingman/graphql/generated"
 	"github.com/bigmikesolutions/wingman/graphql/model"
@@ -14,7 +13,10 @@ import (
 
 // Environment is the resolver for the environment field.
 func (r *queryResolver) Environment(ctx context.Context, id string) (*model.Environment, error) {
-	panic(fmt.Errorf("not implemented: Environment - environment"))
+	// TODO implement this stub
+	return &model.Environment{
+		ID: id,
+	}, nil
 }
 
 // Environment returns generated.EnvironmentResolver implementation.

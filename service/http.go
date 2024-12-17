@@ -2,10 +2,10 @@ package service
 
 import (
 	"net/http"
-	"net/http/pprof"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
@@ -41,6 +41,8 @@ func NewHttpHandler(cfg HttpConfig) (http.Handler, error) {
 		),
 	)
 
+	graphqlHandler.AddTransport(transport.POST{})
+
 	router := newHttpRouter(cfg)
 	router.Handle(GraphqlEndpoint, graphqlHandler)
 
@@ -60,23 +62,6 @@ func newHttpRouter(cfg HttpConfig) *chi.Mux {
 	if cfg.PprofEnabled {
 		r.Mount(pprofEndpoint, pprofRouter())
 	}
-
-	return r
-}
-
-func pprofRouter() *chi.Mux {
-	r := chi.NewRouter()
-	r.HandleFunc("/", pprof.Index)
-
-	r.HandleFunc("/cmdline", pprof.Cmdline)
-	r.HandleFunc("/profile", pprof.Profile)
-	r.HandleFunc("/symbol", pprof.Symbol)
-	r.HandleFunc("/trace", pprof.Trace)
-
-	r.Handle("/cmdline", pprof.Handler("block"))
-	r.Handle("/goroutine", pprof.Handler("goroutine"))
-	r.Handle("/heap", pprof.Handler("heap"))
-	r.Handle("/threadcreate", pprof.Handler("threadcreate"))
 
 	return r
 }

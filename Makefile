@@ -24,7 +24,7 @@ build-api:
 		./cmd/api
 
 install-gqlgen:
-	@go get -d "github.com/99designs/gqlgen"
+	@go get "github.com/99designs/gqlgen"
 
 generate: vendor-delete install-gqlgen
 	@go run github.com/99designs/gqlgen generate

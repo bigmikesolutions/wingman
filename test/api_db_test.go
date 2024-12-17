@@ -1,6 +1,8 @@
 package test
 
-import "testing"
+import (
+	"testing"
+)
 
 func Test_Api_Database_ShouldGetInfo(t *testing.T) {
 	s := NewApiDatabaseStage(t)

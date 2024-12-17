@@ -6,12 +6,14 @@ package graphql
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/bigmikesolutions/wingman/graphql/model"
 )
 
 // Database is the resolver for the database field.
 func (r *environmentResolver) Database(ctx context.Context, obj *model.Environment, id string) (*model.Database, error) {
-	return nil, fmt.Errorf("not implemented")
+	// TODO implement this stub
+	return &model.Database{
+		ID: id,
+	}, nil
 }
