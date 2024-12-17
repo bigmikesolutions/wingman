@@ -2,21 +2,81 @@ package service
 
 import (
 	"net/http"
+	"net/http/pprof"
+	"time"
 
-	"github.com/bigmikesolutions/wingman/core/cqrs"
-	servicehttp "github.com/bigmikesolutions/wingman/service/http"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+
+	"github.com/bigmikesolutions/wingman/graphql"
+	"github.com/bigmikesolutions/wingman/graphql/generated"
 )
 
-func NewHttpCqrs() (cqrs.Config, error) {
-	cfg := cqrs.NewConfig()
+const (
+	GraphqlEndpoint      = "/graphql"
+	ProbesHealthEndpoint = "/probes/health"
+	pprofEndpoint        = "/pprof"
+)
 
-	if err := cfg.AddQueryHandlers(
-		&servicehttp.QueryGetResourceHandler{
-			Client: http.DefaultClient,
-		},
-	); err != nil {
-		return cfg, err
+type HttpConfig struct {
+	Address       string        `envconfig:"HTTP_ADDRESS" default:"0.0.0.0:8080"`
+	WriteTimeout  time.Duration `envconfig:"HTTP_WRITE_TIMEOUT" default:"15s"`
+	ReadTimeout   time.Duration `envconfig:"HTTP_READ_TIMEOUT" default:"15s"`
+	ShutdownTime  time.Duration `envconfig:"HTTP_SHUTDOWN_TIME" default:"30s"`
+	PprofEnabled  bool          `envconfig:"HTTP_PPROF_ENABLED" default:"false"`
+	CompressLevel int           `envconfig:"HTTP_COMPRESS_LEVEL" default:"5"`
+}
+
+func NewHttpHandler(cfg HttpConfig) (http.Handler, error) {
+	// TODO inject dependencies here
+	resolver := graphql.Resolver{}
+
+	graphqlHandler := handler.New(
+		generated.NewExecutableSchema(
+			generated.Config{
+				Resolvers:  &resolver,
+				Directives: generated.DirectiveRoot{},
+			},
+		),
+	)
+
+	router := newHttpRouter(cfg)
+	router.Handle(GraphqlEndpoint, graphqlHandler)
+
+	return router, nil
+}
+
+func newHttpRouter(cfg HttpConfig) *chi.Mux {
+	r := chi.NewRouter()
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.Timeout(cfg.ReadTimeout))
+	r.Use(middleware.Compress(cfg.CompressLevel))
+	r.Use(middleware.Heartbeat(ProbesHealthEndpoint))
+
+	if cfg.PprofEnabled {
+		r.Mount(pprofEndpoint, pprofRouter())
 	}
 
-	return cfg, nil
+	return r
+}
+
+func pprofRouter() *chi.Mux {
+	r := chi.NewRouter()
+	r.HandleFunc("/", pprof.Index)
+
+	r.HandleFunc("/cmdline", pprof.Cmdline)
+	r.HandleFunc("/profile", pprof.Profile)
+	r.HandleFunc("/symbol", pprof.Symbol)
+	r.HandleFunc("/trace", pprof.Trace)
+
+	r.Handle("/cmdline", pprof.Handler("block"))
+	r.Handle("/goroutine", pprof.Handler("goroutine"))
+	r.Handle("/heap", pprof.Handler("heap"))
+	r.Handle("/threadcreate", pprof.Handler("threadcreate"))
+
+	return r
 }

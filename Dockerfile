@@ -1,4 +1,4 @@
-FROM golang:1.17-alpine as builder
+FROM golang:1.23-alpine as builder
 ARG CMD_PATH
 ARG VER
 WORKDIR $GOPATH/src/github.com/bigmikesolutions/wingman

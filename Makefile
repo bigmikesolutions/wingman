@@ -12,6 +12,10 @@ default: build test
 lint:
 	@golangci-lint run ./...
 
+fmt:
+	@goimports -local "github.com/bigmikesolutions/wingman" -l -w .
+	@gofumpt -l -w .
+
 build: generate build-api
 
 build-api:
@@ -25,18 +29,11 @@ install-gqlgen:
 generate: vendor-delete install-gqlgen
 	@go run github.com/99designs/gqlgen generate
 
-graphql-rover-generate:
-	@bin/rover supergraph compose --config api/supergraph.yml > api/supergraph.graphqls --elv2-license=accept
-
-graphql-rover-install:
-	@mkdir bin &2>/dev/null
-	@curl -sSL https://rover.apollo.dev/nix/latest | sh
-	@cp ~/.rover/bin/rover bin/rover
-
 vendor-delete:
 	@rm -rf vendor
 
 vendor:
+	@go mod tidy
 	@go mod vendor
 
 test:
