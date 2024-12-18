@@ -7,6 +7,8 @@ import (
 	"io"
 	"strconv"
 	"time"
+
+	"github.com/bigmikesolutions/wingman/graphql/model/cursor"
 )
 
 type AddK8sUserRole struct {
@@ -56,9 +58,16 @@ type Cluster struct {
 
 func (Cluster) IsEntity() {}
 
+// Meta-info about connection, returned by query, holding information about pagination etc.
+type ConnectionInfo struct {
+	EndCursor   cursor.Cursor `json:"endCursor"`
+	HasNextPage bool          `json:"hasNextPage"`
+}
+
 type Database struct {
-	ID     string      `json:"id"`
-	Driver *DriverType `json:"driver,omitempty"`
+	ID     string               `json:"id"`
+	Driver DriverType           `json:"driver"`
+	Table  *TableDataConnection `json:"table,omitempty"`
 }
 
 func (Database) IsEntity() {}
@@ -101,6 +110,25 @@ type Pod struct {
 func (Pod) IsEntity() {}
 
 type Query struct {
+}
+
+type TableData struct {
+	Ts  time.Time `json:"ts"`
+	Row []*string `json:"row"`
+}
+
+type TableDataConnection struct {
+	ConnectionInfo *ConnectionInfo  `json:"connectionInfo"`
+	Edges          []*TableDataEdge `json:"edges,omitempty"`
+}
+
+type TableDataEdge struct {
+	Cursor cursor.Cursor `json:"cursor"`
+	Node   *TableData    `json:"node,omitempty"`
+}
+
+type TableFilter struct {
+	Columns []*string `json:"columns,omitempty"`
 }
 
 type User struct {

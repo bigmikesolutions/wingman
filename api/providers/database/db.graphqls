@@ -8,7 +8,9 @@ extend type Environment {
 
 type Database @key (fields: "id") {
     id: String!
-    driver: DriverType
+    driver: DriverType!
+
+    table(name: String!, first:Int = 50, after: Cursor, where: TableFilter): TableDataConnection @goField(forceResolver: true)
 }
 
 enum DriverType {
@@ -17,3 +19,21 @@ enum DriverType {
 }
 
 
+input TableFilter {
+    columns: [String]
+}
+
+type TableDataConnection {
+    connectionInfo: ConnectionInfo!
+    edges: [TableDataEdge]
+}
+
+type TableDataEdge {
+    cursor: Cursor!
+    node: TableData
+}
+
+type TableData {
+    ts: Time!
+    row: [String]!
+}

@@ -10,6 +10,12 @@ scalar UserID
 scalar ResourceID
 scalar ResourceGroupID
 
+"""
+Opaque string used in pagination as data pointer.
+Free format which may change in future without prior notice.
+"""
+scalar Cursor
+
 directive @goModel(model: String, models: [String!]) on OBJECT
     | INPUT_OBJECT
     | SCALAR
@@ -36,4 +42,12 @@ directive @withDeprecatedArgs(
 schema {
     query: Query
     mutation: Mutation
+}
+
+"""
+Meta-info about connection, returned by query, holding information about pagination etc.
+"""
+type ConnectionInfo @shareable {
+    endCursor: Cursor!
+    hasNextPage: Boolean!
 }

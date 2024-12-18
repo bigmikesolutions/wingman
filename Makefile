@@ -20,7 +20,7 @@ build: generate build-api
 
 build-api:
 	@CGO_ENABLED=0 go build -o bin/api \
-		-ldflags "-X github.com/bigmikesolutions/wingman/pkg/build.Version=${VER}" \
+		-ldflags "-X github.com/bigmikesolutions/wingman/service/build.Version=${VER}" \
 		./cmd/api
 
 install-gqlgen:

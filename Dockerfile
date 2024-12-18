@@ -4,7 +4,7 @@ ARG VER
 WORKDIR $GOPATH/src/github.com/bigmikesolutions/wingman
 COPY . .
 RUN go build -mod=vendor -v \
-    -ldflags "-X github.com/bigmikesolutions/wingman/pkg/build.Version=${VER}" \
+    -ldflags "-X github.com/bigmikesolutions/wingman/service/build.Version=${VER}" \
     -o /go/bin/service \
     $CMD_PATH
 

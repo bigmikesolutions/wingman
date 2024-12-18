@@ -33,3 +33,6 @@ models:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
+  Cursor:
+    model:
+      - github.com/bigmikesolutions/wingman/graphql/model/cursor.Cursor

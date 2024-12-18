@@ -6,14 +6,41 @@ package graphql
 
 import (
 	"context"
+	"time"
 
+	"github.com/bigmikesolutions/wingman/graphql/generated"
 	"github.com/bigmikesolutions/wingman/graphql/model"
+	"github.com/bigmikesolutions/wingman/graphql/model/cursor"
 )
+
+// Table is the resolver for the table field.
+func (r *databaseResolver) Table(ctx context.Context, obj *model.Database, name string, first *int, after *cursor.Cursor, where *model.TableFilter) (*model.TableDataConnection, error) {
+	// TODO implement logic here
+	return &model.TableDataConnection{
+		ConnectionInfo: &model.ConnectionInfo{
+			HasNextPage: false,
+		},
+		Edges: []*model.TableDataEdge{
+			{
+				Node: &model.TableData{
+					Ts:  time.Now(),
+					Row: []*string{},
+				},
+			},
+		},
+	}, nil
+}
 
 // Database is the resolver for the database field.
 func (r *environmentResolver) Database(ctx context.Context, obj *model.Environment, id string) (*model.Database, error) {
 	// TODO implement this stub
 	return &model.Database{
-		ID: id,
+		ID:     id,
+		Driver: model.DriverTypePostgres,
 	}, nil
 }
+
+// Database returns generated.DatabaseResolver implementation.
+func (r *Resolver) Database() generated.DatabaseResolver { return &databaseResolver{r} }
+
+type databaseResolver struct{ *Resolver }
