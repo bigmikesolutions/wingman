@@ -5,7 +5,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/shurcooL/graphql"
+	"github.com/bigmikesolutions/wingman/graphql"
+	"github.com/bigmikesolutions/wingman/providers/db"
+
+	gql "github.com/shurcooL/graphql"
 
 	"github.com/bigmikesolutions/wingman/service"
 )
@@ -13,8 +16,9 @@ import (
 type HTTPServer struct {
 	server     *httptest.Server
 	client     *http.Client
-	graphql    *graphql.Client
+	graphql    *gql.Client
 	graphqlURL string
+	Resolver   *graphql.Resolver
 }
 
 func New() (*HTTPServer, error) {
@@ -23,7 +27,11 @@ func New() (*HTTPServer, error) {
 		return nil, err
 	}
 
-	handler, err := service.NewHttpHandler(cfg.HTTP)
+	resolver := &graphql.Resolver{
+		DB: db.New(),
+	}
+
+	handler, err := service.NewHttpHandler(cfg.HTTP, resolver)
 	if err != nil {
 		return nil, err
 	}
@@ -35,11 +43,12 @@ func New() (*HTTPServer, error) {
 	return &HTTPServer{
 		server: server,
 		client: client,
-		graphql: graphql.NewClient(
+		graphql: gql.NewClient(
 			graphqlURL,
 			client,
 		),
 		graphqlURL: graphqlURL,
+		Resolver:   resolver,
 	}, nil
 }
 

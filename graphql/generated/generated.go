@@ -142,8 +142,8 @@ type ComplexityRoot struct {
 	}
 
 	TableData struct {
-		Row func(childComplexity int) int
-		Ts  func(childComplexity int) int
+		Rows func(childComplexity int) int
+		Ts   func(childComplexity int) int
 	}
 
 	TableDataConnection struct {
@@ -154,6 +154,11 @@ type ComplexityRoot struct {
 	TableDataEdge struct {
 		Cursor func(childComplexity int) int
 		Node   func(childComplexity int) int
+	}
+
+	TableRow struct {
+		Index  func(childComplexity int) int
+		Values func(childComplexity int) int
 	}
 
 	User struct {
@@ -653,12 +658,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.__resolve_entities(childComplexity, args["representations"].([]map[string]interface{})), true
 
-	case "TableData.row":
-		if e.complexity.TableData.Row == nil {
+	case "TableData.rows":
+		if e.complexity.TableData.Rows == nil {
 			break
 		}
 
-		return e.complexity.TableData.Row(childComplexity), true
+		return e.complexity.TableData.Rows(childComplexity), true
 
 	case "TableData.ts":
 		if e.complexity.TableData.Ts == nil {
@@ -694,6 +699,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.TableDataEdge.Node(childComplexity), true
+
+	case "TableRow.index":
+		if e.complexity.TableRow.Index == nil {
+			break
+		}
+
+		return e.complexity.TableRow.Index(childComplexity), true
+
+	case "TableRow.values":
+		if e.complexity.TableRow.Values == nil {
+			break
+		}
+
+		return e.complexity.TableRow.Values(childComplexity), true
 
 	case "User.active":
 		if e.complexity.User.Active == nil {
@@ -1193,7 +1212,7 @@ enum AddK8sUserRoleClientErrorCode {
 
 
 `, BuiltIn: false},
-	{Name: "../../api/providers/database/db.graphqls", Input: `extend schema @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
+	{Name: "../../api/providers/db/db.graphqls", Input: `extend schema @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
 extend schema @link(url: "../../wingman/shared.graphqls")
 extend schema @link(url: "../../wingman/env.graphqls")
 
@@ -1205,7 +1224,7 @@ type Database @key (fields: "id") {
     id: String!
     driver: DriverType!
 
-    table(name: String!, first:Int = 50, after: Cursor, where: TableFilter): TableDataConnection @goField(forceResolver: true)
+    table(name: String!, first:Int = 50, after: Cursor, where: TableFilter): TableDataConnection! @goField(forceResolver: true)
 }
 
 enum DriverType {
@@ -1230,7 +1249,12 @@ type TableDataEdge {
 
 type TableData {
     ts: Time!
-    row: [String]!
+    rows: [TableRow]
+}
+
+type TableRow {
+    index: Int
+    values: [String]
 }
 `, BuiltIn: false},
 	{Name: "../../federation/directives.graphql", Input: `
@@ -2961,11 +2985,14 @@ func (ec *executionContext) _Database_table(ctx context.Context, field graphql.C
 	})
 
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*model.TableDataConnection)
 	fc.Result = res
-	return ec.marshalOTableDataConnection2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐTableDataConnection(ctx, field.Selections, res)
+	return ec.marshalNTableDataConnection2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐTableDataConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Database_table(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4616,8 +4643,8 @@ func (ec *executionContext) fieldContext_TableData_ts(_ context.Context, field g
 	return fc, nil
 }
 
-func (ec *executionContext) _TableData_row(ctx context.Context, field graphql.CollectedField, obj *model.TableData) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_TableData_row(ctx, field)
+func (ec *executionContext) _TableData_rows(ctx context.Context, field graphql.CollectedField, obj *model.TableData) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TableData_rows(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -4630,28 +4657,31 @@ func (ec *executionContext) _TableData_row(ctx context.Context, field graphql.Co
 	}()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Row, nil
+		return obj.Rows, nil
 	})
 
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.([]*string)
+	res := resTmp.([]*model.TableRow)
 	fc.Result = res
-	return ec.marshalNString2ᚕᚖstring(ctx, field.Selections, res)
+	return ec.marshalOTableRow2ᚕᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐTableRow(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_TableData_row(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_TableData_rows(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "TableData",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			switch field.Name {
+			case "index":
+				return ec.fieldContext_TableRow_index(ctx, field)
+			case "values":
+				return ec.fieldContext_TableRow_values(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TableRow", field.Name)
 		},
 	}
 	return fc, nil
@@ -4824,10 +4854,86 @@ func (ec *executionContext) fieldContext_TableDataEdge_node(_ context.Context, f
 			switch field.Name {
 			case "ts":
 				return ec.fieldContext_TableData_ts(ctx, field)
-			case "row":
-				return ec.fieldContext_TableData_row(ctx, field)
+			case "rows":
+				return ec.fieldContext_TableData_rows(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type TableData", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TableRow_index(ctx context.Context, field graphql.CollectedField, obj *model.TableRow) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TableRow_index(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Index, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TableRow_index(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TableRow",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TableRow_values(ctx context.Context, field graphql.CollectedField, obj *model.TableRow) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TableRow_values(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Values, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*string)
+	fc.Result = res
+	return ec.marshalOString2ᚕᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TableRow_values(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TableRow",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -8010,13 +8116,16 @@ func (ec *executionContext) _Database(ctx context.Context, sel ast.SelectionSet,
 		case "table":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = ec._Database_table(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -8758,11 +8867,8 @@ func (ec *executionContext) _TableData(ctx context.Context, sel ast.SelectionSet
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "row":
-			out.Values[i] = ec._TableData_row(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
+		case "rows":
+			out.Values[i] = ec._TableData_rows(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -8845,6 +8951,44 @@ func (ec *executionContext) _TableDataEdge(ctx context.Context, sel ast.Selectio
 			}
 		case "node":
 			out.Values[i] = ec._TableDataEdge_node(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var tableRowImplementors = []string{"TableRow"}
+
+func (ec *executionContext) _TableRow(ctx context.Context, sel ast.SelectionSet, obj *model.TableRow) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, tableRowImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TableRow")
+		case "index":
+			out.Values[i] = ec._TableRow_index(ctx, field, obj)
+		case "values":
+			out.Values[i] = ec._TableRow_values(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -9749,30 +9893,18 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) unmarshalNString2ᚕᚖstring(ctx context.Context, v interface{}) ([]*string, error) {
-	var vSlice []interface{}
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
-	var err error
-	res := make([]*string, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalOString2ᚖstring(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
+func (ec *executionContext) marshalNTableDataConnection2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐTableDataConnection(ctx context.Context, sel ast.SelectionSet, v model.TableDataConnection) graphql.Marshaler {
+	return ec._TableDataConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNString2ᚕᚖstring(ctx context.Context, sel ast.SelectionSet, v []*string) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	for i := range v {
-		ret[i] = ec.marshalOString2ᚖstring(ctx, sel, v[i])
+func (ec *executionContext) marshalNTableDataConnection2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐTableDataConnection(ctx context.Context, sel ast.SelectionSet, v *model.TableDataConnection) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
 	}
-
-	return ret
+	return ec._TableDataConnection(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
@@ -10717,13 +10849,6 @@ func (ec *executionContext) marshalOTableData2ᚖgithubᚗcomᚋbigmikesolutions
 	return ec._TableData(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOTableDataConnection2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐTableDataConnection(ctx context.Context, sel ast.SelectionSet, v *model.TableDataConnection) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._TableDataConnection(ctx, sel, v)
-}
-
 func (ec *executionContext) marshalOTableDataEdge2ᚕᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐTableDataEdge(ctx context.Context, sel ast.SelectionSet, v []*model.TableDataEdge) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -10778,6 +10903,54 @@ func (ec *executionContext) unmarshalOTableFilter2ᚖgithubᚗcomᚋbigmikesolut
 	}
 	res, err := ec.unmarshalInputTableFilter(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOTableRow2ᚕᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐTableRow(ctx context.Context, sel ast.SelectionSet, v []*model.TableRow) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOTableRow2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐTableRow(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) marshalOTableRow2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐTableRow(ctx context.Context, sel ast.SelectionSet, v *model.TableRow) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._TableRow(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOTime2ᚖtimeᚐTime(ctx context.Context, v interface{}) (*time.Time, error) {

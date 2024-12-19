@@ -28,14 +28,11 @@ type HttpConfig struct {
 	CompressLevel int           `envconfig:"HTTP_COMPRESS_LEVEL" default:"5"`
 }
 
-func NewHttpHandler(cfg HttpConfig) (http.Handler, error) {
-	// TODO inject dependencies here
-	resolver := graphql.Resolver{}
-
+func NewHttpHandler(cfg HttpConfig, resolver *graphql.Resolver) (http.Handler, error) {
 	graphqlHandler := handler.New(
 		generated.NewExecutableSchema(
 			generated.Config{
-				Resolvers:  &resolver,
+				Resolvers:  resolver,
 				Directives: generated.DirectiveRoot{},
 			},
 		),

@@ -3,11 +3,18 @@ package test
 import (
 	"testing"
 
+	"github.com/bigmikesolutions/wingman/graphql/model/cursor"
+	"github.com/bigmikesolutions/wingman/providers/db"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bigmikesolutions/wingman/graphql/model"
 	"github.com/bigmikesolutions/wingman/test/api"
+)
+
+const (
+	driverPGX = "pgx"
 )
 
 type ApiDatabaseStage struct {
@@ -53,14 +60,36 @@ func (s *ApiDatabaseStage) ServerIsUpAndRunning() *ApiDatabaseStage {
 	return s
 }
 
-func (s *ApiDatabaseStage) QueryDatabase(env, id string) *ApiDatabaseStage {
+func (s *ApiDatabaseStage) QueryDatabase(
+	env string,
+	id string,
+) *ApiDatabaseStage {
 	ctx, cancel := testContext()
 	defer cancel()
 	s.queryDatabase, s.err = s.server.Database(ctx, env, id)
 	return s
 }
 
+func (s *ApiDatabaseStage) QueryDatabaseTableData(
+	env string,
+	id string,
+	name string,
+	first int,
+	after cursor.Cursor,
+	where model.TableFilter,
+) *ApiDatabaseStage {
+	ctx, cancel := testContext()
+	defer cancel()
+	s.queryDatabase, s.err = s.server.DatabaseTableData(ctx, env, id, name, first, after, where)
+	return s
+}
+
 func (s *ApiDatabaseStage) NoClientError() *ApiDatabaseStage {
 	assert.NoError(s.t, s.err, "query has failed")
+	return s
+}
+
+func (s *ApiDatabaseStage) DatabaseIsProvided(database db.ConnectionInfo) *ApiDatabaseStage {
+	require.Nilf(s.t, s.server.Resolver.DB.Register(database), "register database: %+v", database)
 	return s
 }

@@ -6,6 +6,7 @@ package graphql
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/bigmikesolutions/wingman/graphql/generated"
@@ -15,7 +16,38 @@ import (
 
 // Table is the resolver for the table field.
 func (r *databaseResolver) Table(ctx context.Context, obj *model.Database, name string, first *int, after *cursor.Cursor, where *model.TableFilter) (*model.TableDataConnection, error) {
-	// TODO implement logic here
+	// TODO finalise logic implementation here
+	db, err := r.DB.Connection(ctx, obj.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO use nice & safe DQL builder here
+	if first == nil {
+		v := 50
+		first = &v
+	}
+	rows, err := db.QueryxContext(ctx, fmt.Sprintf("SELECT * FROM %s limit %d", name, *first))
+	if err != nil {
+		return nil, err
+	}
+
+	data := make([]*model.TableRow, 0)
+	for rows.Next() {
+		v, err := rows.SliceScan()
+		if err != nil {
+			return nil, err
+		}
+		r := model.TableRow{
+			Values: make([]*string, len(v)),
+		}
+		for i, v := range v {
+			s := fmt.Sprintf("%s", v)
+			r.Values[i] = &s
+		}
+		data = append(data, &r)
+	}
+
 	return &model.TableDataConnection{
 		ConnectionInfo: &model.ConnectionInfo{
 			HasNextPage: false,
@@ -23,8 +55,8 @@ func (r *databaseResolver) Table(ctx context.Context, obj *model.Database, name 
 		Edges: []*model.TableDataEdge{
 			{
 				Node: &model.TableData{
-					Ts:  time.Now(),
-					Row: []*string{},
+					Ts:   time.Now(),
+					Rows: data,
 				},
 			},
 		},

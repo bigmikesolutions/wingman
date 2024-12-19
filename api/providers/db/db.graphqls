@@ -10,7 +10,7 @@ type Database @key (fields: "id") {
     id: String!
     driver: DriverType!
 
-    table(name: String!, first:Int = 50, after: Cursor, where: TableFilter): TableDataConnection @goField(forceResolver: true)
+    table(name: String!, first:Int = 50, after: Cursor, where: TableFilter): TableDataConnection! @goField(forceResolver: true)
 }
 
 enum DriverType {
@@ -35,5 +35,10 @@ type TableDataEdge {
 
 type TableData {
     ts: Time!
-    row: [String]!
+    rows: [TableRow]
+}
+
+type TableRow {
+    index: Int
+    values: [String]
 }

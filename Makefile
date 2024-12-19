@@ -23,14 +23,13 @@ build-api:
 		-ldflags "-X github.com/bigmikesolutions/wingman/service/build.Version=${VER}" \
 		./cmd/api
 
-install-gqlgen:
-	@go get "github.com/99designs/gqlgen"
+generate:
+	@go generate ./...
 
-generate: vendor-delete install-gqlgen
-	@go run github.com/99designs/gqlgen generate
-
-vendor-delete:
-	@rm -rf vendor
+vendor-update:
+	@go get -u ./...
+	@go mod tidy
+	@go mod vendor
 
 vendor:
 	@go mod tidy

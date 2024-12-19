@@ -1,7 +1,7 @@
 schema:
   - api/wingman/*.graphqls
   - api/providers/k8s/*.graphqls
-  - api/providers/database/*.graphqls
+  - api/providers/db/*.graphqls
 
 exec:
   filename: graphql/generated/generated.go

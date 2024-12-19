@@ -11,4 +11,4 @@ subgraphs:
   database:
     routing_url: <DOWNSTREAM_DB_URL>
     schema:
-      file: providers/database/db.graphqls
+      file: providers/db/db.graphqls

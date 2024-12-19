@@ -1,0 +1,26 @@
+query {
+    environment(id: "test") {
+        database(id: "test-postgres") {
+            id
+            driver
+            table(name: "students", first: 100, after: "", where: {
+                columns: ["id", "first_name", "last_name", "email"]
+            }) {
+                connectionInfo {
+                    hasNextPage
+                    endCursor
+                }
+                edges {
+                    cursor
+                    node {
+                        ts
+                        rows {
+                            index
+                            values
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

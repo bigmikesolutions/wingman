@@ -67,7 +67,7 @@ type ConnectionInfo struct {
 type Database struct {
 	ID     string               `json:"id"`
 	Driver DriverType           `json:"driver"`
-	Table  *TableDataConnection `json:"table,omitempty"`
+	Table  *TableDataConnection `json:"table"`
 }
 
 func (Database) IsEntity() {}
@@ -113,8 +113,8 @@ type Query struct {
 }
 
 type TableData struct {
-	Ts  time.Time `json:"ts"`
-	Row []*string `json:"row"`
+	Ts   time.Time   `json:"ts"`
+	Rows []*TableRow `json:"rows,omitempty"`
 }
 
 type TableDataConnection struct {
@@ -129,6 +129,11 @@ type TableDataEdge struct {
 
 type TableFilter struct {
 	Columns []*string `json:"columns,omitempty"`
+}
+
+type TableRow struct {
+	Index  *int      `json:"index,omitempty"`
+	Values []*string `json:"values,omitempty"`
 }
 
 type User struct {
