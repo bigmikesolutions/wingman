@@ -18,17 +18,15 @@ import (
 
 const (
 	defaultTimeout = 5 * time.Second
-	driverName     = "pgx"
 
-	dbName     = "postgres"
-	dbPassword = "postgres"
-	dbUser     = "admin"
-	dbPort     = "5432/tcp"
+	DriverName = "pgx"
+	DbName     = "postgres"
+	DbPassword = "postgres"
+	DbUser     = "admin"
+	DbPort     = "5432/tcp"
 
 	noSSL = "sslmode=disable"
-
-	dbInitScript = "containers/pg/init.sh"
-	dbCfg        = "containers/pg/pg.conf"
+	dbCfg = "containers/pg/pg.conf"
 )
 
 // CancelFn cancel function for stopping/clearing DB related stuff.
@@ -39,15 +37,14 @@ func Start(ctx context.Context) (*postgres.PostgresContainer, CancelFn, error) {
 	postgresContainer, err := postgres.Run(
 		ctx,
 		"postgres",
-		postgres.WithDatabase(dbName),
-		postgres.WithUsername(dbUser),
-		postgres.WithPassword(dbPassword),
-		postgres.WithSQLDriver(driverName),
-		postgres.WithInitScripts(dbInitScript),
+		postgres.WithDatabase(DbName),
+		postgres.WithUsername(DbUser),
+		postgres.WithPassword(DbPassword),
+		postgres.WithSQLDriver(DriverName),
 		postgres.WithConfigFile(dbCfg),
 		testcontainers.WithWaitStrategy(
 			wait.ForLog("database system is ready to accept connections").WithOccurrence(2),
-			wait.ForListeningPort(dbPort),
+			wait.ForListeningPort(DbPort),
 		),
 	)
 
@@ -74,12 +71,12 @@ func Connect(ctx context.Context, c *postgres.PostgresContainer) (*sqlx.DB, erro
 		return nil, err
 	}
 
-	return sqlx.ConnectContext(ctx, driverName, cs)
+	return sqlx.ConnectContext(ctx, DriverName, cs)
 }
 
 // ConnectByURL creates connection to PG within docker container using given connection string.
 func ConnectByURL(ctx context.Context, connectionString string) (*sqlx.DB, error) {
-	return sqlx.ConnectContext(ctx, driverName, connectionString)
+	return sqlx.ConnectContext(ctx, DriverName, connectionString)
 }
 
 // ConnectionString created connection string for given container and specified port.
@@ -91,9 +88,9 @@ func ConnectionString(ctx context.Context, c *postgres.PostgresContainer, port i
 
 	return fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s?%s",
-		dbUser, dbPassword,
+		DbUser, DbPassword,
 		host, port,
-		dbName,
+		DbName,
 		noSSL,
 	), nil
 }
@@ -105,5 +102,5 @@ func InternalURL(ctx context.Context, c *postgres.PostgresContainer) (string, er
 		return "", err
 	}
 
-	return fmt.Sprintf("%s:%s", host, strings.ReplaceAll(dbPort, "/tcp", "")), nil
+	return fmt.Sprintf("%s:%s", host, strings.ReplaceAll(DbPort, "/tcp", "")), nil
 }

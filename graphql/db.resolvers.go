@@ -33,19 +33,26 @@ func (r *databaseResolver) Table(ctx context.Context, obj *model.Database, name 
 	}
 
 	data := make([]*model.TableRow, 0)
+	idx := 0
 	for rows.Next() {
 		v, err := rows.SliceScan()
 		if err != nil {
 			return nil, err
 		}
+
+		rowNr := idx
 		r := model.TableRow{
+			Index:  &rowNr,
 			Values: make([]*string, len(v)),
 		}
+
 		for i, v := range v {
-			s := fmt.Sprintf("%s", v)
+			s := fmt.Sprintf("%v", v)
 			r.Values[i] = &s
 		}
+
 		data = append(data, &r)
+		idx++
 	}
 
 	return &model.TableDataConnection{

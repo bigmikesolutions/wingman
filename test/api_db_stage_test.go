@@ -14,7 +14,21 @@ import (
 )
 
 const (
-	driverPGX = "pgx"
+	sqlCreateTableStudents = `
+CREATE TABLE students (
+	id SERIAL,
+	first_name TEXT NOT NULL,
+	last_name TEXT NOT NULL,
+	age INT NOT NULL
+);
+`
+
+	sqlInsertStudents = `
+INSERT INTO students(id,first_name,last_name,age) values
+	('1','johny','bravo',30),
+	('2','mike','tyson',51),
+	('3','pamela','anderson',65);
+`
 )
 
 type ApiDatabaseStage struct {
@@ -91,5 +105,61 @@ func (s *ApiDatabaseStage) NoClientError() *ApiDatabaseStage {
 
 func (s *ApiDatabaseStage) DatabaseIsProvided(database db.ConnectionInfo) *ApiDatabaseStage {
 	require.Nilf(s.t, s.server.Resolver.DB.Register(database), "register database: %+v", database)
+	return s
+}
+
+func (s *ApiDatabaseStage) DatabaseStatement(dbID, statement string, args ...any) *ApiDatabaseStage {
+	ctx, cancel := testContext()
+	defer cancel()
+	pg, err := s.server.Resolver.DB.Connection(ctx, dbID)
+	require.Nilf(s.t, err, "db connection")
+
+	rows, err := pg.QueryxContext(ctx, statement, args...)
+	require.Nilf(s.t, err, "statement error")
+
+	rows.Next()
+
+	return s
+}
+
+func (s *ApiDatabaseStage) DatabaseInfoIsReturned(dbID, driver string) *ApiDatabaseStage {
+	assert.Equal(s.t, dbID, s.queryDatabase.ID, "database ID")
+	assert.Equal(s.t, driver, string(s.queryDatabase.Driver), "database driver")
+	return s
+}
+
+func (s *ApiDatabaseStage) TableQueryHasNextPage(nextPage bool) *ApiDatabaseStage {
+	require.NotNil(s.t, s.queryDatabase.Table, "table data must be returned")
+	require.NotNil(s.t, s.queryDatabase.Table.ConnectionInfo, "connection info must be returned")
+
+	assert.Equal(s.t, nextPage, s.queryDatabase.Table.ConnectionInfo.HasNextPage, "next page")
+	if nextPage {
+		assert.NotEqual(s.t, "", string(s.queryDatabase.Table.ConnectionInfo.EndCursor), "end cursor missing")
+	}
+	return s
+}
+
+func (s *ApiDatabaseStage) TableHasRows(expRows ...model.TableRow) *ApiDatabaseStage {
+	require.NotNil(s.t, s.queryDatabase.Table, "table data must be returned")
+
+	for _, expRow := range expRows {
+		found := false
+		for _, edge := range s.queryDatabase.Table.Edges {
+			for _, row := range edge.Node.Rows {
+				if *expRow.Index == *row.Index {
+					// TODO enable cursor checks
+					// assert.NotEqual(s.t, "", string(edge.Cursor), "cursor missing")
+					assert.Equalf(s.t, len(expRow.Values), len(row.Values), "unexpeted values at row: %d", *expRow.Index)
+					for idx, expValue := range expRow.Values {
+						assert.Equalf(s.t, *expValue, *row.Values[idx], "row value mismatch at %d", idx)
+					}
+					found = true
+					break
+				}
+			}
+		}
+		assert.Truef(s.t, found, "table row not found: %d", *expRow.Index)
+	}
+
 	return s
 }

@@ -54,6 +54,11 @@ func New(ctx context.Context) (*Service, error) {
 	return s, nil
 }
 
+// Postgres returns container.
+func (s *Service) Postgres() *postgres.PostgresContainer {
+	return s.pg
+}
+
 // DB creates direct connect to database.
 func (s *Service) DB(ctx context.Context) (*sqlx.DB, error) {
 	return pg.Connect(ctx, s.pg)

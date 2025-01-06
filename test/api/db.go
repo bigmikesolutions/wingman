@@ -53,6 +53,7 @@ query($env: EnvironmentID!, $databaseID: String!, $tableName: String!, $first: I
 	environment(id: $env) {
 		database(id: $databaseID) {
 			id
+			driver
 			table(name: $tableName, first: $first, after: $after, where: $where) {
 				connectionInfo {
 					endCursor
