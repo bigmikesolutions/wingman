@@ -13,11 +13,8 @@ query {
                 edges {
                     cursor
                     node {
-                        ts
-                        rows {
-                            index
-                            values
-                        }
+                        index
+                        values
                     }
                 }
             }

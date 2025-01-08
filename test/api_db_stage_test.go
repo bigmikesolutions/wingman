@@ -145,17 +145,15 @@ func (s *ApiDatabaseStage) TableHasRows(expRows ...model.TableRow) *ApiDatabaseS
 	for _, expRow := range expRows {
 		found := false
 		for _, edge := range s.queryDatabase.Table.Edges {
-			for _, row := range edge.Node.Rows {
-				if *expRow.Index == *row.Index {
-					// TODO enable cursor checks
-					// assert.NotEqual(s.t, "", string(edge.Cursor), "cursor missing")
-					assert.Equalf(s.t, len(expRow.Values), len(row.Values), "unexpeted values at row: %d", *expRow.Index)
-					for idx, expValue := range expRow.Values {
-						assert.Equalf(s.t, *expValue, *row.Values[idx], "row value mismatch at %d", idx)
-					}
-					found = true
-					break
+			if *expRow.Index == *edge.Node.Index {
+				// TODO enable cursor checks
+				// assert.NotEqual(s.t, "", string(edge.Cursor), "cursor missing")
+				assert.Equalf(s.t, len(expRow.Values), len(edge.Node.Values), "unexpeted values at row: %d", *expRow.Index)
+				for idx, expValue := range expRow.Values {
+					assert.Equalf(s.t, *expValue, *edge.Node.Values[idx], "row value mismatch at %d", idx)
 				}
+				found = true
+				break
 			}
 		}
 		assert.Truef(s.t, found, "table row not found: %d", *expRow.Index)

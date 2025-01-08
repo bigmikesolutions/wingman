@@ -7,7 +7,6 @@ package graphql
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/bigmikesolutions/wingman/graphql/generated"
 	"github.com/bigmikesolutions/wingman/graphql/model"
@@ -32,7 +31,7 @@ func (r *databaseResolver) Table(ctx context.Context, obj *model.Database, name 
 		return nil, err
 	}
 
-	data := make([]*model.TableRow, 0)
+	edges := make([]*model.TableDataEdge, 0)
 	idx := 0
 	for rows.Next() {
 		v, err := rows.SliceScan()
@@ -41,17 +40,20 @@ func (r *databaseResolver) Table(ctx context.Context, obj *model.Database, name 
 		}
 
 		rowNr := idx
-		r := model.TableRow{
-			Index:  &rowNr,
-			Values: make([]*string, len(v)),
+		r := model.TableDataEdge{
+			Cursor: "", // TODO add cursor support here
+			Node: &model.TableRow{
+				Index:  &rowNr,
+				Values: make([]*string, len(v)),
+			},
 		}
 
 		for i, v := range v {
 			s := fmt.Sprintf("%v", v)
-			r.Values[i] = &s
+			r.Node.Values[i] = &s
 		}
 
-		data = append(data, &r)
+		edges = append(edges, &r)
 		idx++
 	}
 
@@ -59,14 +61,7 @@ func (r *databaseResolver) Table(ctx context.Context, obj *model.Database, name 
 		ConnectionInfo: &model.ConnectionInfo{
 			HasNextPage: false,
 		},
-		Edges: []*model.TableDataEdge{
-			{
-				Node: &model.TableData{
-					Ts:   time.Now(),
-					Rows: data,
-				},
-			},
-		},
+		Edges: edges,
 	}, nil
 }
 

@@ -62,11 +62,8 @@ query($env: EnvironmentID!, $databaseID: String!, $tableName: String!, $first: I
 				edges {
 					cursor
 					node {
-						ts
-						rows {
-							index 
-							values
-						}
+						index 
+						values
 					}
 				}
 			}

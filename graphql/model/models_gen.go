@@ -112,11 +112,6 @@ func (Pod) IsEntity() {}
 type Query struct {
 }
 
-type TableData struct {
-	Ts   time.Time   `json:"ts"`
-	Rows []*TableRow `json:"rows,omitempty"`
-}
-
 type TableDataConnection struct {
 	ConnectionInfo *ConnectionInfo  `json:"connectionInfo"`
 	Edges          []*TableDataEdge `json:"edges,omitempty"`
@@ -124,7 +119,7 @@ type TableDataConnection struct {
 
 type TableDataEdge struct {
 	Cursor cursor.Cursor `json:"cursor"`
-	Node   *TableData    `json:"node,omitempty"`
+	Node   *TableRow     `json:"node,omitempty"`
 }
 
 type TableFilter struct {

@@ -30,12 +30,7 @@ type TableDataConnection {
 
 type TableDataEdge {
     cursor: Cursor!
-    node: TableData
-}
-
-type TableData {
-    ts: Time!
-    rows: [TableRow]
+    node: TableRow
 }
 
 type TableRow {
