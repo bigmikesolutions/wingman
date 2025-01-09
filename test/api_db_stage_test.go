@@ -29,6 +29,8 @@ INSERT INTO students(id,first_name,last_name,age) values
 	('2','mike','tyson',51),
 	('3','pamela','anderson',65);
 `
+
+	expDriverPostgres = "POSTGRES"
 )
 
 type ApiDatabaseStage struct {
@@ -80,7 +82,7 @@ func (s *ApiDatabaseStage) QueryDatabase(
 ) *ApiDatabaseStage {
 	ctx, cancel := testContext()
 	defer cancel()
-	s.queryDatabase, s.err = s.server.Database(ctx, env, id)
+	s.queryDatabase, s.err = s.server.DatabaseQuery(ctx, env, id)
 	return s
 }
 
@@ -94,7 +96,7 @@ func (s *ApiDatabaseStage) QueryDatabaseTableData(
 ) *ApiDatabaseStage {
 	ctx, cancel := testContext()
 	defer cancel()
-	s.queryDatabase, s.err = s.server.DatabaseTableData(ctx, env, id, name, first, after, where)
+	s.queryDatabase, s.err = s.server.DatabaseTableDataQuery(ctx, env, id, name, first, after, where)
 	return s
 }
 
@@ -124,7 +126,10 @@ func (s *ApiDatabaseStage) DatabaseStatement(dbID, statement string, args ...any
 
 func (s *ApiDatabaseStage) DatabaseInfoIsReturned(dbID, driver string) *ApiDatabaseStage {
 	assert.Equal(s.t, dbID, s.queryDatabase.ID, "database ID")
-	assert.Equal(s.t, driver, string(s.queryDatabase.Driver), "database driver")
+	assert.Equal(s.t, dbID, s.queryDatabase.Info.ID, "database info: ID")
+	assert.Equal(s.t, driver, string(s.queryDatabase.Info.Driver), "database info: driver")
+	assert.Equal(s.t, "", s.queryDatabase.Info.Host, "database info: host")
+	assert.Equal(s.t, 0, s.queryDatabase.Info.Port, "database info: port")
 	return s
 }
 
@@ -159,5 +164,14 @@ func (s *ApiDatabaseStage) TableHasRows(expRows ...model.TableRow) *ApiDatabaseS
 		assert.Truef(s.t, found, "table row not found: %d", *expRow.Index)
 	}
 
+	return s
+}
+
+func (s *ApiDatabaseStage) DatabaseUserRoleIsCreated(input model.AddDatabaseUserRoleInput) *ApiDatabaseStage {
+	ctx, cancel := testContext()
+	defer cancel()
+	payload, err := s.server.CreateDatabaseUserRoleMutation(ctx, input)
+	require.Nil(s.t, err, "server error create database user role")
+	require.Nil(s.t, payload.Error, "client error create database user role")
 	return s
 }

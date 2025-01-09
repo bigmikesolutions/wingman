@@ -13,6 +13,15 @@ import (
 	"github.com/bigmikesolutions/wingman/graphql/model/cursor"
 )
 
+// Info is the resolver for the info field.
+func (r *databaseResolver) Info(ctx context.Context, obj *model.Database) (*model.DatabaseInfo, error) {
+	// TODO implement this stub
+	return &model.DatabaseInfo{
+		ID:     obj.ID,
+		Driver: model.DriverTypePostgres,
+	}, nil
+}
+
 // Table is the resolver for the table field.
 func (r *databaseResolver) Table(ctx context.Context, obj *model.Database, name string, first *int, after *cursor.Cursor, where *model.TableFilter) (*model.TableDataConnection, error) {
 	// TODO finalise logic implementation here
@@ -69,8 +78,7 @@ func (r *databaseResolver) Table(ctx context.Context, obj *model.Database, name 
 func (r *environmentResolver) Database(ctx context.Context, obj *model.Environment, id string) (*model.Database, error) {
 	// TODO implement this stub
 	return &model.Database{
-		ID:     id,
-		Driver: model.DriverTypePostgres,
+		ID: id,
 	}, nil
 }
 

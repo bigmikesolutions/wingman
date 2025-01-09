@@ -16,7 +16,12 @@ query {
         }
         database(id: "test-postgres") {
             id
-            driver
+            info {
+                id
+                host
+                port
+                driver
+            }
         }
     }
 }

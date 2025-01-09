@@ -9,13 +9,18 @@ import (
 	"github.com/bigmikesolutions/wingman/graphql/model"
 )
 
-func (s *HTTPServer) Database(ctx context.Context, env string, id string) (*model.Database, error) {
+func (s *HTTPServer) DatabaseQuery(ctx context.Context, env string, id string) (*model.Database, error) {
 	query := `
 query($env: EnvironmentID!, $databaseID:String!) {
 	environment(id: $env) {
 		database(id: $databaseID) {
 			id
-			driver
+			info {
+				id
+                host
+                port
+                driver
+            }
 		}
 	}
 }
@@ -39,7 +44,7 @@ query($env: EnvironmentID!, $databaseID:String!) {
 	return response.Data.Environment.Database, nil
 }
 
-func (s *HTTPServer) DatabaseTableData(
+func (s *HTTPServer) DatabaseTableDataQuery(
 	ctx context.Context,
 	env string,
 	id string,
@@ -53,7 +58,12 @@ query($env: EnvironmentID!, $databaseID: String!, $tableName: String!, $first: I
 	environment(id: $env) {
 		database(id: $databaseID) {
 			id
-			driver
+			info {
+				id
+                host
+                port
+                driver
+            }
 			table(name: $tableName, first: $first, after: $after, where: $where) {
 				connectionInfo {
 					endCursor
@@ -92,4 +102,22 @@ query($env: EnvironmentID!, $databaseID: String!, $tableName: String!, $first: I
 	}
 
 	return response.Data.Environment.Database, nil
+}
+
+func (s *HTTPServer) CreateDatabaseUserRoleMutation(
+	ctx context.Context,
+	input model.AddDatabaseUserRoleInput,
+) (*model.AddDatabaseUserRolePayload, error) {
+	var mutation struct {
+		model.AddDatabaseUserRolePayload `graphql:"addDatabaseUserRole(input: $input)"`
+	}
+
+	err := s.graphql.Mutate(ctx, &mutation, map[string]interface{}{
+		"input": input,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &mutation.AddDatabaseUserRolePayload, nil
 }

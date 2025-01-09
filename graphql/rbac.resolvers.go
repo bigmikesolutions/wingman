@@ -22,6 +22,14 @@ func (r *mutationResolver) AddK8sUserRole(ctx context.Context, input model.AddK8
 	panic(fmt.Errorf("not implemented: AddK8sUserRole - addK8sUserRole"))
 }
 
+// AddDatabaseUserRole is the resolver for the addDatabaseUserRole field.
+func (r *mutationResolver) AddDatabaseUserRole(ctx context.Context, input model.AddDatabaseUserRoleInput) (*model.AddDatabaseUserRolePayload, error) {
+	//TODO implement this
+	return &model.AddDatabaseUserRolePayload{
+		MutationID: input.MutationID,
+	}, nil
+}
+
 // UserRoles is the resolver for the userRoles field.
 func (r *userRoleBindingResolver) UserRoles(ctx context.Context, obj *model.UserRoleBinding) ([]*model.UserRole, error) {
 	panic(fmt.Errorf("not implemented: UserRoles - userRoles"))
@@ -35,7 +43,5 @@ func (r *Resolver) UserRoleBinding() generated.UserRoleBindingResolver {
 	return &userRoleBindingResolver{r}
 }
 
-type (
-	mutationResolver        struct{ *Resolver }
-	userRoleBindingResolver struct{ *Resolver }
-)
+type mutationResolver struct{ *Resolver }
+type userRoleBindingResolver struct{ *Resolver }

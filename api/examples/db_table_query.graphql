@@ -2,7 +2,12 @@ query {
     environment(id: "test") {
         database(id: "test-postgres") {
             id
-            driver
+            info {
+                id
+                host
+                port
+                driver
+            }
             table(name: "students", first: 100, after: "", where: {
                 columns: ["id", "first_name", "last_name", "email"]
             }) {

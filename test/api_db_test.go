@@ -1,6 +1,7 @@
 package test
 
 import (
+	"github.com/google/uuid"
 	"testing"
 
 	"github.com/bigmikesolutions/wingman/graphql/model"
@@ -10,32 +11,52 @@ func Test_Api_Database_ShouldGetInfo(t *testing.T) {
 	s := NewApiDatabaseStage(t)
 	defer s.Close()
 
+	envID := "test-env"
+	dbID := "pg-1"
+
 	s.Given().
 		ServerIsUpAndRunning().And().
-		DatabaseIsProvided(connectionInfo("pg-1", dc.Postgres()))
+		DatabaseIsProvided(connectionInfo(dbID, dc.Postgres()))
 
 	s.When().
-		QueryDatabase("test-env", "pg-1")
+		QueryDatabase(envID, dbID)
 
 	s.Then().
 		NoClientError().And().
-		DatabaseInfoIsReturned("pg-1", "POSTGRES")
+		DatabaseInfoIsReturned(dbID, expDriverPostgres)
 }
 
 func Test_Api_Database_ShouldGetTableData(t *testing.T) {
 	s := NewApiDatabaseStage(t)
 	defer s.Close()
 
+	envID := "test-env"
+	dbID := "pg-1"
+	roleID := uuid.New().String()
+
 	s.Given().
 		ServerIsUpAndRunning().And().
-		DatabaseIsProvided(connectionInfo("pg-1", dc.Postgres())).
-		DatabaseStatement("pg-1", sqlCreateTableStudents).And().
-		DatabaseStatement("pg-1", sqlInsertStudents)
+		DatabaseIsProvided(connectionInfo(dbID, dc.Postgres())).
+		DatabaseStatement(dbID, sqlCreateTableStudents).And().
+		DatabaseStatement(dbID, sqlInsertStudents).And().
+		DatabaseUserRoleIsCreated(model.AddDatabaseUserRoleInput{
+			MutationID: ptr(t.Name()),
+			UserRoles: []*model.AddDatabaseUserRole{
+				{
+					ID:          ptr(roleID),
+					AccessType:  model.AccessTypeRead,
+					Description: ptr("read-only access"),
+					DatabaseIds: []*string{
+						ptr(dbID),
+					},
+				},
+			},
+		})
 
 	s.When().
 		QueryDatabaseTableData(
-			"test-env",
-			"pg-1",
+			envID,
+			dbID,
 			"students",
 			50,
 			"",
@@ -44,7 +65,7 @@ func Test_Api_Database_ShouldGetTableData(t *testing.T) {
 
 	s.Then().
 		NoClientError().And().
-		DatabaseInfoIsReturned("pg-1", "POSTGRES").And().
+		DatabaseInfoIsReturned(dbID, expDriverPostgres).And().
 		TableQueryHasNextPage(false).And().
 		TableHasRows(
 			model.TableRow{

@@ -25,7 +25,5 @@ func (r *Resolver) Environment() generated.EnvironmentResolver { return &environ
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
-type (
-	environmentResolver struct{ *Resolver }
-	queryResolver       struct{ *Resolver }
-)
+type environmentResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }

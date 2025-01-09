@@ -2,39 +2,37 @@ extend schema @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@
 extend schema @link(url: "../../wingman/shared.graphqls")
 
 extend type Mutation {
-    addK8sUserRole(input: AddK8sUserRoleInput!): AddK8sUserRolePayload!
+    addDatabaseUserRole(input: AddDatabaseUserRoleInput!): AddDatabaseUserRolePayload!
 }
 
 extend type UserRole {
-    namespaces: [String]
-    pods: [Pod!]
+    databases: [DatabaseInfo]
 }
 
-input AddK8sUserRole {
+input AddDatabaseUserRole {
     id: String
     accessType: AccessType!
     description: String
-    namespaces: [String]
-    pods: [String]
+    databaseIds: [String]
 }
 
-input AddK8sUserRoleInput {
+input AddDatabaseUserRoleInput {
     mutationId: String
-    userRoles: [AddK8sUserRole!]!
+    userRoles: [AddDatabaseUserRole!]!
 }
 
-type AddK8sUserRolePayload {
+type AddDatabaseUserRolePayload {
     mutationId: ID
     userRoles: [UserRole]
-    error: AddK8sUserRoleError
+    error: AddDatabaseUserRoleError
 }
 
-type AddK8sUserRoleError {
-    code: AddK8sUserRoleClientErrorCode!
+type AddDatabaseUserRoleError {
+    code: AddDatabaseUserRoleClientErrorCode!
     message: String
 }
 
-enum AddK8sUserRoleClientErrorCode {
+enum AddDatabaseUserRoleClientErrorCode {
     INVALID_INPUT
     USER_NOT_FOUND
     USER_ROLE_NOT_FOUND

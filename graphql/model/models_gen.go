@@ -11,6 +11,29 @@ import (
 	"github.com/bigmikesolutions/wingman/graphql/model/cursor"
 )
 
+type AddDatabaseUserRole struct {
+	ID          *string    `json:"id,omitempty"`
+	AccessType  AccessType `json:"accessType"`
+	Description *string    `json:"description,omitempty"`
+	DatabaseIds []*string  `json:"databaseIds,omitempty"`
+}
+
+type AddDatabaseUserRoleError struct {
+	Code    AddDatabaseUserRoleClientErrorCode `json:"code"`
+	Message *string                            `json:"message,omitempty"`
+}
+
+type AddDatabaseUserRoleInput struct {
+	MutationID *string                `json:"mutationId,omitempty"`
+	UserRoles  []*AddDatabaseUserRole `json:"userRoles"`
+}
+
+type AddDatabaseUserRolePayload struct {
+	MutationID *string                   `json:"mutationId,omitempty"`
+	UserRoles  []*UserRole               `json:"userRoles,omitempty"`
+	Error      *AddDatabaseUserRoleError `json:"error,omitempty"`
+}
+
 type AddK8sUserRole struct {
 	ID          *string    `json:"id,omitempty"`
 	AccessType  AccessType `json:"accessType"`
@@ -25,12 +48,12 @@ type AddK8sUserRoleError struct {
 }
 
 type AddK8sUserRoleInput struct {
-	MutationID *string           `json:"mutationID,omitempty"`
+	MutationID *string           `json:"mutationId,omitempty"`
 	UserRoles  []*AddK8sUserRole `json:"userRoles"`
 }
 
 type AddK8sUserRolePayload struct {
-	MutationID *string              `json:"mutationID,omitempty"`
+	MutationID *string              `json:"mutationId,omitempty"`
 	UserRoles  []*UserRole          `json:"userRoles,omitempty"`
 	Error      *AddK8sUserRoleError `json:"error,omitempty"`
 }
@@ -65,12 +88,19 @@ type ConnectionInfo struct {
 }
 
 type Database struct {
-	ID     string               `json:"id"`
-	Driver DriverType           `json:"driver"`
-	Table  *TableDataConnection `json:"table"`
+	ID    string               `json:"id"`
+	Info  *DatabaseInfo        `json:"info,omitempty"`
+	Table *TableDataConnection `json:"table"`
 }
 
 func (Database) IsEntity() {}
+
+type DatabaseInfo struct {
+	ID     string     `json:"id"`
+	Host   string     `json:"host"`
+	Port   int        `json:"port"`
+	Driver DriverType `json:"driver"`
+}
 
 type Environment struct {
 	ID          string     `json:"id"`
@@ -146,13 +176,14 @@ type User struct {
 func (User) IsEntity() {}
 
 type UserRole struct {
-	ID          string     `json:"id"`
-	AccessType  AccessType `json:"accessType"`
-	Description *string    `json:"description,omitempty"`
-	CreatedAt   time.Time  `json:"createdAt"`
-	ModifiedAt  *time.Time `json:"modifiedAt,omitempty"`
-	Namespaces  []*string  `json:"namespaces,omitempty"`
-	Pods        []*Pod     `json:"pods,omitempty"`
+	ID          string          `json:"id"`
+	AccessType  AccessType      `json:"accessType"`
+	Description *string         `json:"description,omitempty"`
+	CreatedAt   time.Time       `json:"createdAt"`
+	ModifiedAt  *time.Time      `json:"modifiedAt,omitempty"`
+	Namespaces  []*string       `json:"namespaces,omitempty"`
+	Pods        []*Pod          `json:"pods,omitempty"`
+	Databases   []*DatabaseInfo `json:"databases,omitempty"`
 }
 
 func (UserRole) IsEntity() {}
@@ -206,6 +237,53 @@ func (e *AccessType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e AccessType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type AddDatabaseUserRoleClientErrorCode string
+
+const (
+	AddDatabaseUserRoleClientErrorCodeInvalidInput     AddDatabaseUserRoleClientErrorCode = "INVALID_INPUT"
+	AddDatabaseUserRoleClientErrorCodeUserNotFound     AddDatabaseUserRoleClientErrorCode = "USER_NOT_FOUND"
+	AddDatabaseUserRoleClientErrorCodeUserRoleNotFound AddDatabaseUserRoleClientErrorCode = "USER_ROLE_NOT_FOUND"
+	AddDatabaseUserRoleClientErrorCodeProviderError    AddDatabaseUserRoleClientErrorCode = "PROVIDER_ERROR"
+	AddDatabaseUserRoleClientErrorCodeGenericError     AddDatabaseUserRoleClientErrorCode = "GENERIC_ERROR"
+)
+
+var AllAddDatabaseUserRoleClientErrorCode = []AddDatabaseUserRoleClientErrorCode{
+	AddDatabaseUserRoleClientErrorCodeInvalidInput,
+	AddDatabaseUserRoleClientErrorCodeUserNotFound,
+	AddDatabaseUserRoleClientErrorCodeUserRoleNotFound,
+	AddDatabaseUserRoleClientErrorCodeProviderError,
+	AddDatabaseUserRoleClientErrorCodeGenericError,
+}
+
+func (e AddDatabaseUserRoleClientErrorCode) IsValid() bool {
+	switch e {
+	case AddDatabaseUserRoleClientErrorCodeInvalidInput, AddDatabaseUserRoleClientErrorCodeUserNotFound, AddDatabaseUserRoleClientErrorCodeUserRoleNotFound, AddDatabaseUserRoleClientErrorCodeProviderError, AddDatabaseUserRoleClientErrorCodeGenericError:
+		return true
+	}
+	return false
+}
+
+func (e AddDatabaseUserRoleClientErrorCode) String() string {
+	return string(e)
+}
+
+func (e *AddDatabaseUserRoleClientErrorCode) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AddDatabaseUserRoleClientErrorCode(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AddDatabaseUserRoleClientErrorCode", str)
+	}
+	return nil
+}
+
+func (e AddDatabaseUserRoleClientErrorCode) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

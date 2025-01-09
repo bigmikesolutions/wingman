@@ -8,9 +8,15 @@ extend type Environment {
 
 type Database @key (fields: "id") {
     id: String!
-    driver: DriverType!
-
+    info:DatabaseInfo @goField(forceResolver: true)
     table(name: String!, first:Int = 50, after: Cursor, where: TableFilter): TableDataConnection! @goField(forceResolver: true)
+}
+
+type DatabaseInfo  {
+    id: String!
+    host: String!
+    port: Int!
+    driver: DriverType!
 }
 
 enum DriverType {

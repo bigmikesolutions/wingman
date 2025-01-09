@@ -1,13 +1,12 @@
 mutation {
-    addK8sUserRole(input: {
-        mutationId: "sample-k8s-create-user-role"
+    addDatabaseUserRole(input: {
+        mutationId: "sample-db-create-user-role"
         userRoles: [
             {
-                id: "k8s-pods-read-only"
-                description: "read-only access to a single pod"
+                id: "db-read-only"
+                description: "read-only access to a single database"
                 accessType: Read
-                namespaces: ["default"]
-                pods: ["only-single-pod"]
+                databaseIds: ["test-postgres"]
             }
         ]
     }) {
@@ -18,12 +17,12 @@ mutation {
             description
             createdAt
             modifiedAt
-            pods {
+            databases {
                 id
-                namespace
-                name
+                driver
+                host
+                port
             }
-            namespaces
         }
         error {
             code
@@ -31,11 +30,11 @@ mutation {
         }
     }
     addUserRoleBinding(input: {
-        mutationID: "sample-k8s-create-user-role-binding"
+        mutationID: "sample-database-create-user-role-binding"
         bindings: [
             {
                 userID: "michal",
-                roleIDs: ["k8s-pods-read-only"]
+                roleIDs: ["db-read-only"]
                 description: "needed because..."
             }
         ]
@@ -53,12 +52,12 @@ mutation {
                 description
                 createdAt
                 modifiedAt
-                pods {
+                databases {
                     id
-                    name
-                    namespace
+                    driver
+                    host
+                    port
                 }
-                namespaces
             }
         }
         error {
