@@ -8,7 +8,7 @@ extend type Environment {
 
 type Database @key (fields: "id") {
     id: String!
-    info:DatabaseInfo @goField(forceResolver: true)
+    info: DatabaseInfo @goField(forceResolver: true)
     table(name: String!, first:Int = 50, after: Cursor, where: TableFilter): TableDataConnection! @goField(forceResolver: true)
 }
 

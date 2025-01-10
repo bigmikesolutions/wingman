@@ -24,7 +24,7 @@ func (r *mutationResolver) AddK8sUserRole(ctx context.Context, input model.AddK8
 
 // AddDatabaseUserRole is the resolver for the addDatabaseUserRole field.
 func (r *mutationResolver) AddDatabaseUserRole(ctx context.Context, input model.AddDatabaseUserRoleInput) (*model.AddDatabaseUserRolePayload, error) {
-	//TODO implement this
+	// TODO implement this
 	return &model.AddDatabaseUserRolePayload{
 		MutationID: input.MutationID,
 	}, nil
@@ -43,5 +43,7 @@ func (r *Resolver) UserRoleBinding() generated.UserRoleBindingResolver {
 	return &userRoleBindingResolver{r}
 }
 
-type mutationResolver struct{ *Resolver }
-type userRoleBindingResolver struct{ *Resolver }
+type (
+	mutationResolver        struct{ *Resolver }
+	userRoleBindingResolver struct{ *Resolver }
+)

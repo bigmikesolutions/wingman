@@ -65,6 +65,11 @@ func (s *Service) Connection(ctx context.Context, id string) (*sqlx.DB, error) {
 	return conn, nil
 }
 
+func (s *Service) Info(id string) (ConnectionInfo, bool) {
+	info, ok := s.databases[id]
+	return info, ok
+}
+
 func connectionString(db ConnectionInfo) string {
 	return fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s",

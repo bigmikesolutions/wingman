@@ -15,10 +15,16 @@ import (
 
 // Info is the resolver for the info field.
 func (r *databaseResolver) Info(ctx context.Context, obj *model.Database) (*model.DatabaseInfo, error) {
-	// TODO implement this stub
+	info, ok := r.DB.Info(obj.ID)
+	if !ok {
+		return nil, nil
+	}
+
 	return &model.DatabaseInfo{
-		ID:     obj.ID,
-		Driver: model.DriverTypePostgres,
+		ID:     info.ID,
+		Driver: model.DriverType(info.Driver),
+		Host:   info.Host,
+		Port:   info.Port,
 	}, nil
 }
 

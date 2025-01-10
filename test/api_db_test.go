@@ -1,8 +1,9 @@
 package test
 
 import (
-	"github.com/google/uuid"
 	"testing"
+
+	"github.com/google/uuid"
 
 	"github.com/bigmikesolutions/wingman/graphql/model"
 )

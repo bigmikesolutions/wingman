@@ -38,5 +38,7 @@ func (r *Resolver) Cluster() generated.ClusterResolver { return &clusterResolver
 // Namespace returns generated.NamespaceResolver implementation.
 func (r *Resolver) Namespace() generated.NamespaceResolver { return &namespaceResolver{r} }
 
-type clusterResolver struct{ *Resolver }
-type namespaceResolver struct{ *Resolver }
+type (
+	clusterResolver   struct{ *Resolver }
+	namespaceResolver struct{ *Resolver }
+)

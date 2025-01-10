@@ -15,10 +15,11 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
-	"github.com/bigmikesolutions/wingman/graphql/model"
-	"github.com/bigmikesolutions/wingman/graphql/model/cursor"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+
+	"github.com/bigmikesolutions/wingman/graphql/model"
+	"github.com/bigmikesolutions/wingman/graphql/model/cursor"
 )
 
 // region    ************************** generated!.gotpl **************************
