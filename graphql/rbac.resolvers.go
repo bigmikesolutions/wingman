@@ -8,10 +8,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bigmikesolutions/wingman/providers/db"
-
 	"github.com/bigmikesolutions/wingman/graphql/generated"
 	"github.com/bigmikesolutions/wingman/graphql/model"
+	"github.com/bigmikesolutions/wingman/providers/db"
 )
 
 // AddUserRoleBinding is the resolver for the addUserRoleBinding field.
@@ -52,6 +51,11 @@ func (r *mutationResolver) AddDatabaseUserRole(ctx context.Context, input model.
 	}, nil
 }
 
+// Databases is the resolver for the databases field.
+func (r *userRoleResolver) Databases(ctx context.Context, obj *model.UserRole) ([]*model.DatabaseAccess, error) {
+	panic(fmt.Errorf("not implemented: Databases - databases"))
+}
+
 // UserRoles is the resolver for the userRoles field.
 func (r *userRoleBindingResolver) UserRoles(ctx context.Context, obj *model.UserRoleBinding) ([]*model.UserRole, error) {
 	panic(fmt.Errorf("not implemented: UserRoles - userRoles"))
@@ -60,6 +64,9 @@ func (r *userRoleBindingResolver) UserRoles(ctx context.Context, obj *model.User
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
+// UserRole returns generated.UserRoleResolver implementation.
+func (r *Resolver) UserRole() generated.UserRoleResolver { return &userRoleResolver{r} }
+
 // UserRoleBinding returns generated.UserRoleBindingResolver implementation.
 func (r *Resolver) UserRoleBinding() generated.UserRoleBindingResolver {
 	return &userRoleBindingResolver{r}
@@ -67,5 +74,6 @@ func (r *Resolver) UserRoleBinding() generated.UserRoleBindingResolver {
 
 type (
 	mutationResolver        struct{ *Resolver }
+	userRoleResolver        struct{ *Resolver }
 	userRoleBindingResolver struct{ *Resolver }
 )

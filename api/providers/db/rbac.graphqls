@@ -6,7 +6,7 @@ extend type Mutation {
 }
 
 extend type UserRole {
-    databases: [DatabaseAccess]
+    databases: [DatabaseAccess] @goField(forceResolver: true)
 }
 
 type DatabaseTableAccess  {
