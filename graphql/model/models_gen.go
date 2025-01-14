@@ -223,18 +223,20 @@ func (UserRoleBinding) IsEntity() {}
 type AccessType string
 
 const (
-	AccessTypeRead  AccessType = "Read"
-	AccessTypeWrite AccessType = "Write"
+	AccessTypeReadOnly  AccessType = "ReadOnly"
+	AccessTypeWriteOnly AccessType = "WriteOnly"
+	AccessTypeReadWrite AccessType = "ReadWrite"
 )
 
 var AllAccessType = []AccessType{
-	AccessTypeRead,
-	AccessTypeWrite,
+	AccessTypeReadOnly,
+	AccessTypeWriteOnly,
+	AccessTypeReadWrite,
 }
 
 func (e AccessType) IsValid() bool {
 	switch e {
-	case AccessTypeRead, AccessTypeWrite:
+	case AccessTypeReadOnly, AccessTypeWriteOnly, AccessTypeReadWrite:
 		return true
 	}
 	return false

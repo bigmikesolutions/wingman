@@ -41,7 +41,7 @@ func (r *databaseResolver) Table(ctx context.Context, obj *model.Database, name 
 		v := 50
 		first = &v
 	}
-	rows, err := db.QueryxContext(ctx, fmt.Sprintf("SELECT * FROM %s limit %d", name, *first))
+	rows, err := db.SelectFromTable(ctx, name, *first)
 	if err != nil {
 		return nil, err
 	}

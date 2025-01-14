@@ -1,7 +1,12 @@
 package test
 
 import (
+	"fmt"
 	"testing"
+
+	"github.com/jmoiron/sqlx"
+
+	"github.com/bigmikesolutions/wingman/test/containers/pg"
 
 	"github.com/bigmikesolutions/wingman/graphql/model/cursor"
 	"github.com/bigmikesolutions/wingman/providers/db"
@@ -113,12 +118,20 @@ func (s *ApiDatabaseStage) DatabaseIsProvided(database db.ConnectionInfo) *ApiDa
 }
 
 func (s *ApiDatabaseStage) DatabaseStatement(dbID, statement string, args ...any) *ApiDatabaseStage {
-	ctx, cancel := testContext()
-	defer cancel()
-	pg, err := s.server.Resolver.DB.Connection(ctx, dbID)
+	info, hasInfo := s.server.Resolver.DB.Info(dbID)
+	require.True(s.t, hasInfo, "db info")
+
+	conn, err := sqlx.Connect(pg.DriverName, fmt.Sprintf(
+		"postgres://%s:%s@%s:%d/%s",
+		info.User, info.Pass,
+		info.Host, info.Port,
+		info.Name,
+	))
 	require.Nilf(s.t, err, "db connection")
 
-	rows, err := pg.QueryxContext(ctx, statement, args...)
+	ctx, cancel := testContext()
+	defer cancel()
+	rows, err := conn.QueryxContext(ctx, statement, args...)
 	require.Nilf(s.t, err, "statement error")
 
 	rows.Next()

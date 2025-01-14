@@ -8,6 +8,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/bigmikesolutions/wingman/providers/db"
+
 	"github.com/bigmikesolutions/wingman/graphql/generated"
 	"github.com/bigmikesolutions/wingman/graphql/model"
 )
@@ -25,6 +27,26 @@ func (r *mutationResolver) AddK8sUserRole(ctx context.Context, input model.AddK8
 // AddDatabaseUserRole is the resolver for the addDatabaseUserRole field.
 func (r *mutationResolver) AddDatabaseUserRole(ctx context.Context, input model.AddDatabaseUserRoleInput) (*model.AddDatabaseUserRolePayload, error) {
 	// TODO implement this
+	role := input.UserRoles[0]
+	err := r.DB.RBAC().Add(db.UserRole{
+		ID:          *role.ID,
+		Description: role.Description,
+		DatabaseAccess: []db.DatabaseAccess{
+			{
+				DatabaseID: role.DatabaseAccess[0].ID,
+				Tables: []db.TableAccess{
+					{
+						Name:       role.DatabaseAccess[0].Tables[0].Name,
+						AccessType: db.ReadOnlyAccess,
+					},
+				},
+			},
+		},
+	})
+	// TODO handle error
+	if err != nil {
+		return nil, err
+	}
 	return &model.AddDatabaseUserRolePayload{
 		MutationID: input.MutationID,
 	}, nil

@@ -5,7 +5,7 @@ mutation {
             {
                 id: "k8s-pods-read-only"
                 description: "read-only access to a single pod"
-                accessType: Read
+                accessType: ReadOnly
                 namespaces: ["default"]
                 pods: ["only-single-pod"]
             }

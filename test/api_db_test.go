@@ -34,6 +34,7 @@ func Test_Api_Database_ShouldGetTableData(t *testing.T) {
 	envID := "test-env"
 	dbID := "pg-1"
 	roleID := uuid.New().String()
+	roleID = "any" // TODO remove this
 
 	s.Given().
 		ServerIsUpAndRunning().And().
@@ -52,7 +53,7 @@ func Test_Api_Database_ShouldGetTableData(t *testing.T) {
 							Tables: []*model.DatabaseTableAccessInput{
 								{
 									Name:       sqlTableStudents,
-									AccessType: model.AccessTypeRead,
+									AccessType: model.AccessTypeReadOnly,
 								},
 							},
 						},

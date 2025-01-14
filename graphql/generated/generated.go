@@ -1146,8 +1146,9 @@ extend type Mutation {
 }
 
 enum AccessType {
-    Read
-    Write
+    ReadOnly
+    WriteOnly
+    ReadWrite
 }
 
 type UserRole @key (fields: "id"){

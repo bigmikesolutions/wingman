@@ -18,65 +18,68 @@ var (
 type (
 	ID = string
 
-	ConnectionInfo struct {
-		ID     ID
-		Driver string
-		Host   string
-		Name   string
-		Port   int
-		User   string
-		Pass   string
-	}
-
 	Service struct {
-		databases   map[ID]ConnectionInfo
-		connections map[ID]*sqlx.DB
+		dbInfo map[ID]ConnectionInfo
+		conns  map[ID]*Connection
+		rbac   RBAC
 	}
 )
 
 func New() *Service {
 	return &Service{
-		connections: make(map[string]*sqlx.DB),
-		databases:   make(map[string]ConnectionInfo),
+		conns:  make(map[string]*Connection),
+		dbInfo: make(map[string]ConnectionInfo),
+		rbac: &InMemoryRBAC{
+			roles: make(map[RoleID]*UserRole),
+		},
 	}
 }
 
 func (s *Service) Register(db ConnectionInfo) error {
-	if _, ok := s.databases[db.ID]; ok {
+	if _, ok := s.dbInfo[db.ID]; ok {
 		return ErrDatabaseAlreadyExists
 	}
-	s.databases[db.ID] = db
+	s.dbInfo[db.ID] = db
 	return nil
 }
 
-func (s *Service) Connection(ctx context.Context, id ID) (*sqlx.DB, error) {
-	conn, ok := s.connections[id]
+func (s *Service) Connection(ctx context.Context, id ID) (*Connection, error) {
+	conn, ok := s.conns[id]
 	if !ok {
-		db, dbOK := s.databases[id]
+		dbInfo, dbOK := s.dbInfo[id]
 		if !dbOK {
 			return nil, ErrDatabaseNotFound
 		}
 
+		access, accessErr := s.rbac.Check(id, "any") // TODO use user ID from context here
+		if accessErr != nil {
+			return nil, fmt.Errorf("check database access: %w", accessErr)
+		}
+		if access == nil {
+			return nil, ErrDatabaseAccessDenied
+		}
+
 		var err error
-		conn, err = sqlx.ConnectContext(ctx, db.Driver, connectionString(db))
+		dbx, err := sqlx.ConnectContext(ctx, dbInfo.Driver, connectionString(dbInfo))
 		if err != nil {
 			return nil, fmt.Errorf("connect to database: %w", err)
 		}
-		s.connections[id] = conn
+
+		conn = &Connection{
+			dbID: id,
+			db:   dbx,
+			rbac: s.rbac,
+		}
+		s.conns[id] = conn
 	}
 	return conn, nil
 }
 
 func (s *Service) Info(id ID) (ConnectionInfo, bool) {
-	info, ok := s.databases[id]
+	info, ok := s.dbInfo[id]
 	return info, ok
 }
 
-func connectionString(db ConnectionInfo) string {
-	return fmt.Sprintf(
-		"postgres://%s:%s@%s:%d/%s",
-		db.User, db.Pass,
-		db.Host, db.Port,
-		db.Name,
-	)
+func (s *Service) RBAC() RBAC {
+	return s.rbac
 }

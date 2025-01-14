@@ -10,12 +10,12 @@ mutation {
                         id: "test-postgres"
                         tables: [
                             {
-                                accessType: Read
+                                accessType: ReadOnly
                                 name: "students"
                                 columns: [ "id", "first_name", "last_name" ]
                             },
                             {
-                                accessType: Read
+                                accessType: ReadOnly
                                 name: "news"
                             }
                         ]
