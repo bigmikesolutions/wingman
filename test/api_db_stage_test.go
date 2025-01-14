@@ -14,6 +14,8 @@ import (
 )
 
 const (
+	sqlTableStudents = "students"
+
 	sqlCreateTableStudents = `
 CREATE TABLE students (
 	id SERIAL,
@@ -128,8 +130,8 @@ func (s *ApiDatabaseStage) DatabaseInfoIsReturned(dbID, driver string) *ApiDatab
 	assert.Equal(s.t, dbID, s.queryDatabase.ID, "database ID")
 	assert.Equal(s.t, dbID, s.queryDatabase.Info.ID, "database info: ID")
 	assert.Equal(s.t, driver, string(s.queryDatabase.Info.Driver), "database info: driver")
-	assert.Equal(s.t, "", s.queryDatabase.Info.Host, "database info: host")
-	assert.Equal(s.t, 0, s.queryDatabase.Info.Port, "database info: port")
+	assert.Equal(s.t, "localhost", s.queryDatabase.Info.Host, "database info: host")
+	assert.NotEqual(s.t, 0, s.queryDatabase.Info.Port, "database info: port")
 	return s
 }
 

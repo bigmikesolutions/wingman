@@ -5,8 +5,22 @@ mutation {
             {
                 id: "db-read-only"
                 description: "read-only access to a single database"
-                accessType: Read
-                databaseIds: ["test-postgres"]
+                databaseAccess: [
+                    {
+                        id: "test-postgres"
+                        tables: [
+                            {
+                                accessType: Read
+                                name: "students"
+                                columns: [ "id", "first_name", "last_name" ]
+                            },
+                            {
+                                accessType: Read
+                                name: "news"
+                            }
+                        ]
+                    }
+                ]
             }
         ]
     }) {
@@ -19,9 +33,11 @@ mutation {
             modifiedAt
             databases {
                 id
-                driver
-                host
-                port
+                tables {
+                    name
+                    columns
+                    accessType
+                }
             }
         }
         error {
@@ -54,9 +70,11 @@ mutation {
                 modifiedAt
                 databases {
                     id
-                    driver
-                    host
-                    port
+                    tables {
+                        name
+                        columns
+                        accessType
+                    }
                 }
             }
         }

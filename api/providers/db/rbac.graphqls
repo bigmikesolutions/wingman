@@ -6,14 +6,35 @@ extend type Mutation {
 }
 
 extend type UserRole {
-    databases: [DatabaseInfo]
+    databases: [DatabaseAccess]
+}
+
+type DatabaseTableAccess  {
+    name: String!
+    columns: [String]
+    accessType: AccessType!
+}
+
+type DatabaseAccess  {
+    id: String!
+    tables: [DatabaseTableAccess!]
+}
+
+input DatabaseTableAccessInput  {
+    name: String!
+    columns: [String]
+    accessType: AccessType!
+}
+
+input DatabaseAccessInput  {
+    id: String!
+    tables: [DatabaseTableAccessInput]
 }
 
 input AddDatabaseUserRole {
     id: String
-    accessType: AccessType!
     description: String
-    databaseIds: [String]
+    databaseAccess: [DatabaseAccessInput]
 }
 
 input AddDatabaseUserRoleInput {

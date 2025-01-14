@@ -45,10 +45,17 @@ func Test_Api_Database_ShouldGetTableData(t *testing.T) {
 			UserRoles: []*model.AddDatabaseUserRole{
 				{
 					ID:          ptr(roleID),
-					AccessType:  model.AccessTypeRead,
 					Description: ptr("read-only access"),
-					DatabaseIds: []*string{
-						ptr(dbID),
+					DatabaseAccess: []*model.DatabaseAccessInput{
+						{
+							ID: dbID,
+							Tables: []*model.DatabaseTableAccessInput{
+								{
+									Name:       sqlTableStudents,
+									AccessType: model.AccessTypeRead,
+								},
+							},
+						},
 					},
 				},
 			},

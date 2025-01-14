@@ -16,8 +16,10 @@ var (
 )
 
 type (
+	ID = string
+
 	ConnectionInfo struct {
-		ID     string
+		ID     ID
 		Driver string
 		Host   string
 		Name   string
@@ -27,8 +29,8 @@ type (
 	}
 
 	Service struct {
-		databases   map[string]ConnectionInfo
-		connections map[string]*sqlx.DB
+		databases   map[ID]ConnectionInfo
+		connections map[ID]*sqlx.DB
 	}
 )
 
@@ -47,7 +49,7 @@ func (s *Service) Register(db ConnectionInfo) error {
 	return nil
 }
 
-func (s *Service) Connection(ctx context.Context, id string) (*sqlx.DB, error) {
+func (s *Service) Connection(ctx context.Context, id ID) (*sqlx.DB, error) {
 	conn, ok := s.connections[id]
 	if !ok {
 		db, dbOK := s.databases[id]
@@ -65,7 +67,7 @@ func (s *Service) Connection(ctx context.Context, id string) (*sqlx.DB, error) {
 	return conn, nil
 }
 
-func (s *Service) Info(id string) (ConnectionInfo, bool) {
+func (s *Service) Info(id ID) (ConnectionInfo, bool) {
 	info, ok := s.databases[id]
 	return info, ok
 }

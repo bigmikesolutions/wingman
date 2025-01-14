@@ -12,10 +12,9 @@ import (
 )
 
 type AddDatabaseUserRole struct {
-	ID          *string    `json:"id,omitempty"`
-	AccessType  AccessType `json:"accessType"`
-	Description *string    `json:"description,omitempty"`
-	DatabaseIds []*string  `json:"databaseIds,omitempty"`
+	ID             *string                `json:"id,omitempty"`
+	Description    *string                `json:"description,omitempty"`
+	DatabaseAccess []*DatabaseAccessInput `json:"databaseAccess,omitempty"`
 }
 
 type AddDatabaseUserRoleError struct {
@@ -95,11 +94,33 @@ type Database struct {
 
 func (Database) IsEntity() {}
 
+type DatabaseAccess struct {
+	ID     string                 `json:"id"`
+	Tables []*DatabaseTableAccess `json:"tables,omitempty"`
+}
+
+type DatabaseAccessInput struct {
+	ID     string                      `json:"id"`
+	Tables []*DatabaseTableAccessInput `json:"tables,omitempty"`
+}
+
 type DatabaseInfo struct {
 	ID     string     `json:"id"`
 	Host   string     `json:"host"`
 	Port   int        `json:"port"`
 	Driver DriverType `json:"driver"`
+}
+
+type DatabaseTableAccess struct {
+	Name       string     `json:"name"`
+	Columns    []*string  `json:"columns,omitempty"`
+	AccessType AccessType `json:"accessType"`
+}
+
+type DatabaseTableAccessInput struct {
+	Name       string     `json:"name"`
+	Columns    []*string  `json:"columns,omitempty"`
+	AccessType AccessType `json:"accessType"`
 }
 
 type Environment struct {
@@ -176,14 +197,14 @@ type User struct {
 func (User) IsEntity() {}
 
 type UserRole struct {
-	ID          string          `json:"id"`
-	AccessType  AccessType      `json:"accessType"`
-	Description *string         `json:"description,omitempty"`
-	CreatedAt   time.Time       `json:"createdAt"`
-	ModifiedAt  *time.Time      `json:"modifiedAt,omitempty"`
-	Namespaces  []*string       `json:"namespaces,omitempty"`
-	Pods        []*Pod          `json:"pods,omitempty"`
-	Databases   []*DatabaseInfo `json:"databases,omitempty"`
+	ID          string            `json:"id"`
+	AccessType  AccessType        `json:"accessType"`
+	Description *string           `json:"description,omitempty"`
+	CreatedAt   time.Time         `json:"createdAt"`
+	ModifiedAt  *time.Time        `json:"modifiedAt,omitempty"`
+	Namespaces  []*string         `json:"namespaces,omitempty"`
+	Pods        []*Pod            `json:"pods,omitempty"`
+	Databases   []*DatabaseAccess `json:"databases,omitempty"`
 }
 
 func (UserRole) IsEntity() {}

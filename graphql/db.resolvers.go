@@ -22,7 +22,7 @@ func (r *databaseResolver) Info(ctx context.Context, obj *model.Database) (*mode
 
 	return &model.DatabaseInfo{
 		ID:     info.ID,
-		Driver: model.DriverType(info.Driver),
+		Driver: model.DriverTypePostgres,
 		Host:   info.Host,
 		Port:   info.Port,
 	}, nil
