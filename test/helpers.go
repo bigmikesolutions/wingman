@@ -4,10 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/testcontainers/testcontainers-go/modules/postgres"
+	"github.com/bigmikesolutions/wingman/test/containers"
 
 	"github.com/bigmikesolutions/wingman/providers/db"
-	"github.com/bigmikesolutions/wingman/test/containers/pg"
 )
 
 const (
@@ -18,28 +17,15 @@ func testContext() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), clientTimeout)
 }
 
-func connectionInfo(id string, c *postgres.PostgresContainer) db.ConnectionInfo {
-	ctx, cancel := context.WithTimeout(context.Background(), clientTimeout)
-	defer cancel()
-
-	host, err := c.Host(ctx)
-	if err != nil {
-		panic(err)
-	}
-
-	containerPort, err := c.MappedPort(ctx, pg.DbPort)
-	if err != nil {
-		panic(err)
-	}
-
+func connectionInfo(id string, cfg containers.PostgresCfg) db.ConnectionInfo {
 	return db.ConnectionInfo{
 		ID:     id,
-		Host:   host,
-		Port:   containerPort.Int(),
-		Driver: pg.DriverName,
-		Name:   pg.DbName,
-		User:   pg.DbUser,
-		Pass:   pg.DbPassword,
+		Host:   containers.GetHost(),
+		Port:   cfg.Port,
+		Driver: containers.PostgresDriverName,
+		Name:   cfg.Name,
+		User:   cfg.User,
+		Pass:   cfg.Pass,
 	}
 }
 

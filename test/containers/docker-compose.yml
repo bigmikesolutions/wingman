@@ -1,0 +1,26 @@
+version: "3"
+services:
+
+  postgres:
+    container_name: wingman_postgres_$uid
+    image: postgres
+    environment:
+      - POSTGRES_DB=$pgName
+      - POSTGRES_USER=$pgUser
+      - POSTGRES_PASSWORD=$pgPass
+      - listen_addresses='*'
+    ports:
+      - $pgPort:5432
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 20s
+      retries: 3
+
+  toxiproxy:
+    container_name: wingman_toxiproxy_$uid
+    image: shopify/toxiproxy
+    ports:
+      - $toxiPort:8474
+      - $toxiPgPort:15432
+

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/jmoiron/sqlx"
+	"github.com/bigmikesolutions/wingman/test/containers"
 
-	"github.com/bigmikesolutions/wingman/test/containers/pg"
+	"github.com/jmoiron/sqlx"
 
 	"github.com/bigmikesolutions/wingman/graphql/model/cursor"
 	"github.com/bigmikesolutions/wingman/providers/db"
@@ -121,7 +121,7 @@ func (s *ApiDatabaseStage) DatabaseStatement(dbID, statement string, args ...any
 	info, hasInfo := s.server.Resolver.DB.Info(dbID)
 	require.True(s.t, hasInfo, "db info")
 
-	conn, err := sqlx.Connect(pg.DriverName, fmt.Sprintf(
+	conn, err := sqlx.Connect(containers.PostgresDriverName, fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s",
 		info.User, info.Pass,
 		info.Host, info.Port,
