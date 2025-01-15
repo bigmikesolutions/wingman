@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	toxiproxy "github.com/Shopify/toxiproxy/v2/client"
+	_ "github.com/jackc/pgx/v5/stdlib" // drivers
 	"github.com/jmoiron/sqlx"
 	"github.com/testcontainers/testcontainers-go/modules/compose"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -46,6 +47,7 @@ func New(ctx context.Context) (*Service, error) {
 	err = composeStack.
 		WithEnv(cfg.Env()).
 		WaitForService("postgres", wait.ForListeningPort("5432/tcp")).
+		WaitForService("toxiproxy", wait.ForListeningPort("8474/tcp")).
 		Up(ctx, compose.Wait(true))
 	if err != nil {
 		defer svc.Close()
@@ -67,11 +69,13 @@ func (s *Service) DB(ctx context.Context) (*sqlx.DB, error) {
 
 // DBProxy creates connection to database via proxy.
 func (s *Service) DBProxy(ctx context.Context) (*DBProxy, error) {
-	containerName := fmt.Sprintf("%s_postgres_%s", dockerID, s.cfg.uid)
-	upstream := fmt.Sprintf("%s:%d", containerName, s.cfg.Postgres.Port)
-	listen := fmt.Sprintf("[::]:%d", s.cfg.ToxiProxy.PostgresPort)
+	containerName := fmt.Sprintf("%s_postgres_%d", dockerID, s.cfg.uid)
+	upstream := fmt.Sprintf("%s:%s", containerName, "5432")
 
-	proxy, err := s.toxiClient.CreateProxy(containerName, listen, upstream)
+	proxy, err := s.toxiClient.CreateProxy(containerName, "[::]:15432", upstream)
+	if err != nil {
+		return nil, fmt.Errorf("postgres proxy: %w", err)
+	}
 
 	connString := s.cfg.Postgres.ConnectionString()
 	connString = strings.ReplaceAll(connString, strconv.Itoa(s.cfg.Postgres.Port), strconv.Itoa(s.cfg.ToxiProxy.PostgresPort))

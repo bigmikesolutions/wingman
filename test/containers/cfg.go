@@ -2,7 +2,7 @@ package containers
 
 import (
 	"fmt"
-	"math/rand"
+	"math/rand/v2"
 	"strconv"
 )
 
@@ -11,20 +11,22 @@ const (
 	PostgresDriverName = "pgx"
 )
 
-// cfg represents configuration of docker compose with random ports
+// cfg represents configuration of docker compose with random ports.
 type cfg struct {
-	uid       int
 	Postgres  PostgresCfg
 	ToxiProxy ToxiProxyCfg
+	uid       int
 }
 
+// PostgresCfg keeps docker-compose config.
 type PostgresCfg struct {
-	Port int
 	Name string
 	User string
 	Pass string
+	Port int
 }
 
+// ToxiProxyCfg keeps docker-compose config.
 type ToxiProxyCfg struct {
 	Port         int
 	PostgresPort int
@@ -46,6 +48,7 @@ func newCfg() cfg {
 	}
 }
 
+// Env returns env variables.
 func (c cfg) Env() map[string]string {
 	return map[string]string{
 		"uid":        strconv.Itoa(c.uid),
@@ -58,6 +61,7 @@ func (c cfg) Env() map[string]string {
 	}
 }
 
+// ConnectionString returns connection string for postgres container.
 func (c PostgresCfg) ConnectionString() string {
 	return fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s?%s",

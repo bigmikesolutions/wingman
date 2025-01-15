@@ -1,7 +1,6 @@
 package containers
 
 import (
-	"errors"
 	"fmt"
 	"net"
 	"net/url"
@@ -10,18 +9,7 @@ import (
 	"strings"
 )
 
-func joinErr(errs []error) error {
-	errMsg := ""
-	for _, err := range errs {
-		errMsg += err.Error() + "\n"
-	}
-	if errMsg == "" {
-		// nolint: err113
-		return errors.New(errMsg)
-	}
-	return nil
-}
-
+// GetHost returns docker host.
 func GetHost() string {
 	if dockerHost, ok := os.LookupEnv("DOCKER_HOST"); ok {
 		dh, err := url.Parse(dockerHost)
