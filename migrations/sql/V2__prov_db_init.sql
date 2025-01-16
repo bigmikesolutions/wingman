@@ -1,3 +1,6 @@
+CREATE SCHEMA provider_db;
+USE provider_db;
+
 CREATE TABLE IF NOT EXISTS "db_user_role" (
     id TEXT PRIMARY KEY,
     role_id TEXT PRIMARY KEY,

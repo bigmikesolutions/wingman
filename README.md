@@ -24,11 +24,3 @@ GET /api/v1/pods?limit=500
 GET /postgres/db/{db_name}/tables/{table_name}?id=5&limit=10
  
 ```
-
-
-docker run --rm \
--v ./migrations/sql:/flyway/sql \
--e FLYWAY_URL=jdbc:postgresql://localhost:5432/wingman \
--e FLYWAY_USER=admin \
--e FLYWAY_PASSWORD=pass \
-flyway/flyway:11 migrate
