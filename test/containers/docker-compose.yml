@@ -17,6 +17,19 @@ services:
       timeout: 20s
       retries: 3
 
+  migrations:
+    container_name: wingman_migration_$uid
+    build: ../../migrations
+    entrypoint: "/bin/bash -c 'while ! (echo > /dev/tcp/postgres/5432) > /dev/null 2>&1; do sleep 1; done; /flyway/flyway migrate'"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - FLYWAY_URL=jdbc:postgres://postgres:5432/$pgName
+      - FLYWAY_USER=$pgUser
+      - FLYWAY_PASSWORD=$pgPass
+      - FLYWAY_LOCATIONS=/flyway/sql
+
   toxiproxy:
     container_name: wingman_toxiproxy_$uid
     image: shopify/toxiproxy

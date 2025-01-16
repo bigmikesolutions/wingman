@@ -48,6 +48,10 @@ func New(ctx context.Context) (*Service, error) {
 		WithEnv(cfg.Env()).
 		WaitForService("postgres", wait.ForListeningPort("5432/tcp")).
 		WaitForService("toxiproxy", wait.ForListeningPort("8474/tcp")).
+		WaitForService("migrations", wait.ForAll(
+			wait.ForLog("Successfully applied"),
+			wait.ForExit(),
+		)).
 		Up(ctx, compose.Wait(true))
 	if err != nil {
 		defer svc.Close()
