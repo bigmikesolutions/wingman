@@ -1,9 +1,8 @@
 CREATE SCHEMA provider_db;
-USE provider_db;
+SET search_path TO provider_db;
 
-CREATE TABLE IF NOT EXISTS "db_user_role" (
+CREATE TABLE IF NOT EXISTS "user_role" (
     id TEXT PRIMARY KEY,
-    role_id TEXT PRIMARY KEY,
 
     created_at TIMESTAMP WITH TIME ZONE,
     created_by TEXT,
@@ -12,9 +11,8 @@ CREATE TABLE IF NOT EXISTS "db_user_role" (
 
     description TEXT,
     database_id TEXT,
-    tables JSOB,
+    tables JSONB
 );
 
-CREATE INDEX db_user_role_db_id_idx ON db_user_role(database_id);
-CREATE INDEX db_user_role_role_id_idx ON db_user_role(role_id);
-CREATE INDEX db_user_role_db_id_role_id_idx ON db_user_role(database_id, role_id);
+CREATE INDEX user_role_db_id_idx ON user_role(database_id);
+CREATE INDEX user_role_db_id_role_id_idx ON user_role(database_id, id);

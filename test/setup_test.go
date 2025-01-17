@@ -2,7 +2,6 @@ package test
 
 import (
 	"context"
-	"log"
 	"os"
 	"testing"
 	"time"
@@ -30,10 +29,4 @@ func TestMain(m *testing.M) {
 
 	code := m.Run()
 	defer os.Exit(code)
-}
-
-type logger struct{}
-
-func (c logger) Printf(format string, v ...interface{}) {
-	log.Printf(format, v...)
 }
