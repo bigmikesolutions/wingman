@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	rbac2 "github.com/bigmikesolutions/wingman/providers/db/rbac"
+
 	"github.com/jmoiron/sqlx"
 )
 
@@ -21,7 +23,7 @@ type (
 	Connection struct {
 		dbID ID
 		db   *sqlx.DB
-		rbac RBAC
+		rbac rbac2.Repository
 	}
 )
 

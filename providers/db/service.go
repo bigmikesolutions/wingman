@@ -25,13 +25,11 @@ type (
 	}
 )
 
-func New() *Service {
+func New(rbac RBAC) *Service {
 	return &Service{
 		conns:  make(map[string]*Connection),
 		dbInfo: make(map[string]ConnectionInfo),
-		rbac: &InMemoryRBAC{
-			roles: make(map[RoleID]*UserRole),
-		},
+		rbac:   rbac,
 	}
 }
 
@@ -51,7 +49,7 @@ func (s *Service) Connection(ctx context.Context, id ID) (*Connection, error) {
 			return nil, ErrDatabaseNotFound
 		}
 
-		access, accessErr := s.rbac.Check(id, "any") // TODO use user ID from context here
+		access, accessErr := s.rbac.FindUserRolesByDatabaseID(ctx, id) // TODO use user ID from context here
 		if accessErr != nil {
 			return nil, fmt.Errorf("check database access: %w", accessErr)
 		}
@@ -81,5 +79,6 @@ func (s *Service) Info(id ID) (ConnectionInfo, bool) {
 }
 
 func (s *Service) RBAC() RBAC {
+	// TODO check user access here
 	return s.rbac
 }

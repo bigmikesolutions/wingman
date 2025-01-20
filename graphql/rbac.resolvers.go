@@ -8,9 +8,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/bigmikesolutions/wingman/providers/db"
+
 	"github.com/bigmikesolutions/wingman/graphql/generated"
 	"github.com/bigmikesolutions/wingman/graphql/model"
-	"github.com/bigmikesolutions/wingman/providers/db"
 )
 
 // AddUserRoleBinding is the resolver for the addUserRoleBinding field.
@@ -27,7 +28,7 @@ func (r *mutationResolver) AddK8sUserRole(ctx context.Context, input model.AddK8
 func (r *mutationResolver) AddDatabaseUserRole(ctx context.Context, input model.AddDatabaseUserRoleInput) (*model.AddDatabaseUserRolePayload, error) {
 	// TODO implement this
 	role := input.UserRoles[0]
-	err := r.DB.RBAC().Add(db.UserRole{
+	err := r.Providers.DB.RBAC().CreateUserRole(ctx, db.UserRole{
 		ID:          *role.ID,
 		Description: role.Description,
 		DatabaseAccess: []db.DatabaseAccess{

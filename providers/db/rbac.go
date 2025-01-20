@@ -1,6 +1,10 @@
 package db
 
-import "errors"
+import (
+	"context"
+	"errors"
+	"time"
+)
 
 type AccessType uint8
 
@@ -18,6 +22,12 @@ const (
 type (
 	RoleID = string
 
+	RBAC interface {
+		CreateUserRole(ctx context.Context, role UserRole) error
+		FindUserRolesByDatabaseID(ctx context.Context, id ID) ([]UserRole, error)
+		Close() error
+	}
+
 	DatabaseAccess struct {
 		DatabaseID ID
 		Tables     []TableAccess
@@ -30,18 +40,16 @@ type (
 	}
 
 	UserRole struct {
-		ID             RoleID           `json:"id"`
+		ID RoleID `db:"id"`
+
+		CreatedAt time.Time `db:"created_at"`
+		CreatedBy string    `db:"created_by"`
+		UpdatedAt time.Time `db:"updated_at"`
+		UpdatedBy string    `db:"updated_by"`
+
 		Description    *string          `db:"description"`
-		DatabaseAccess []DatabaseAccess `db:"database_access"`
-	}
-
-	RBAC interface {
-		Add(role UserRole) error
-		Check(id ID, role RoleID) (*DatabaseAccess, error)
-	}
-
-	InMemoryRBAC struct {
-		roles map[RoleID]*UserRole
+		DatabaseID     ID               `db:"database_id"`
+		DatabaseAccess []DatabaseAccess `db:"tables"`
 	}
 )
 
@@ -53,25 +61,4 @@ func (db *DatabaseAccess) CanReadTable(name string, columns ...string) bool {
 		}
 	}
 	return false
-}
-
-func (i InMemoryRBAC) Add(role UserRole) error {
-	i.roles[role.ID] = &role
-	return nil
-}
-
-func (i InMemoryRBAC) Check(id ID, roleID RoleID) (*DatabaseAccess, error) {
-	role, ok := i.roles[roleID]
-	if !ok {
-		return nil, nil
-	}
-
-	for _, access := range role.DatabaseAccess {
-		if access.DatabaseID == id {
-			clone := access
-			return &clone, nil
-		}
-	}
-
-	return nil, nil
 }

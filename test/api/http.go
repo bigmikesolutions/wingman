@@ -5,10 +5,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/bigmikesolutions/wingman/graphql"
-	"github.com/bigmikesolutions/wingman/providers/db"
+	"github.com/bigmikesolutions/wingman/providers"
 
 	gql "github.com/shurcooL/graphql"
+
+	"github.com/bigmikesolutions/wingman/graphql"
 
 	"github.com/bigmikesolutions/wingman/service"
 )
@@ -28,7 +29,7 @@ func New() (*HTTPServer, error) {
 	}
 
 	resolver := &graphql.Resolver{
-		DB: db.New(),
+		Providers: providers.NewProviders(),
 	}
 
 	handler, err := service.NewHttpHandler(cfg.HTTP, resolver)
