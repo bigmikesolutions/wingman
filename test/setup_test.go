@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jmoiron/sqlx"
+
 	"github.com/bigmikesolutions/wingman/providers"
 	"github.com/bigmikesolutions/wingman/test/containers"
 )
@@ -39,4 +41,12 @@ func newProviders() *providers.Providers {
 		panic(fmt.Errorf("could not connect to db: %w", err))
 	}
 	return providers.NewProviders(db)
+}
+
+func mustDB() *sqlx.DB {
+	dbx, err := dc.DB(context.Background())
+	if err != nil {
+		panic(fmt.Errorf("could not connect to db: %w", err))
+	}
+	return dbx
 }

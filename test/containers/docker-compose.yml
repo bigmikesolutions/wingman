@@ -9,8 +9,6 @@ services:
       - POSTGRES_USER=$pgUser
       - POSTGRES_PASSWORD=$pgPass
       - listen_addresses='*'
-    volumes:
-      - ./pg:/docker-entrypoint-initdb.d
     ports:
       - $pgPort:5432
     healthcheck:

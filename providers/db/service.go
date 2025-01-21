@@ -49,11 +49,11 @@ func (s *Service) Connection(ctx context.Context, id ID) (*Connection, error) {
 			return nil, ErrDatabaseNotFound
 		}
 
-		access, accessErr := s.rbac.FindUserRolesByDatabaseID(ctx, id) // TODO use user ID from context here
-		if accessErr != nil {
-			return nil, fmt.Errorf("check database access: %w", accessErr)
+		roles, rolesErr := s.rbac.FindUserRolesByDatabaseID(ctx, id) // TODO use user ID from context here
+		if rolesErr != nil {
+			return nil, fmt.Errorf("check database roles: %w", rolesErr)
 		}
-		if access == nil {
+		if len(roles) == 0 {
 			return nil, ErrDatabaseAccessDenied
 		}
 

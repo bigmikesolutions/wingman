@@ -2,7 +2,11 @@ package test
 
 import (
 	"context"
+	"fmt"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 
 	"github.com/bigmikesolutions/wingman/providers/db"
 	"github.com/bigmikesolutions/wingman/test/containers"
@@ -10,7 +14,6 @@ import (
 
 const (
 	clientTimeout = 1 * time.Second
-	dbPg1         = "pg-1"
 )
 
 func testContext() (context.Context, context.CancelFunc) {
@@ -29,10 +32,41 @@ func connectionInfo(id string, cfg containers.PostgresCfg) db.ConnectionInfo {
 	}
 }
 
-func databaseConnectionInfo(id string, name string, cfg containers.PostgresCfg) db.ConnectionInfo {
-	info := connectionInfo(id, cfg)
-	info.Name = name
-	return info
+func cleanTables(dbx *sqlx.DB, tables []string) {
+	for _, table := range tables {
+		ctx, cancel := testContext()
+		if _, err := dbx.ExecContext(ctx, fmt.Sprintf("DELETE FROM %s", table)); err != nil {
+			panic(fmt.Errorf("clean table %s: %w", table, err))
+		}
+		cancel()
+	}
+}
+
+func newTestDatabase(dc *containers.Service) containers.PostgresCfg {
+	ctx, cancel := testContext()
+	defer cancel()
+
+	dbx, err := dc.DB(ctx)
+	if err != nil {
+		panic(fmt.Errorf("db conn: %w", err))
+	}
+	defer func() {
+		_ = dbx.Close()
+	}()
+
+	dbCfg := dc.Postgres()
+	dbCfg.Name = uuid.New().String()
+
+	_, err = dbx.ExecContext(ctx, fmt.Sprintf(`CREATE DATABASE "%s"`, dbCfg.Name))
+	if err != nil {
+		panic(fmt.Errorf("create db: %w", err))
+	}
+	_, err = dbx.ExecContext(ctx, fmt.Sprintf(`GRANT ALL PRIVILEGES ON DATABASE "%s" TO %s;`, dbCfg.Name, dbCfg.User))
+	if err != nil {
+		panic(fmt.Errorf("create db: %w", err))
+	}
+
+	return dbCfg
 }
 
 func ptr[T any](v T) *T {

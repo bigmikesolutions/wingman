@@ -31,6 +31,7 @@ func (r *mutationResolver) AddDatabaseUserRole(ctx context.Context, input model.
 	err := r.Providers.DB.RBAC().CreateUserRole(ctx, db.UserRole{
 		ID:          *role.ID,
 		Description: role.Description,
+		DatabaseID:  role.DatabaseAccess[0].ID,
 		DatabaseAccess: []db.DatabaseAccess{
 			{
 				DatabaseID: role.DatabaseAccess[0].ID,

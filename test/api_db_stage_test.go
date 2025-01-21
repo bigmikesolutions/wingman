@@ -4,22 +4,20 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/bigmikesolutions/wingman/test/containers"
-
 	"github.com/jmoiron/sqlx"
-
-	"github.com/bigmikesolutions/wingman/graphql/model/cursor"
-	"github.com/bigmikesolutions/wingman/providers/db"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bigmikesolutions/wingman/graphql/model"
+	"github.com/bigmikesolutions/wingman/graphql/model/cursor"
+	"github.com/bigmikesolutions/wingman/providers/db"
 	"github.com/bigmikesolutions/wingman/test/api"
+	"github.com/bigmikesolutions/wingman/test/containers"
 )
 
 const (
-	sqlTableStudents = "students"
+	sqlTableStudents         = "students"
+	sqlTableNonExistingTable = "non-existing-table"
 
 	sqlCreateTableStudents = `
 CREATE TABLE students (
@@ -39,6 +37,10 @@ INSERT INTO students(id,first_name,last_name,age) values
 
 	expDriverPostgres = "POSTGRES"
 )
+
+var dbCleanTables = []string{
+	"provider_db.user_role",
+}
 
 type ApiDatabaseStage struct {
 	t      *testing.T
@@ -60,6 +62,12 @@ func NewApiDatabaseStage(t *testing.T) *ApiDatabaseStage {
 
 func (s *ApiDatabaseStage) Close() {
 	s.server.Close()
+
+	dbx := mustDB()
+	defer func() {
+		_ = dbx.Close()
+	}()
+	cleanTables(dbx, dbCleanTables)
 }
 
 func (s *ApiDatabaseStage) Given() *ApiDatabaseStage {
@@ -112,6 +120,12 @@ func (s *ApiDatabaseStage) NoClientError() *ApiDatabaseStage {
 	return s
 }
 
+func (s *ApiDatabaseStage) ClientErrorIs(expMsg string) *ApiDatabaseStage {
+	require.Error(s.t, s.err, "client error expected", expMsg)
+	assert.Contains(s.t, s.err.Error(), expMsg, "unexpected client error")
+	return s
+}
+
 func (s *ApiDatabaseStage) DatabaseIsProvided(database db.ConnectionInfo) *ApiDatabaseStage {
 	require.Nilf(s.t, s.server.Resolver.Providers.DB.Register(database), "register database: %+v", database)
 	return s
@@ -140,6 +154,8 @@ func (s *ApiDatabaseStage) DatabaseStatement(dbID, statement string, args ...any
 }
 
 func (s *ApiDatabaseStage) DatabaseInfoIsReturned(dbID, driver string) *ApiDatabaseStage {
+	require.NotNil(s.t, s.queryDatabase, "query database is nil")
+
 	assert.Equal(s.t, dbID, s.queryDatabase.ID, "database ID")
 	assert.Equal(s.t, dbID, s.queryDatabase.Info.ID, "database info: ID")
 	assert.Equal(s.t, driver, string(s.queryDatabase.Info.Driver), "database info: driver")
@@ -177,6 +193,16 @@ func (s *ApiDatabaseStage) TableHasRows(expRows ...model.TableRow) *ApiDatabaseS
 			}
 		}
 		assert.Truef(s.t, found, "table row not found: %d", *expRow.Index)
+	}
+
+	return s
+}
+
+func (s *ApiDatabaseStage) NoTableRows() *ApiDatabaseStage {
+	require.NotNil(s.t, s.queryDatabase.Table, "table data must be returned")
+
+	for _, edge := range s.queryDatabase.Table.Edges {
+		assert.Empty(s.t, edge.Node.Values, "no table rows expected")
 	}
 
 	return s

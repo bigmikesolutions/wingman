@@ -26,24 +26,28 @@ type (
 )
 
 func (c *Connection) SelectFromTable(ctx context.Context, name string, first int) (*sqlx.Rows, error) {
+	// TODO move authorization part to a separate function
 	roles, err := c.rbac.FindUserRolesByDatabaseID(ctx, c.dbID) // TODO use userID from ctx here
 	if err != nil {
 		return nil, fmt.Errorf("rbac: %w", err)
 	}
-	if roles == nil {
-		return nil, ErrDatabaseAccessDenied
-	}
 
+	canRead := false
 	for _, role := range roles {
 		for _, access := range role.DatabaseAccess {
-			if !access.CanReadTable(name) {
-				return nil, ErrTableAccessDenied
+			if access.CanReadTable(name) {
+				canRead = true
+				break
 			}
 		}
 	}
 
+	if !canRead {
+		return nil, ErrDatabaseAccessDenied
+	}
+
 	// TODO use prepared statement here to prevent sql-injection
-	return c.db.QueryxContext(ctx, fmt.Sprintf("SELECT * FROM %s limit %d", name, first))
+	return c.db.QueryxContext(ctx, fmt.Sprintf("SELECT * FROM %s LIMIT %d", name, first))
 }
 
 func connectionString(db ConnectionInfo) string {

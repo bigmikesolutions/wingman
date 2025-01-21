@@ -13,11 +13,12 @@ func Test_Api_Database_ShouldGetInfo(t *testing.T) {
 	defer s.Close()
 
 	envID := "test-env"
-	dbID := dbPg1
+	dbID := uuid.New().String()
+	dbCfg := newTestDatabase(dc)
 
 	s.Given().
 		ServerIsUpAndRunning().And().
-		DatabaseIsProvided(databaseConnectionInfo(dbID, dbPg1, dc.Postgres()))
+		DatabaseIsProvided(connectionInfo(dbID, dbCfg))
 
 	s.When().
 		QueryDatabase(envID, dbID)
@@ -32,13 +33,14 @@ func Test_Api_Database_ShouldGetTableData(t *testing.T) {
 	defer s.Close()
 
 	envID := "test-env"
-	dbID := dbPg1
 	roleID := uuid.New().String()
-	roleID = "any" // TODO remove this
+
+	dbID := uuid.New().String()
+	dbCfg := newTestDatabase(dc)
 
 	s.Given().
 		ServerIsUpAndRunning().And().
-		DatabaseIsProvided(databaseConnectionInfo(dbID, dbID, dc.Postgres())).
+		DatabaseIsProvided(connectionInfo(dbID, dbCfg)).
 		DatabaseStatement(dbID, sqlCreateTableStudents).And().
 		DatabaseStatement(dbID, sqlInsertStudents).And().
 		DatabaseUserRoleIsCreated(model.AddDatabaseUserRoleInput{
@@ -66,7 +68,7 @@ func Test_Api_Database_ShouldGetTableData(t *testing.T) {
 		QueryDatabaseTableData(
 			envID,
 			dbID,
-			"students",
+			sqlTableStudents,
 			50,
 			"",
 			model.TableFilter{},
@@ -90,4 +92,54 @@ func Test_Api_Database_ShouldGetTableData(t *testing.T) {
 				Values: []*string{ptr("3"), ptr("pamela"), ptr("anderson"), ptr("65")},
 			},
 		)
+}
+
+func Test_Api_Database_ShouldForbidGettingTableData(t *testing.T) {
+	s := NewApiDatabaseStage(t)
+	defer s.Close()
+
+	envID := "test-env"
+	roleID := uuid.New().String()
+
+	dbID := uuid.New().String()
+	dbCfg := newTestDatabase(dc)
+
+	s.Given().
+		ServerIsUpAndRunning().And().
+		DatabaseIsProvided(connectionInfo(dbID, dbCfg)).
+		DatabaseStatement(dbID, sqlCreateTableStudents).And().
+		DatabaseStatement(dbID, sqlInsertStudents).And().
+		DatabaseUserRoleIsCreated(model.AddDatabaseUserRoleInput{
+			MutationID: ptr(t.Name()),
+			UserRoles: []*model.AddDatabaseUserRole{
+				{
+					ID:          ptr(roleID),
+					Description: ptr("read-only access"),
+					DatabaseAccess: []*model.DatabaseAccessInput{
+						{
+							ID: dbID,
+							Tables: []*model.DatabaseTableAccessInput{
+								{
+									Name:       sqlTableNonExistingTable,
+									AccessType: model.AccessTypeReadOnly,
+								},
+							},
+						},
+					},
+				},
+			},
+		})
+
+	s.When().
+		QueryDatabaseTableData(
+			envID,
+			dbID,
+			sqlTableStudents,
+			50,
+			"",
+			model.TableFilter{},
+		)
+
+	s.Then().
+		ClientErrorIs("database access denied") // TODO make client errors user friendly
 }
