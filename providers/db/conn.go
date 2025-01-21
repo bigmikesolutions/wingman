@@ -34,11 +34,9 @@ func (c *Connection) SelectFromTable(ctx context.Context, name string, first int
 
 	canRead := false
 	for _, role := range roles {
-		for _, access := range role.DatabaseAccess {
-			if access.CanReadTable(name) {
-				canRead = true
-				break
-			}
+		if role.CanReadTable(name) {
+			canRead = true
+			break
 		}
 	}
 

@@ -7,11 +7,11 @@ package graphql
 import (
 	"context"
 	"fmt"
-
-	"github.com/bigmikesolutions/wingman/providers/db"
+	"time"
 
 	"github.com/bigmikesolutions/wingman/graphql/generated"
 	"github.com/bigmikesolutions/wingman/graphql/model"
+	"github.com/bigmikesolutions/wingman/providers/db"
 )
 
 // AddUserRoleBinding is the resolver for the addUserRoleBinding field.
@@ -28,19 +28,20 @@ func (r *mutationResolver) AddK8sUserRole(ctx context.Context, input model.AddK8
 func (r *mutationResolver) AddDatabaseUserRole(ctx context.Context, input model.AddDatabaseUserRoleInput) (*model.AddDatabaseUserRolePayload, error) {
 	// TODO implement this
 	role := input.UserRoles[0]
+	now := time.Now().UTC()
 	err := r.Providers.DB.RBAC().CreateUserRole(ctx, db.UserRole{
 		ID:          *role.ID,
 		Description: role.Description,
-		DatabaseID:  role.DatabaseAccess[0].ID,
-		DatabaseAccess: []db.DatabaseAccess{
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		CreatedBy:   "unknown", // TODO add this info
+		UpdatedBy:   "unknown",
+
+		DatabaseID: role.DatabaseAccess[0].ID,
+		Tables: []db.TableAccess{
 			{
-				DatabaseID: role.DatabaseAccess[0].ID,
-				Tables: []db.TableAccess{
-					{
-						Name:       role.DatabaseAccess[0].Tables[0].Name,
-						AccessType: db.ReadOnlyAccess,
-					},
-				},
+				Name:       role.DatabaseAccess[0].Tables[0].Name,
+				AccessType: db.ReadOnlyAccess,
 			},
 		},
 	})
