@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	rbac2 "github.com/bigmikesolutions/wingman/providers/db/rbac"
-
 	"github.com/jmoiron/sqlx"
 )
 
@@ -23,21 +21,25 @@ type (
 	Connection struct {
 		dbID ID
 		db   *sqlx.DB
-		rbac rbac2.Repository
+		rbac RBAC
 	}
 )
 
 func (c *Connection) SelectFromTable(ctx context.Context, name string, first int) (*sqlx.Rows, error) {
-	access, err := c.rbac.Check(c.dbID, "any") // TODO use userID from ctx here
+	roles, err := c.rbac.FindUserRolesByDatabaseID(ctx, c.dbID) // TODO use userID from ctx here
 	if err != nil {
 		return nil, fmt.Errorf("rbac: %w", err)
 	}
-	if access == nil {
+	if roles == nil {
 		return nil, ErrDatabaseAccessDenied
 	}
 
-	if !access.CanReadTable(name) {
-		return nil, ErrTableAccessDenied
+	for _, role := range roles {
+		for _, access := range role.DatabaseAccess {
+			if !access.CanReadTable(name) {
+				return nil, ErrTableAccessDenied
+			}
+		}
 	}
 
 	// TODO use prepared statement here to prevent sql-injection

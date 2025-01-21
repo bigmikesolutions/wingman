@@ -13,11 +13,11 @@ func Test_Api_Database_ShouldGetInfo(t *testing.T) {
 	defer s.Close()
 
 	envID := "test-env"
-	dbID := "pg-1"
+	dbID := dbPg1
 
 	s.Given().
 		ServerIsUpAndRunning().And().
-		DatabaseIsProvided(connectionInfo(dbID, dc.Postgres()))
+		DatabaseIsProvided(databaseConnectionInfo(dbID, dbPg1, dc.Postgres()))
 
 	s.When().
 		QueryDatabase(envID, dbID)
@@ -32,13 +32,13 @@ func Test_Api_Database_ShouldGetTableData(t *testing.T) {
 	defer s.Close()
 
 	envID := "test-env"
-	dbID := "pg-1"
+	dbID := dbPg1
 	roleID := uuid.New().String()
 	roleID = "any" // TODO remove this
 
 	s.Given().
 		ServerIsUpAndRunning().And().
-		DatabaseIsProvided(connectionInfo(dbID, dc.Postgres())).
+		DatabaseIsProvided(databaseConnectionInfo(dbID, dbID, dc.Postgres())).
 		DatabaseStatement(dbID, sqlCreateTableStudents).And().
 		DatabaseStatement(dbID, sqlInsertStudents).And().
 		DatabaseUserRoleIsCreated(model.AddDatabaseUserRoleInput{

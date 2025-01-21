@@ -5,12 +5,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/bigmikesolutions/wingman/providers"
-
 	gql "github.com/shurcooL/graphql"
 
 	"github.com/bigmikesolutions/wingman/graphql"
-
+	"github.com/bigmikesolutions/wingman/providers"
 	"github.com/bigmikesolutions/wingman/service"
 )
 
@@ -20,16 +18,17 @@ type HTTPServer struct {
 	graphql    *gql.Client
 	graphqlURL string
 	Resolver   *graphql.Resolver
+	providers  *providers.Providers
 }
 
-func New() (*HTTPServer, error) {
+func New(prov *providers.Providers) (*HTTPServer, error) {
 	cfg, err := service.LoadCfg()
 	if err != nil {
 		return nil, err
 	}
 
 	resolver := &graphql.Resolver{
-		Providers: providers.NewProviders(),
+		Providers: prov,
 	}
 
 	handler, err := service.NewHttpHandler(cfg.HTTP, resolver)
@@ -50,9 +49,11 @@ func New() (*HTTPServer, error) {
 		),
 		graphqlURL: graphqlURL,
 		Resolver:   resolver,
+		providers:  prov,
 	}, nil
 }
 
 func (s *HTTPServer) Close() {
 	s.server.Close()
+	_ = s.providers.Close()
 }

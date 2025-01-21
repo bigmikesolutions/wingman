@@ -82,3 +82,7 @@ func (s *Service) RBAC() RBAC {
 	// TODO check user access here
 	return s.rbac
 }
+
+func (s *Service) Close() error {
+	return s.rbac.Close()
+}

@@ -2,10 +2,12 @@ package test
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/bigmikesolutions/wingman/providers"
 	"github.com/bigmikesolutions/wingman/test/containers"
 )
 
@@ -29,4 +31,12 @@ func TestMain(m *testing.M) {
 
 	code := m.Run()
 	defer os.Exit(code)
+}
+
+func newProviders() *providers.Providers {
+	db, err := dc.DB(context.Background())
+	if err != nil {
+		panic(fmt.Errorf("could not connect to db: %w", err))
+	}
+	return providers.NewProviders(db)
 }

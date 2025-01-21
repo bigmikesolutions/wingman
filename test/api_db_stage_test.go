@@ -49,7 +49,7 @@ type ApiDatabaseStage struct {
 }
 
 func NewApiDatabaseStage(t *testing.T) *ApiDatabaseStage {
-	server, err := api.New()
+	server, err := api.New(newProviders())
 	require.Nil(t, err, "api server")
 
 	return &ApiDatabaseStage{
@@ -113,12 +113,12 @@ func (s *ApiDatabaseStage) NoClientError() *ApiDatabaseStage {
 }
 
 func (s *ApiDatabaseStage) DatabaseIsProvided(database db.ConnectionInfo) *ApiDatabaseStage {
-	require.Nilf(s.t, s.server.Resolver.DB.Register(database), "register database: %+v", database)
+	require.Nilf(s.t, s.server.Resolver.Providers.DB.Register(database), "register database: %+v", database)
 	return s
 }
 
 func (s *ApiDatabaseStage) DatabaseStatement(dbID, statement string, args ...any) *ApiDatabaseStage {
-	info, hasInfo := s.server.Resolver.DB.Info(dbID)
+	info, hasInfo := s.server.Resolver.Providers.DB.Info(dbID)
 	require.True(s.t, hasInfo, "db info")
 
 	conn, err := sqlx.Connect(containers.PostgresDriverName, fmt.Sprintf(

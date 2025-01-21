@@ -15,7 +15,7 @@ import (
 
 // Info is the resolver for the info field.
 func (r *databaseResolver) Info(ctx context.Context, obj *model.Database) (*model.DatabaseInfo, error) {
-	info, ok := r.DB.Info(obj.ID)
+	info, ok := r.Providers.DB.Info(obj.ID)
 	if !ok {
 		return nil, nil
 	}
@@ -31,7 +31,7 @@ func (r *databaseResolver) Info(ctx context.Context, obj *model.Database) (*mode
 // Table is the resolver for the table field.
 func (r *databaseResolver) Table(ctx context.Context, obj *model.Database, name string, first *int, after *cursor.Cursor, where *model.TableFilter) (*model.TableDataConnection, error) {
 	// TODO finalise logic implementation here
-	db, err := r.DB.Connection(ctx, obj.ID)
+	db, err := r.Providers.DB.Connection(ctx, obj.ID)
 	if err != nil {
 		return nil, err
 	}
