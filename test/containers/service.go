@@ -52,6 +52,7 @@ func New(ctx context.Context) (*Service, error) {
 			wait.ForLog("Successfully applied"),
 			wait.ForExit(),
 		)).
+		WaitForService("vault", wait.ForListeningPort("8200/tcp")).
 		Up(ctx, compose.Wait(true))
 	if err != nil {
 		defer svc.Close()

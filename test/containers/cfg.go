@@ -15,6 +15,7 @@ const (
 type cfg struct {
 	Postgres  PostgresCfg
 	ToxiProxy ToxiProxyCfg
+	Vault     VaultCfg
 	uid       int
 }
 
@@ -32,6 +33,12 @@ type ToxiProxyCfg struct {
 	PostgresPort int
 }
 
+// VaultCfg keeps docker-compose config.
+type VaultCfg struct {
+	Port      int
+	RootToken string
+}
+
 func newCfg() cfg {
 	return cfg{
 		uid: rand.Int() % 1024,
@@ -45,19 +52,25 @@ func newCfg() cfg {
 			Port:         randomPort(),
 			PostgresPort: randomPort(),
 		},
+		Vault: VaultCfg{
+			Port:      randomPort(),
+			RootToken: "root",
+		},
 	}
 }
 
 // Env returns env variables.
 func (c cfg) Env() map[string]string {
 	return map[string]string{
-		"uid":        strconv.Itoa(c.uid),
-		"pgPort":     strconv.Itoa(c.Postgres.Port),
-		"pgName":     c.Postgres.Name,
-		"pgUser":     c.Postgres.User,
-		"pgPass":     c.Postgres.Pass,
-		"toxiPort":   strconv.Itoa(c.ToxiProxy.Port),
-		"toxiPgPort": strconv.Itoa(c.ToxiProxy.PostgresPort),
+		"uid":            strconv.Itoa(c.uid),
+		"pgPort":         strconv.Itoa(c.Postgres.Port),
+		"pgName":         c.Postgres.Name,
+		"pgUser":         c.Postgres.User,
+		"pgPass":         c.Postgres.Pass,
+		"toxiPort":       strconv.Itoa(c.ToxiProxy.Port),
+		"toxiPgPort":     strconv.Itoa(c.ToxiProxy.PostgresPort),
+		"vaultPort":      strconv.Itoa(c.Vault.Port),
+		"vaultRootToken": c.Vault.RootToken,
 	}
 }
 
