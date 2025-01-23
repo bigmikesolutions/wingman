@@ -1,4 +1,4 @@
-package secrets
+package vault
 
 import (
 	"context"
@@ -19,18 +19,9 @@ type (
 )
 
 func New(ctx context.Context, cfg Config) (*Secrets, error) {
-	client, err := vault.New(cfg.vaultOptions()...)
+	client, err := newClient(ctx, cfg)
 	if err != nil {
-		return nil, fmt.Errorf("vault client: %w", err)
-	}
-
-	token, err := vaultAuth(ctx, client, cfg)
-	if err != nil {
-		return nil, fmt.Errorf("vault auth: %w", err)
-	}
-
-	if err := client.SetToken(token); err != nil {
-		return nil, fmt.Errorf("vault token: %w", err)
+		return nil, err
 	}
 
 	return &Secrets{
