@@ -8,14 +8,16 @@ import (
 )
 
 type (
+	ID = string
+
 	ConnectionInfo struct {
-		ID     ID
-		Driver string
-		Host   string
-		Name   string
-		Port   int
-		User   string
-		Pass   string
+		ID     ID     `json:"id"`
+		Driver string `json:"driver"`
+		Host   string `json:"host"`
+		Name   string `json:"name"`
+		Port   int    `json:"port"`
+		User   string `json:"user"`
+		Pass   string `json:"pass"`
 	}
 
 	Connection struct {

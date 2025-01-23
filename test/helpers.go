@@ -54,7 +54,7 @@ func newTestDatabase(dc *containers.Service) containers.PostgresCfg {
 		_ = dbx.Close()
 	}()
 
-	dbCfg := dc.Postgres()
+	dbCfg := dc.Config().Postgres
 	dbCfg.Name = uuid.New().String()
 
 	_, err = dbx.ExecContext(ctx, fmt.Sprintf(`CREATE DATABASE "%s"`, dbCfg.Name))

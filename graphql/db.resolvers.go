@@ -15,8 +15,12 @@ import (
 
 // Info is the resolver for the info field.
 func (r *databaseResolver) Info(ctx context.Context, obj *model.Database) (*model.DatabaseInfo, error) {
-	info, ok := r.Providers.DB.Info(obj.ID)
-	if !ok {
+	info, err := r.Providers.DB.Info(ctx, obj.ID)
+	if err != nil {
+		return nil, err
+	}
+	if info == nil {
+		// TODO return user friendly client error here
 		return nil, nil
 	}
 

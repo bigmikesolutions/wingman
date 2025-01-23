@@ -21,7 +21,7 @@ const (
 
 // Service holds state of started containers.
 type Service struct {
-	cfg          cfg
+	cfg          Config
 	composeStack compose.ComposeStack
 	toxiClient   *toxiproxy.Client
 }
@@ -62,9 +62,9 @@ func New(ctx context.Context) (*Service, error) {
 	return svc, nil
 }
 
-// Postgres returns container.
-func (s *Service) Postgres() PostgresCfg {
-	return s.cfg.Postgres
+// Config returns configuration for current docker-compose set-up.
+func (s *Service) Config() Config {
+	return s.cfg
 }
 
 // DB creates direct connect to database.

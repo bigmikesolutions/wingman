@@ -11,8 +11,8 @@ const (
 	PostgresDriverName = "pgx"
 )
 
-// cfg represents configuration of docker compose with random ports.
-type cfg struct {
+// Config represents configuration of docker compose with random ports.
+type Config struct {
 	Postgres  PostgresCfg
 	ToxiProxy ToxiProxyCfg
 	Vault     VaultCfg
@@ -39,8 +39,8 @@ type VaultCfg struct {
 	RootToken string
 }
 
-func newCfg() cfg {
-	return cfg{
+func newCfg() Config {
+	return Config{
 		uid: rand.Int() % 1024,
 		Postgres: PostgresCfg{
 			Port: randomPort(),
@@ -60,7 +60,7 @@ func newCfg() cfg {
 }
 
 // Env returns env variables.
-func (c cfg) Env() map[string]string {
+func (c Config) Env() map[string]string {
 	return map[string]string{
 		"uid":            strconv.Itoa(c.uid),
 		"pgPort":         strconv.Itoa(c.Postgres.Port),

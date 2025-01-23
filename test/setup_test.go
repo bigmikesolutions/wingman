@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bigmikesolutions/wingman/service/vault"
+
 	"github.com/jmoiron/sqlx"
 
 	"github.com/bigmikesolutions/wingman/providers"
@@ -40,7 +42,17 @@ func newProviders() *providers.Providers {
 	if err != nil {
 		panic(fmt.Errorf("could not connect to db: %w", err))
 	}
-	return providers.NewProviders(db)
+
+	vaultCfg := dc.Config().Vault
+	v, err := vault.New(context.Background(), vault.Config{
+		Address: fmt.Sprintf("http://localhost:%d", vaultCfg.Port),
+		Token:   vaultCfg.RootToken,
+	})
+	if err != nil {
+		panic(fmt.Errorf("could not connect to vault: %w", err))
+	}
+
+	return providers.NewProviders(db, v)
 }
 
 func mustDB() *sqlx.DB {

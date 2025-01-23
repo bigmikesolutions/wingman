@@ -127,13 +127,19 @@ func (s *ApiDatabaseStage) ClientErrorIs(expMsg string) *ApiDatabaseStage {
 }
 
 func (s *ApiDatabaseStage) DatabaseIsProvided(database db.ConnectionInfo) *ApiDatabaseStage {
-	require.Nilf(s.t, s.server.Resolver.Providers.DB.Register(database), "register database: %+v", database)
+	ctx, cancel := testContext()
+	defer cancel()
+	require.Nilf(s.t, s.server.Resolver.Providers.DB.Register(ctx, database), "register database: %+v", database)
 	return s
 }
 
 func (s *ApiDatabaseStage) DatabaseStatement(dbID, statement string, args ...any) *ApiDatabaseStage {
-	info, hasInfo := s.server.Resolver.Providers.DB.Info(dbID)
-	require.True(s.t, hasInfo, "db info")
+	ctx, cancel := testContext()
+	defer cancel()
+
+	info, err := s.server.Resolver.Providers.DB.Info(ctx, dbID)
+	require.NoError(s.t, err, "db info error")
+	require.NotNil(s.t, info, "db info missing")
 
 	conn, err := sqlx.Connect(containers.PostgresDriverName, fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s",
@@ -143,8 +149,6 @@ func (s *ApiDatabaseStage) DatabaseStatement(dbID, statement string, args ...any
 	))
 	require.Nilf(s.t, err, "db connection")
 
-	ctx, cancel := testContext()
-	defer cancel()
 	rows, err := conn.QueryxContext(ctx, statement, args...)
 	require.Nilf(s.t, err, "statement error")
 
