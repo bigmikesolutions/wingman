@@ -6,7 +6,9 @@ const (
 	attrValue = "value"
 )
 
-func ToSecretValue(v any) (SecretValue, error) {
+type SecretValue map[string]any
+
+func marshall(v any) (SecretValue, error) {
 	j, err := json.Marshal(v)
 	if err != nil {
 		return SecretValue{}, err
@@ -17,7 +19,7 @@ func ToSecretValue(v any) (SecretValue, error) {
 	return s, nil
 }
 
-func FromSecretValue(secret SecretValue, v any) error {
+func unmarshall(secret SecretValue, v any) error {
 	b := []byte(secret[attrValue].(string))
 	return json.Unmarshal(b, v)
 }

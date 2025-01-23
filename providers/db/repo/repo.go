@@ -3,9 +3,9 @@ package repo
 import (
 	"context"
 
-	"github.com/bigmikesolutions/wingman/providers/db"
-
 	"github.com/jmoiron/sqlx"
+
+	"github.com/bigmikesolutions/wingman/providers/db"
 )
 
 type (

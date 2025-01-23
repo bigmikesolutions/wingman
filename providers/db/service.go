@@ -13,6 +13,11 @@ import (
 var ErrDatabaseNotFound = errors.New("database not found")
 
 type (
+	secureStorage interface {
+		Write(context.Context, string, any) error
+		Read(context.Context, string, any) error
+	}
+
 	Service struct {
 		storage secureStorage
 		conns   map[ID]*Connection
@@ -29,18 +34,16 @@ func New(rbac RBAC, storage secureStorage) *Service {
 }
 
 func (s *Service) Register(ctx context.Context, db ConnectionInfo) error {
-	return s.storage.write(ctx, db)
+	return s.storage.Write(ctx, path(db.ID), db)
 }
 
 func (s *Service) Connection(ctx context.Context, id ID) (*Connection, error) {
 	conn, ok := s.conns[id]
 	if !ok {
-		dbInfo, err := s.storage.read(ctx, id)
-		if err != nil {
+		dbInfo := &ConnectionInfo{}
+		if err := s.storage.Read(ctx, path(id), &conn); err != nil {
+			// TODO handle not found error
 			return nil, err
-		}
-		if dbInfo == nil {
-			return nil, ErrDatabaseNotFound
 		}
 
 		roles, rolesErr := s.rbac.FindUserRolesByDatabaseID(ctx, id) // TODO use user ID from context here
@@ -67,7 +70,11 @@ func (s *Service) Connection(ctx context.Context, id ID) (*Connection, error) {
 }
 
 func (s *Service) Info(ctx context.Context, id ID) (*ConnectionInfo, error) {
-	return s.storage.read(ctx, id)
+	conn := &ConnectionInfo{}
+	if err := s.storage.Read(ctx, path(id), &conn); err != nil {
+		return nil, err
+	}
+	return conn, nil
 }
 
 func (s *Service) RBAC() RBAC {
@@ -77,4 +84,8 @@ func (s *Service) RBAC() RBAC {
 
 func (s *Service) Close() error {
 	return s.rbac.Close()
+}
+
+func path(id ID) string {
+	return fmt.Sprintf("/providers/db/connections/%s", id)
 }

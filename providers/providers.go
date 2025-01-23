@@ -14,7 +14,7 @@ type Providers struct {
 
 func NewProviders(dbx *sqlx.DB, secrets *vault.Secrets) *Providers {
 	return &Providers{
-		DB: db.New(repo.NewRBAC(dbx), db.NewStorage(secrets)),
+		DB: db.New(repo.NewRBAC(dbx), secrets),
 	}
 }
 
