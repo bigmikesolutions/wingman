@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"testing"
 
+	_ "github.com/jackc/pgx/v5/stdlib" // drivers
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq" // drivers
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -12,7 +14,6 @@ import (
 	"github.com/bigmikesolutions/wingman/graphql/model/cursor"
 	"github.com/bigmikesolutions/wingman/providers/db"
 	"github.com/bigmikesolutions/wingman/test/api"
-	"github.com/bigmikesolutions/wingman/test/containers"
 )
 
 const (
@@ -142,7 +143,7 @@ func (s *ApiDatabaseStage) DatabaseStatement(dbID, statement string, args ...any
 	require.NoError(s.t, err, "db info error")
 	require.NotNil(s.t, info, "db info missing")
 
-	conn, err := sqlx.Connect(containers.PostgresDriverName, fmt.Sprintf(
+	conn, err := sqlx.Connect(info.Driver, fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s",
 		info.User, info.Pass,
 		info.Host, info.Port,

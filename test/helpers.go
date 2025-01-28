@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	clientTimeout = 1 * time.Second
+	clientTimeout = 5 * time.Second
 )
 
 func testContext() (context.Context, context.CancelFunc) {

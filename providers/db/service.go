@@ -40,10 +40,13 @@ func (s *Service) Register(ctx context.Context, db ConnectionInfo) error {
 func (s *Service) Connection(ctx context.Context, id ID) (*Connection, error) {
 	conn, ok := s.conns[id]
 	if !ok {
-		dbInfo := &ConnectionInfo{}
-		if err := s.storage.Read(ctx, path(id), &conn); err != nil {
+		dbInfo, err := s.Info(ctx, id)
+		if err != nil {
 			// TODO handle not found error
 			return nil, err
+		}
+		if dbInfo.ID == "" {
+			return nil, ErrDatabaseNotFound
 		}
 
 		roles, rolesErr := s.rbac.FindUserRolesByDatabaseID(ctx, id) // TODO use user ID from context here
@@ -70,6 +73,7 @@ func (s *Service) Connection(ctx context.Context, id ID) (*Connection, error) {
 }
 
 func (s *Service) Info(ctx context.Context, id ID) (*ConnectionInfo, error) {
+	// TODO check user access here
 	conn := &ConnectionInfo{}
 	if err := s.storage.Read(ctx, path(id), &conn); err != nil {
 		return nil, err

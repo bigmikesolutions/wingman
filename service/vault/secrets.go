@@ -3,6 +3,7 @@ package vault
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/hashicorp/vault-client-go"
@@ -15,6 +16,8 @@ type (
 		vault *vault.Client
 	}
 )
+
+var secretMountPath = vault.WithMountPath("secret")
 
 func New(ctx context.Context, cfg Config) (*Secrets, error) {
 	client, err := newClient(ctx, cfg)
@@ -29,7 +32,10 @@ func New(ctx context.Context, cfg Config) (*Secrets, error) {
 }
 
 func (s *Secrets) Read(ctx context.Context, path string, v any) error {
-	sv, err := s.vault.Secrets.KvV2Read(ctx, path, vault.WithMountPath("secret"))
+	// TODO make it a debug
+	log.Printf("reading secret with a path %s", path)
+
+	sv, err := s.vault.Secrets.KvV2Read(ctx, path, secretMountPath)
 	if err != nil {
 		if vault.IsErrorStatus(err, http.StatusNotFound) {
 			// TODO convert this error here
@@ -38,7 +44,8 @@ func (s *Secrets) Read(ctx context.Context, path string, v any) error {
 		return fmt.Errorf("read secret: %w", err)
 	}
 
-	if err := unmarshall(sv.Data.Data, v); err != nil {
+	log.Printf("read secret: %v", sv.Data.Data)
+	if err := unmarshall(sv.Data.Data, &v); err != nil {
 		return fmt.Errorf("read secret: %w", err)
 	}
 
@@ -51,13 +58,16 @@ func (s *Secrets) Write(ctx context.Context, path string, v any) error {
 		return err
 	}
 
+	// TODO make it a debug
+	log.Printf("writing secret %+v with a path %s", v, path)
+
 	_, err = s.vault.Secrets.KvV2Write(
 		ctx,
 		path,
 		schema.KvV2WriteRequest{
 			Data: sv,
 		},
-		vault.WithMountPath("secret"),
+		secretMountPath,
 	)
 	if err != nil {
 		return fmt.Errorf("write secret: %w", err)

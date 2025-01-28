@@ -16,7 +16,6 @@ import (
 )
 
 const (
-	defaultTimeout     = 5 * time.Second
 	dockerSetupTimeout = 120 * time.Second
 )
 

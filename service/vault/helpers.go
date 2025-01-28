@@ -21,5 +21,5 @@ func marshall(v any) (SecretValue, error) {
 
 func unmarshall(secret SecretValue, v any) error {
 	b := []byte(secret[attrValue].(string))
-	return json.Unmarshal(b, v)
+	return json.Unmarshal(b, &v)
 }
