@@ -47,7 +47,7 @@ services:
       VAULT_ADDR: "http://127.0.0.1:8200"
     cap_add:
       - IPC_LOCK
-    command: server -dev -dev-root-token-id=${VAULT_DEV_ROOT_TOKEN_ID} -dev-listen-address=${VAULT_DEV_LISTEN_ADDRESS}
+    command: server -dev -dev-root-token-id=${vaultRootToken} -dev-listen-address=0.0.0.0:8200
     healthcheck:
       test: ["CMD-SHELL", "vault status || exit 1"]
       interval: 10s

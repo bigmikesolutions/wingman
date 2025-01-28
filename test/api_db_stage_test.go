@@ -129,7 +129,8 @@ func (s *ApiDatabaseStage) ClientErrorIs(expMsg string) *ApiDatabaseStage {
 func (s *ApiDatabaseStage) DatabaseIsProvided(database db.ConnectionInfo) *ApiDatabaseStage {
 	ctx, cancel := testContext()
 	defer cancel()
-	require.Nilf(s.t, s.server.Resolver.Providers.DB.Register(ctx, database), "register database: %+v", database)
+	err := s.server.Resolver.Providers.DB.Register(ctx, database)
+	require.Nilf(s.t, err, "register database: %+v", database)
 	return s
 }
 
