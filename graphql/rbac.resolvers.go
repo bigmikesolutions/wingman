@@ -9,9 +9,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bigmikesolutions/wingman/providers/db/rbac"
+
 	"github.com/bigmikesolutions/wingman/graphql/generated"
 	"github.com/bigmikesolutions/wingman/graphql/model"
-	"github.com/bigmikesolutions/wingman/providers/db"
 )
 
 // AddUserRoleBinding is the resolver for the addUserRoleBinding field.
@@ -29,7 +30,7 @@ func (r *mutationResolver) AddDatabaseUserRole(ctx context.Context, input model.
 	// TODO implement this
 	role := input.UserRoles[0]
 	now := time.Now().UTC()
-	err := r.Providers.DB.RBAC().CreateUserRole(ctx, db.UserRole{
+	err := r.Providers.DbRbac.CreateUserRole(ctx, rbac.UserRole{
 		ID:          *role.ID,
 		Description: role.Description,
 		CreatedAt:   now,
@@ -38,10 +39,10 @@ func (r *mutationResolver) AddDatabaseUserRole(ctx context.Context, input model.
 		UpdatedBy:   "unknown",
 
 		DatabaseID: role.DatabaseAccess[0].ID,
-		Tables: []db.TableAccess{
+		Tables: []rbac.TableScope{
 			{
 				Name:       role.DatabaseAccess[0].Tables[0].Name,
-				AccessType: db.ReadOnlyAccess,
+				AccessType: rbac.ReadOnlyAccess,
 			},
 		},
 	})

@@ -23,27 +23,13 @@ type (
 	Connection struct {
 		dbID ID
 		db   *sqlx.DB
-		rbac RBAC
+		rbac rbac
 	}
 )
 
 func (c *Connection) SelectFromTable(ctx context.Context, name string, first int) (*sqlx.Rows, error) {
-	// TODO move authorization part to a separate function
-	roles, err := c.rbac.FindUserRolesByDatabaseID(ctx, c.dbID) // TODO use userID from ctx here
-	if err != nil {
-		return nil, fmt.Errorf("rbac: %w", err)
-	}
-
-	canRead := false
-	for _, role := range roles {
-		if role.CanReadTable(name) {
-			canRead = true
-			break
-		}
-	}
-
-	if !canRead {
-		return nil, ErrDatabaseAccessDenied
+	if err := c.rbac.ReadTable(ctx, c.dbID, name); err != nil {
+		return nil, err
 	}
 
 	// TODO use prepared statement here to prevent sql-injection
