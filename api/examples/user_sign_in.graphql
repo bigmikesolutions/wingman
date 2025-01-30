@@ -1,0 +1,37 @@
+mutation {
+    signIn(input: {
+        mutationId: "test"
+        login: "developer"
+        password: "pass"
+    }) {
+        mutationId
+        token
+        error {
+            code
+            message
+        }
+        user {
+            id
+            email
+            firstName
+            lastName
+            description
+            createdAt
+            modifiedAt
+            active
+            userRoles {
+                id
+                accessType
+                description
+                createdAt
+                modifiedAt
+                pods {
+                    id
+                    name
+                    namespace
+                }
+                namespaces
+            }
+        }
+    }
+}

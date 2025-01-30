@@ -32,6 +32,11 @@ func (r *namespaceResolver) Pods(ctx context.Context, obj *model.Namespace, name
 	panic(fmt.Errorf("not implemented: Pods - pods"))
 }
 
+// K8s is the resolver for the k8s field.
+func (r *resourceGrantInputResolver) K8s(ctx context.Context, obj *model.ResourceGrantInput, data []*model.NamespaceResource) error {
+	panic(fmt.Errorf("not implemented: K8s - k8s"))
+}
+
 // Cluster returns generated.ClusterResolver implementation.
 func (r *Resolver) Cluster() generated.ClusterResolver { return &clusterResolver{r} }
 

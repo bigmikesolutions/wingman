@@ -1,5 +1,6 @@
-extend schema @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
-extend schema @link(url: "../../wingman/shared.graphqls")
+extend schema
+    @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
+    @link(url: "../../wingman/shared.graphqls")
 
 extend type Mutation {
     addDatabaseUserRole(input: AddDatabaseUserRoleInput!): AddDatabaseUserRolePayload!

@@ -92,6 +92,11 @@ func (r *environmentResolver) Database(ctx context.Context, obj *model.Environme
 	}, nil
 }
 
+// Database is the resolver for the database field.
+func (r *resourceGrantInputResolver) Database(ctx context.Context, obj *model.ResourceGrantInput, data []*model.DatabaseResource) error {
+	panic(fmt.Errorf("not implemented: Database - database"))
+}
+
 // Database returns generated.DatabaseResolver implementation.
 func (r *Resolver) Database() generated.DatabaseResolver { return &databaseResolver{r} }
 

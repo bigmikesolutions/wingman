@@ -91,7 +91,7 @@ func (s *Service) ReadTable(ctx context.Context, dbID string, tableName string, 
 	}
 
 	if !canRead {
-		return ErrDatabaseAccessDenied
+		return ErrTableAccessDenied
 	}
 
 	return nil

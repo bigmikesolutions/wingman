@@ -1,6 +1,7 @@
-extend schema @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
-extend schema @link(url: "../../wingman/shared.graphqls")
-extend schema @link(url: "../../wingman/env.graphqls")
+extend schema
+    @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
+    @link(url: "../../wingman/shared.graphqls")
+    @link(url: "../../wingman/env.graphqls")
 
 extend type Environment {
     database(id: String!): Database @goField(forceResolver: true)
@@ -19,11 +20,25 @@ type DatabaseInfo  {
     driver: DriverType!
 }
 
+extend input ResourceGrantInput {
+    database: [DatabaseResource] @goField(forceResolver: true)
+}
+
+input DatabaseResource {
+    id: String!
+    table: [TableResource]
+}
+
+input TableResource {
+    name: String!
+    columns: [String]
+    accessType: AccessType
+}
+
 enum DriverType {
     POSTGRES
     MYSQL
 }
-
 
 input TableFilter {
     columns: [String]

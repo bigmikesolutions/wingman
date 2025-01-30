@@ -6,10 +6,16 @@ package graphql
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/bigmikesolutions/wingman/graphql/generated"
 	"github.com/bigmikesolutions/wingman/graphql/model"
 )
+
+// EnvGrant is the resolver for the envGrant field.
+func (r *mutationResolver) EnvGrant(ctx context.Context, input model.EnvGrantInput) (*model.EnvGrantOutput, error) {
+	panic(fmt.Errorf("not implemented: EnvGrant - envGrant"))
+}
 
 // Environment is the resolver for the environment field.
 func (r *queryResolver) Environment(ctx context.Context, id string) (*model.Environment, error) {
@@ -22,10 +28,20 @@ func (r *queryResolver) Environment(ctx context.Context, id string) (*model.Envi
 // Environment returns generated.EnvironmentResolver implementation.
 func (r *Resolver) Environment() generated.EnvironmentResolver { return &environmentResolver{r} }
 
+// Mutation returns generated.MutationResolver implementation.
+func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+// ResourceGrantInput returns generated.ResourceGrantInputResolver implementation.
+func (r *Resolver) ResourceGrantInput() generated.ResourceGrantInputResolver {
+	return &resourceGrantInputResolver{r}
+}
+
 type (
-	environmentResolver struct{ *Resolver }
-	queryResolver       struct{ *Resolver }
+	environmentResolver        struct{ *Resolver }
+	mutationResolver           struct{ *Resolver }
+	queryResolver              struct{ *Resolver }
+	resourceGrantInputResolver struct{ *Resolver }
 )

@@ -9,10 +9,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/bigmikesolutions/wingman/providers/db/rbac"
-
 	"github.com/bigmikesolutions/wingman/graphql/generated"
 	"github.com/bigmikesolutions/wingman/graphql/model"
+	"github.com/bigmikesolutions/wingman/providers/db/rbac"
 )
 
 // AddUserRoleBinding is the resolver for the addUserRoleBinding field.
@@ -65,9 +64,6 @@ func (r *userRoleBindingResolver) UserRoles(ctx context.Context, obj *model.User
 	panic(fmt.Errorf("not implemented: UserRoles - userRoles"))
 }
 
-// Mutation returns generated.MutationResolver implementation.
-func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
-
 // UserRole returns generated.UserRoleResolver implementation.
 func (r *Resolver) UserRole() generated.UserRoleResolver { return &userRoleResolver{r} }
 
@@ -77,7 +73,6 @@ func (r *Resolver) UserRoleBinding() generated.UserRoleBindingResolver {
 }
 
 type (
-	mutationResolver        struct{ *Resolver }
 	userRoleResolver        struct{ *Resolver }
 	userRoleBindingResolver struct{ *Resolver }
 )

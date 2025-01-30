@@ -111,6 +111,11 @@ type DatabaseInfo struct {
 	Driver DriverType `json:"driver"`
 }
 
+type DatabaseResource struct {
+	ID    string           `json:"id"`
+	Table []*TableResource `json:"table,omitempty"`
+}
+
 type DatabaseTableAccess struct {
 	Name       string     `json:"name"`
 	Columns    []*string  `json:"columns,omitempty"`
@@ -121,6 +126,24 @@ type DatabaseTableAccessInput struct {
 	Name       string     `json:"name"`
 	Columns    []*string  `json:"columns,omitempty"`
 	AccessType AccessType `json:"accessType"`
+}
+
+type EnvGrantError struct {
+	Code    EnvGrantErrorCode `json:"code"`
+	Message *string           `json:"message,omitempty"`
+}
+
+type EnvGrantInput struct {
+	MutationID *string               `json:"mutationId,omitempty"`
+	Reason     *string               `json:"reason,omitempty"`
+	IncidentID *string               `json:"incidentId,omitempty"`
+	Resource   []*ResourceGrantInput `json:"resource,omitempty"`
+}
+
+type EnvGrantOutput struct {
+	MutationID *string        `json:"mutationId,omitempty"`
+	Token      *string        `json:"token,omitempty"`
+	Error      *EnvGrantError `json:"error,omitempty"`
 }
 
 type Environment struct {
@@ -134,6 +157,11 @@ type Environment struct {
 
 func (Environment) IsEntity() {}
 
+type K8sResource struct {
+	ID        *string              `json:"id,omitempty"`
+	Namespace []*NamespaceResource `json:"namespace,omitempty"`
+}
+
 type Mutation struct {
 }
 
@@ -144,6 +172,11 @@ type Namespace struct {
 }
 
 func (Namespace) IsEntity() {}
+
+type NamespaceResource struct {
+	Name string    `json:"name"`
+	Pods []*string `json:"pods,omitempty"`
+}
 
 type NewUserRoleBindingData struct {
 	UserID      string   `json:"userID"`
@@ -163,6 +196,30 @@ func (Pod) IsEntity() {}
 type Query struct {
 }
 
+type ResourceGrantInput struct {
+	Env      string               `json:"env"`
+	K8s      []*NamespaceResource `json:"k8s,omitempty"`
+	Database []*DatabaseResource  `json:"database,omitempty"`
+}
+
+type SignInError struct {
+	Code    SignInErrorCode `json:"code"`
+	Message *string         `json:"message,omitempty"`
+}
+
+type SignInInput struct {
+	MutationID *string `json:"mutationId,omitempty"`
+	Login      string  `json:"login"`
+	Password   string  `json:"password"`
+}
+
+type SignInOutput struct {
+	MutationID *string      `json:"mutationId,omitempty"`
+	Token      *string      `json:"token,omitempty"`
+	User       *User        `json:"user,omitempty"`
+	Error      *SignInError `json:"error,omitempty"`
+}
+
 type TableDataConnection struct {
 	ConnectionInfo *ConnectionInfo  `json:"connectionInfo"`
 	Edges          []*TableDataEdge `json:"edges,omitempty"`
@@ -175,6 +232,12 @@ type TableDataEdge struct {
 
 type TableFilter struct {
 	Columns []*string `json:"columns,omitempty"`
+}
+
+type TableResource struct {
+	Name       string      `json:"name"`
+	Columns    []*string   `json:"columns,omitempty"`
+	AccessType *AccessType `json:"accessType,omitempty"`
 }
 
 type TableRow struct {
@@ -442,5 +505,89 @@ func (e *DriverType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e DriverType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type EnvGrantErrorCode string
+
+const (
+	EnvGrantErrorCodeInvalidInput  EnvGrantErrorCode = "INVALID_INPUT"
+	EnvGrantErrorCodeUnauthorized  EnvGrantErrorCode = "UNAUTHORIZED"
+	EnvGrantErrorCodeGrantRejected EnvGrantErrorCode = "GRANT_REJECTED"
+)
+
+var AllEnvGrantErrorCode = []EnvGrantErrorCode{
+	EnvGrantErrorCodeInvalidInput,
+	EnvGrantErrorCodeUnauthorized,
+	EnvGrantErrorCodeGrantRejected,
+}
+
+func (e EnvGrantErrorCode) IsValid() bool {
+	switch e {
+	case EnvGrantErrorCodeInvalidInput, EnvGrantErrorCodeUnauthorized, EnvGrantErrorCodeGrantRejected:
+		return true
+	}
+	return false
+}
+
+func (e EnvGrantErrorCode) String() string {
+	return string(e)
+}
+
+func (e *EnvGrantErrorCode) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = EnvGrantErrorCode(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid EnvGrantErrorCode", str)
+	}
+	return nil
+}
+
+func (e EnvGrantErrorCode) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type SignInErrorCode string
+
+const (
+	SignInErrorCodeInvalidInput      SignInErrorCode = "INVALID_INPUT"
+	SignInErrorCodeWrongUserPassword SignInErrorCode = "WRONG_USER_PASSWORD"
+)
+
+var AllSignInErrorCode = []SignInErrorCode{
+	SignInErrorCodeInvalidInput,
+	SignInErrorCodeWrongUserPassword,
+}
+
+func (e SignInErrorCode) IsValid() bool {
+	switch e {
+	case SignInErrorCodeInvalidInput, SignInErrorCodeWrongUserPassword:
+		return true
+	}
+	return false
+}
+
+func (e SignInErrorCode) String() string {
+	return string(e)
+}
+
+func (e *SignInErrorCode) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SignInErrorCode(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SignInErrorCode", str)
+	}
+	return nil
+}
+
+func (e SignInErrorCode) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

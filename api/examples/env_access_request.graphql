@@ -1,0 +1,45 @@
+mutation {
+    envGrant(input: {
+        mutationId: "env-access-request"
+        reason: "production incident"
+        incidentId: "pager-duty-123"
+        resource: [
+            {
+                env: "production"
+                database: [
+                    {
+                        id: "postgres"
+                        table: [
+                            {
+                                name: "users"
+                                columns: ["id", "first_name", "last_name", "email"]
+                            },
+                            {
+                                name: "orders"
+                                columns: ["amount", "name", "price"]
+                            }
+                        ]
+                    }
+                ]
+                k8s: [
+                    {
+                        id: "k8s-prod"
+                        namespace: [
+                            {
+                                name: "default"
+                                pods: ["nginx-1"]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+    }) {
+        mutationId
+        token
+        error {
+            code
+            message
+        }
+    }
+}

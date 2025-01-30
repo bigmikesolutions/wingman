@@ -12,6 +12,11 @@ import (
 	"github.com/bigmikesolutions/wingman/graphql/model"
 )
 
+// SignIn is the resolver for the signIn field.
+func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) (*model.SignInOutput, error) {
+	panic(fmt.Errorf("not implemented: SignIn - signIn"))
+}
+
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id *string) (*model.User, error) {
 	panic(fmt.Errorf("not implemented: User - user"))

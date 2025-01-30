@@ -4,6 +4,10 @@ extend type Query {
     user(id: UserID): User
 }
 
+extend type Mutation {
+    signIn(input: SignInInput!): SignInOutput!
+}
+
 type User @key (fields: "id") {
     id: UserID!
 
@@ -17,4 +21,27 @@ type User @key (fields: "id") {
 
     active: Boolean
     userRoles: [UserRole!] @goField(forceResolver: true)
+}
+
+input SignInInput  {
+    mutationId: ID
+    login: String!
+    password: String!
+}
+
+type SignInOutput {
+    mutationId: ID
+    token: String
+    user: User
+    error: SignInError
+}
+
+type SignInError {
+    code: SignInErrorCode!
+    message: String
+}
+
+enum SignInErrorCode {
+    INVALID_INPUT
+    WRONG_USER_PASSWORD
 }

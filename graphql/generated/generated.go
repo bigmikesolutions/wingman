@@ -52,6 +52,7 @@ type ResolverRoot interface {
 	User() UserResolver
 	UserRole() UserRoleResolver
 	UserRoleBinding() UserRoleBindingResolver
+	ResourceGrantInput() ResourceGrantInputResolver
 }
 
 type DirectiveRoot struct {
@@ -137,6 +138,17 @@ type ComplexityRoot struct {
 		FindUserRoleByID        func(childComplexity int, id string) int
 	}
 
+	EnvGrantError struct {
+		Code    func(childComplexity int) int
+		Message func(childComplexity int) int
+	}
+
+	EnvGrantOutput struct {
+		Error      func(childComplexity int) int
+		MutationID func(childComplexity int) int
+		Token      func(childComplexity int) int
+	}
+
 	Environment struct {
 		CreatedAt   func(childComplexity int) int
 		Database    func(childComplexity int, id string) int
@@ -150,6 +162,8 @@ type ComplexityRoot struct {
 		AddDatabaseUserRole func(childComplexity int, input model.AddDatabaseUserRoleInput) int
 		AddK8sUserRole      func(childComplexity int, input model.AddK8sUserRoleInput) int
 		AddUserRoleBinding  func(childComplexity int, input model.AddUserRoleBindingInput) int
+		EnvGrant            func(childComplexity int, input model.EnvGrantInput) int
+		SignIn              func(childComplexity int, input model.SignInInput) int
 	}
 
 	Namespace struct {
@@ -170,6 +184,18 @@ type ComplexityRoot struct {
 		User               func(childComplexity int, id *string) int
 		__resolve__service func(childComplexity int) int
 		__resolve_entities func(childComplexity int, representations []map[string]interface{}) int
+	}
+
+	SignInError struct {
+		Code    func(childComplexity int) int
+		Message func(childComplexity int) int
+	}
+
+	SignInOutput struct {
+		Error      func(childComplexity int) int
+		MutationID func(childComplexity int) int
+		Token      func(childComplexity int) int
+		User       func(childComplexity int) int
 	}
 
 	TableDataConnection struct {
@@ -246,7 +272,9 @@ type EnvironmentResolver interface {
 	Database(ctx context.Context, obj *model.Environment, id string) (*model.Database, error)
 }
 type MutationResolver interface {
+	EnvGrant(ctx context.Context, input model.EnvGrantInput) (*model.EnvGrantOutput, error)
 	AddUserRoleBinding(ctx context.Context, input model.AddUserRoleBindingInput) (*model.AddUserRoleBindingPayload, error)
+	SignIn(ctx context.Context, input model.SignInInput) (*model.SignInOutput, error)
 	AddK8sUserRole(ctx context.Context, input model.AddK8sUserRoleInput) (*model.AddK8sUserRolePayload, error)
 	AddDatabaseUserRole(ctx context.Context, input model.AddDatabaseUserRoleInput) (*model.AddDatabaseUserRolePayload, error)
 }
@@ -266,6 +294,11 @@ type UserRoleResolver interface {
 }
 type UserRoleBindingResolver interface {
 	UserRoles(ctx context.Context, obj *model.UserRoleBinding) ([]*model.UserRole, error)
+}
+
+type ResourceGrantInputResolver interface {
+	K8s(ctx context.Context, obj *model.ResourceGrantInput, data []*model.NamespaceResource) error
+	Database(ctx context.Context, obj *model.ResourceGrantInput, data []*model.DatabaseResource) error
 }
 
 type executableSchema struct {
@@ -610,6 +643,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Entity.FindUserRoleByID(childComplexity, args["id"].(string)), true
 
+	case "EnvGrantError.code":
+		if e.complexity.EnvGrantError.Code == nil {
+			break
+		}
+
+		return e.complexity.EnvGrantError.Code(childComplexity), true
+
+	case "EnvGrantError.message":
+		if e.complexity.EnvGrantError.Message == nil {
+			break
+		}
+
+		return e.complexity.EnvGrantError.Message(childComplexity), true
+
+	case "EnvGrantOutput.error":
+		if e.complexity.EnvGrantOutput.Error == nil {
+			break
+		}
+
+		return e.complexity.EnvGrantOutput.Error(childComplexity), true
+
+	case "EnvGrantOutput.mutationId":
+		if e.complexity.EnvGrantOutput.MutationID == nil {
+			break
+		}
+
+		return e.complexity.EnvGrantOutput.MutationID(childComplexity), true
+
+	case "EnvGrantOutput.token":
+		if e.complexity.EnvGrantOutput.Token == nil {
+			break
+		}
+
+		return e.complexity.EnvGrantOutput.Token(childComplexity), true
+
 	case "Environment.createdAt":
 		if e.complexity.Environment.CreatedAt == nil {
 			break
@@ -697,6 +765,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.AddUserRoleBinding(childComplexity, args["input"].(model.AddUserRoleBindingInput)), true
+
+	case "Mutation.envGrant":
+		if e.complexity.Mutation.EnvGrant == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_envGrant_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.EnvGrant(childComplexity, args["input"].(model.EnvGrantInput)), true
+
+	case "Mutation.signIn":
+		if e.complexity.Mutation.SignIn == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_signIn_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.SignIn(childComplexity, args["input"].(model.SignInInput)), true
 
 	case "Namespace.name":
 		if e.complexity.Namespace.Name == nil {
@@ -799,6 +891,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.__resolve_entities(childComplexity, args["representations"].([]map[string]interface{})), true
+
+	case "SignInError.code":
+		if e.complexity.SignInError.Code == nil {
+			break
+		}
+
+		return e.complexity.SignInError.Code(childComplexity), true
+
+	case "SignInError.message":
+		if e.complexity.SignInError.Message == nil {
+			break
+		}
+
+		return e.complexity.SignInError.Message(childComplexity), true
+
+	case "SignInOutput.error":
+		if e.complexity.SignInOutput.Error == nil {
+			break
+		}
+
+		return e.complexity.SignInOutput.Error(childComplexity), true
+
+	case "SignInOutput.mutationId":
+		if e.complexity.SignInOutput.MutationID == nil {
+			break
+		}
+
+		return e.complexity.SignInOutput.MutationID(childComplexity), true
+
+	case "SignInOutput.token":
+		if e.complexity.SignInOutput.Token == nil {
+			break
+		}
+
+		return e.complexity.SignInOutput.Token(childComplexity), true
+
+	case "SignInOutput.user":
+		if e.complexity.SignInOutput.User == nil {
+			break
+		}
+
+		return e.complexity.SignInOutput.User(childComplexity), true
 
 	case "TableDataConnection.connectionInfo":
 		if e.complexity.TableDataConnection.ConnectionInfo == nil {
@@ -1024,9 +1158,16 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputAddK8sUserRoleInput,
 		ec.unmarshalInputAddUserRoleBindingInput,
 		ec.unmarshalInputDatabaseAccessInput,
+		ec.unmarshalInputDatabaseResource,
 		ec.unmarshalInputDatabaseTableAccessInput,
+		ec.unmarshalInputEnvGrantInput,
+		ec.unmarshalInputK8sResource,
+		ec.unmarshalInputNamespaceResource,
 		ec.unmarshalInputNewUserRoleBindingData,
+		ec.unmarshalInputResourceGrantInput,
+		ec.unmarshalInputSignInInput,
 		ec.unmarshalInputTableFilter,
+		ec.unmarshalInputTableResource,
 	)
 	first := true
 
@@ -1124,12 +1265,17 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../../api/wingman/env.graphqls", Input: `extend schema @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
+	{Name: "../../api/wingman/env.graphqls", Input: `extend schema
+    @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
 
 scalar EnvironmentID
 
 extend type Query {
     environment(id: EnvironmentID!): Environment
+}
+
+extend type Mutation {
+    envGrant(input: EnvGrantInput!): EnvGrantOutput!
 }
 
 type Environment @key (fields: "id") {
@@ -1139,7 +1285,34 @@ type Environment @key (fields: "id") {
     createdAt: Time!
     modifiedAt: Time
 }
-`, BuiltIn: false},
+
+input EnvGrantInput  {
+    mutationId: ID
+    reason: String
+    incidentId: ID
+    resource: [ResourceGrantInput]
+}
+
+input ResourceGrantInput {
+    env: EnvironmentID!
+}
+
+type EnvGrantOutput {
+    mutationId: ID
+    token: String
+    error: EnvGrantError
+}
+
+type EnvGrantError {
+    code: EnvGrantErrorCode!
+    message: String
+}
+
+enum EnvGrantErrorCode {
+    INVALID_INPUT
+    UNAUTHORIZED
+    GRANT_REJECTED
+}`, BuiltIn: false},
 	{Name: "../../api/wingman/rbac.graphqls", Input: `extend schema @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
 
 scalar UserRoleID
@@ -1147,12 +1320,6 @@ scalar UserRoleBindingID
 
 extend type Mutation {
     addUserRoleBinding(input: AddUserRoleBindingInput!): AddUserRoleBindingPayload!
-}
-
-enum AccessType {
-    ReadOnly
-    WriteOnly
-    ReadWrite
 }
 
 type UserRole @key (fields: "id"){
@@ -1245,7 +1412,6 @@ directive @withDeprecatedArgs(
     newArg: String
 ) on FIELD
 
-
 schema {
     query: Query
     mutation: Mutation
@@ -1257,11 +1423,21 @@ Meta-info about connection, returned by query, holding information about paginat
 type ConnectionInfo @shareable {
     endCursor: Cursor!
     hasNextPage: Boolean!
+}
+
+enum AccessType {
+    ReadOnly
+    WriteOnly
+    ReadWrite
 }`, BuiltIn: false},
 	{Name: "../../api/wingman/user.graphqls", Input: `extend schema @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
 
 extend type Query {
     user(id: UserID): User
+}
+
+extend type Mutation {
+    signIn(input: SignInInput!): SignInOutput!
 }
 
 type User @key (fields: "id") {
@@ -1278,9 +1454,34 @@ type User @key (fields: "id") {
     active: Boolean
     userRoles: [UserRole!] @goField(forceResolver: true)
 }
+
+input SignInInput  {
+    mutationId: ID
+    login: String!
+    password: String!
+}
+
+type SignInOutput {
+    mutationId: ID
+    token: String
+    user: User
+    error: SignInError
+}
+
+type SignInError {
+    code: SignInErrorCode!
+    message: String
+}
+
+enum SignInErrorCode {
+    INVALID_INPUT
+    WRONG_USER_PASSWORD
+}
 `, BuiltIn: false},
-	{Name: "../../api/providers/k8s/k8s.graphqls", Input: `extend schema @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
-extend schema @link(url: "../../wingman/shared.graphqls")
+	{Name: "../../api/providers/k8s/k8s.graphqls", Input: `extend schema
+    @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
+    @link(url: "../../wingman/shared.graphqls")
+    @link(url: "../../wingman/env.graphqls")
 
 extend type Environment {
     k8s(id: String!): Cluster @goField(forceResolver: true)
@@ -1305,7 +1506,20 @@ type Pod @key (fields: "id") {
     namespace: String!
     image: String!
 }
-`, BuiltIn: false},
+
+extend input ResourceGrantInput {
+    k8s: [NamespaceResource] @goField(forceResolver: true)
+}
+
+input K8sResource {
+    id: String
+    namespace: [NamespaceResource]
+}
+
+input NamespaceResource {
+    name: String!
+    pods: [String]
+}`, BuiltIn: false},
 	{Name: "../../api/providers/k8s/rbac.graphqls", Input: `extend schema @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
 extend schema @link(url: "../../wingman/shared.graphqls")
 
@@ -1352,9 +1566,10 @@ enum AddK8sUserRoleClientErrorCode {
 
 
 `, BuiltIn: false},
-	{Name: "../../api/providers/db/db.graphqls", Input: `extend schema @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
-extend schema @link(url: "../../wingman/shared.graphqls")
-extend schema @link(url: "../../wingman/env.graphqls")
+	{Name: "../../api/providers/db/db.graphqls", Input: `extend schema
+    @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
+    @link(url: "../../wingman/shared.graphqls")
+    @link(url: "../../wingman/env.graphqls")
 
 extend type Environment {
     database(id: String!): Database @goField(forceResolver: true)
@@ -1373,11 +1588,25 @@ type DatabaseInfo  {
     driver: DriverType!
 }
 
+extend input ResourceGrantInput {
+    database: [DatabaseResource] @goField(forceResolver: true)
+}
+
+input DatabaseResource {
+    id: String!
+    table: [TableResource]
+}
+
+input TableResource {
+    name: String!
+    columns: [String]
+    accessType: AccessType
+}
+
 enum DriverType {
     POSTGRES
     MYSQL
 }
-
 
 input TableFilter {
     columns: [String]
@@ -1398,8 +1627,9 @@ type TableRow {
     values: [String]
 }
 `, BuiltIn: false},
-	{Name: "../../api/providers/db/rbac.graphqls", Input: `extend schema @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
-extend schema @link(url: "../../wingman/shared.graphqls")
+	{Name: "../../api/providers/db/rbac.graphqls", Input: `extend schema
+    @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
+    @link(url: "../../wingman/shared.graphqls")
 
 extend type Mutation {
     addDatabaseUserRole(input: AddDatabaseUserRoleInput!): AddDatabaseUserRolePayload!
@@ -2163,6 +2393,70 @@ func (ec *executionContext) field_Mutation_addUserRoleBinding_argsInput(
 	}
 
 	var zeroVal model.AddUserRoleBindingInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_envGrant_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_envGrant_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_envGrant_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.EnvGrantInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["input"]
+	if !ok {
+		var zeroVal model.EnvGrantInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNEnvGrantInput2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐEnvGrantInput(ctx, tmp)
+	}
+
+	var zeroVal model.EnvGrantInput
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_signIn_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_signIn_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_signIn_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (model.SignInInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["input"]
+	if !ok {
+		var zeroVal model.SignInInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNSignInInput2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐSignInInput(ctx, tmp)
+	}
+
+	var zeroVal model.SignInInput
 	return zeroVal, nil
 }
 
@@ -4374,6 +4668,205 @@ func (ec *executionContext) fieldContext_Entity_findUserRoleBindingByID(ctx cont
 	return fc, nil
 }
 
+func (ec *executionContext) _EnvGrantError_code(ctx context.Context, field graphql.CollectedField, obj *model.EnvGrantError) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EnvGrantError_code(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Code, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.EnvGrantErrorCode)
+	fc.Result = res
+	return ec.marshalNEnvGrantErrorCode2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐEnvGrantErrorCode(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EnvGrantError_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EnvGrantError",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type EnvGrantErrorCode does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EnvGrantError_message(ctx context.Context, field graphql.CollectedField, obj *model.EnvGrantError) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EnvGrantError_message(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EnvGrantError_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EnvGrantError",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EnvGrantOutput_mutationId(ctx context.Context, field graphql.CollectedField, obj *model.EnvGrantOutput) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EnvGrantOutput_mutationId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MutationID, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EnvGrantOutput_mutationId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EnvGrantOutput",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EnvGrantOutput_token(ctx context.Context, field graphql.CollectedField, obj *model.EnvGrantOutput) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EnvGrantOutput_token(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Token, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EnvGrantOutput_token(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EnvGrantOutput",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EnvGrantOutput_error(ctx context.Context, field graphql.CollectedField, obj *model.EnvGrantOutput) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EnvGrantOutput_error(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Error, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.EnvGrantError)
+	fc.Result = res
+	return ec.marshalOEnvGrantError2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐEnvGrantError(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EnvGrantOutput_error(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EnvGrantOutput",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "code":
+				return ec.fieldContext_EnvGrantError_code(ctx, field)
+			case "message":
+				return ec.fieldContext_EnvGrantError_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type EnvGrantError", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Environment_id(ctx context.Context, field graphql.CollectedField, obj *model.Environment) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Environment_id(ctx, field)
 	if err != nil {
@@ -4644,6 +5137,66 @@ func (ec *executionContext) fieldContext_Environment_database(ctx context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_envGrant(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_envGrant(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().EnvGrant(rctx, fc.Args["input"].(model.EnvGrantInput))
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.EnvGrantOutput)
+	fc.Result = res
+	return ec.marshalNEnvGrantOutput2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐEnvGrantOutput(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_envGrant(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "mutationId":
+				return ec.fieldContext_EnvGrantOutput_mutationId(ctx, field)
+			case "token":
+				return ec.fieldContext_EnvGrantOutput_token(ctx, field)
+			case "error":
+				return ec.fieldContext_EnvGrantOutput_error(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type EnvGrantOutput", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_envGrant_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_addUserRoleBinding(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_addUserRoleBinding(ctx, field)
 	if err != nil {
@@ -4698,6 +5251,68 @@ func (ec *executionContext) fieldContext_Mutation_addUserRoleBinding(ctx context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_addUserRoleBinding_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_signIn(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_signIn(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SignIn(rctx, fc.Args["input"].(model.SignInInput))
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.SignInOutput)
+	fc.Result = res
+	return ec.marshalNSignInOutput2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐSignInOutput(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_signIn(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "mutationId":
+				return ec.fieldContext_SignInOutput_mutationId(ctx, field)
+			case "token":
+				return ec.fieldContext_SignInOutput_token(ctx, field)
+			case "user":
+				return ec.fieldContext_SignInOutput_user(ctx, field)
+			case "error":
+				return ec.fieldContext_SignInOutput_error(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SignInOutput", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_signIn_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5494,6 +6109,263 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SignInError_code(ctx context.Context, field graphql.CollectedField, obj *model.SignInError) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SignInError_code(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Code, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.SignInErrorCode)
+	fc.Result = res
+	return ec.marshalNSignInErrorCode2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐSignInErrorCode(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SignInError_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SignInError",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type SignInErrorCode does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SignInError_message(ctx context.Context, field graphql.CollectedField, obj *model.SignInError) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SignInError_message(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SignInError_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SignInError",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SignInOutput_mutationId(ctx context.Context, field graphql.CollectedField, obj *model.SignInOutput) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SignInOutput_mutationId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MutationID, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SignInOutput_mutationId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SignInOutput",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SignInOutput_token(ctx context.Context, field graphql.CollectedField, obj *model.SignInOutput) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SignInOutput_token(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Token, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SignInOutput_token(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SignInOutput",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SignInOutput_user(ctx context.Context, field graphql.CollectedField, obj *model.SignInOutput) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SignInOutput_user(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.User, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.User)
+	fc.Result = res
+	return ec.marshalOUser2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SignInOutput_user(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SignInOutput",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "description":
+				return ec.fieldContext_User_description(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "modifiedAt":
+				return ec.fieldContext_User_modifiedAt(ctx, field)
+			case "active":
+				return ec.fieldContext_User_active(ctx, field)
+			case "userRoles":
+				return ec.fieldContext_User_userRoles(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SignInOutput_error(ctx context.Context, field graphql.CollectedField, obj *model.SignInOutput) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SignInOutput_error(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Error, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.SignInError)
+	fc.Result = res
+	return ec.marshalOSignInError2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐSignInError(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SignInOutput_error(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SignInOutput",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "code":
+				return ec.fieldContext_SignInError_code(ctx, field)
+			case "message":
+				return ec.fieldContext_SignInError_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SignInError", field.Name)
 		},
 	}
 	return fc, nil
@@ -8639,6 +9511,40 @@ func (ec *executionContext) unmarshalInputDatabaseAccessInput(ctx context.Contex
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputDatabaseResource(ctx context.Context, obj interface{}) (model.DatabaseResource, error) {
+	var it model.DatabaseResource
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "table"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "table":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("table"))
+			data, err := ec.unmarshalOTableResource2ᚕᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐTableResource(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Table = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputDatabaseTableAccessInput(ctx context.Context, obj interface{}) (model.DatabaseTableAccessInput, error) {
 	var it model.DatabaseTableAccessInput
 	asMap := map[string]interface{}{}
@@ -8674,6 +9580,122 @@ func (ec *executionContext) unmarshalInputDatabaseTableAccessInput(ctx context.C
 				return it, err
 			}
 			it.AccessType = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputEnvGrantInput(ctx context.Context, obj interface{}) (model.EnvGrantInput, error) {
+	var it model.EnvGrantInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"mutationId", "reason", "incidentId", "resource"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "mutationId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("mutationId"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MutationID = data
+		case "reason":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("reason"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Reason = data
+		case "incidentId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("incidentId"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IncidentID = data
+		case "resource":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("resource"))
+			data, err := ec.unmarshalOResourceGrantInput2ᚕᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐResourceGrantInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Resource = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputK8sResource(ctx context.Context, obj interface{}) (model.K8sResource, error) {
+	var it model.K8sResource
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "namespace"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "namespace":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("namespace"))
+			data, err := ec.unmarshalONamespaceResource2ᚕᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐNamespaceResource(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Namespace = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNamespaceResource(ctx context.Context, obj interface{}) (model.NamespaceResource, error) {
+	var it model.NamespaceResource
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name", "pods"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "pods":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("pods"))
+			data, err := ec.unmarshalOString2ᚕᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Pods = data
 		}
 	}
 
@@ -8721,6 +9743,92 @@ func (ec *executionContext) unmarshalInputNewUserRoleBindingData(ctx context.Con
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputResourceGrantInput(ctx context.Context, obj interface{}) (model.ResourceGrantInput, error) {
+	var it model.ResourceGrantInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"env", "k8s", "database"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "env":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("env"))
+			data, err := ec.unmarshalNEnvironmentID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Env = data
+		case "k8s":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("k8s"))
+			data, err := ec.unmarshalONamespaceResource2ᚕᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐNamespaceResource(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			if err = ec.resolvers.ResourceGrantInput().K8s(ctx, &it, data); err != nil {
+				return it, err
+			}
+		case "database":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("database"))
+			data, err := ec.unmarshalODatabaseResource2ᚕᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐDatabaseResource(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			if err = ec.resolvers.ResourceGrantInput().Database(ctx, &it, data); err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputSignInInput(ctx context.Context, obj interface{}) (model.SignInInput, error) {
+	var it model.SignInInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"mutationId", "login", "password"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "mutationId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("mutationId"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MutationID = data
+		case "login":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("login"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Login = data
+		case "password":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Password = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputTableFilter(ctx context.Context, obj interface{}) (model.TableFilter, error) {
 	var it model.TableFilter
 	asMap := map[string]interface{}{}
@@ -8742,6 +9850,47 @@ func (ec *executionContext) unmarshalInputTableFilter(ctx context.Context, obj i
 				return it, err
 			}
 			it.Columns = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputTableResource(ctx context.Context, obj interface{}) (model.TableResource, error) {
+	var it model.TableResource
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name", "columns", "accessType"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "columns":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("columns"))
+			data, err := ec.unmarshalOString2ᚕᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Columns = data
+		case "accessType":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accessType"))
+			data, err := ec.unmarshalOAccessType2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐAccessType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AccessType = data
 		}
 	}
 
@@ -9650,6 +10799,87 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 	return out
 }
 
+var envGrantErrorImplementors = []string{"EnvGrantError"}
+
+func (ec *executionContext) _EnvGrantError(ctx context.Context, sel ast.SelectionSet, obj *model.EnvGrantError) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, envGrantErrorImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("EnvGrantError")
+		case "code":
+			out.Values[i] = ec._EnvGrantError_code(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "message":
+			out.Values[i] = ec._EnvGrantError_message(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var envGrantOutputImplementors = []string{"EnvGrantOutput"}
+
+func (ec *executionContext) _EnvGrantOutput(ctx context.Context, sel ast.SelectionSet, obj *model.EnvGrantOutput) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, envGrantOutputImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("EnvGrantOutput")
+		case "mutationId":
+			out.Values[i] = ec._EnvGrantOutput_mutationId(ctx, field, obj)
+		case "token":
+			out.Values[i] = ec._EnvGrantOutput_token(ctx, field, obj)
+		case "error":
+			out.Values[i] = ec._EnvGrantOutput_error(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var environmentImplementors = []string{"Environment", "_Entity"}
 
 func (ec *executionContext) _Environment(ctx context.Context, sel ast.SelectionSet, obj *model.Environment) graphql.Marshaler {
@@ -9783,9 +11013,23 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
+		case "envGrant":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_envGrant(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "addUserRoleBinding":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_addUserRoleBinding(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "signIn":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_signIn(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -10095,6 +11339,89 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var signInErrorImplementors = []string{"SignInError"}
+
+func (ec *executionContext) _SignInError(ctx context.Context, sel ast.SelectionSet, obj *model.SignInError) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, signInErrorImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SignInError")
+		case "code":
+			out.Values[i] = ec._SignInError_code(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "message":
+			out.Values[i] = ec._SignInError_message(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var signInOutputImplementors = []string{"SignInOutput"}
+
+func (ec *executionContext) _SignInOutput(ctx context.Context, sel ast.SelectionSet, obj *model.SignInOutput) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, signInOutputImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SignInOutput")
+		case "mutationId":
+			out.Values[i] = ec._SignInOutput_mutationId(ctx, field, obj)
+		case "token":
+			out.Values[i] = ec._SignInOutput_token(ctx, field, obj)
+		case "user":
+			out.Values[i] = ec._SignInOutput_user(ctx, field, obj)
+		case "error":
+			out.Values[i] = ec._SignInOutput_error(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -11089,6 +12416,35 @@ func (ec *executionContext) marshalNDriverType2githubᚗcomᚋbigmikesolutions�
 	return v
 }
 
+func (ec *executionContext) unmarshalNEnvGrantErrorCode2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐEnvGrantErrorCode(ctx context.Context, v interface{}) (model.EnvGrantErrorCode, error) {
+	var res model.EnvGrantErrorCode
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNEnvGrantErrorCode2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐEnvGrantErrorCode(ctx context.Context, sel ast.SelectionSet, v model.EnvGrantErrorCode) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNEnvGrantInput2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐEnvGrantInput(ctx context.Context, v interface{}) (model.EnvGrantInput, error) {
+	res, err := ec.unmarshalInputEnvGrantInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNEnvGrantOutput2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐEnvGrantOutput(ctx context.Context, sel ast.SelectionSet, v model.EnvGrantOutput) graphql.Marshaler {
+	return ec._EnvGrantOutput(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNEnvGrantOutput2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐEnvGrantOutput(ctx context.Context, sel ast.SelectionSet, v *model.EnvGrantOutput) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._EnvGrantOutput(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNEnvironment2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐEnvironment(ctx context.Context, sel ast.SelectionSet, v model.Environment) graphql.Marshaler {
 	return ec._Environment(ctx, sel, &v)
 }
@@ -11211,6 +12567,35 @@ func (ec *executionContext) marshalNPod2ᚖgithubᚗcomᚋbigmikesolutionsᚋwin
 		return graphql.Null
 	}
 	return ec._Pod(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNSignInErrorCode2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐSignInErrorCode(ctx context.Context, v interface{}) (model.SignInErrorCode, error) {
+	var res model.SignInErrorCode
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNSignInErrorCode2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐSignInErrorCode(ctx context.Context, sel ast.SelectionSet, v model.SignInErrorCode) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNSignInInput2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐSignInInput(ctx context.Context, v interface{}) (model.SignInInput, error) {
+	res, err := ec.unmarshalInputSignInInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNSignInOutput2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐSignInOutput(ctx context.Context, sel ast.SelectionSet, v model.SignInOutput) graphql.Marshaler {
+	return ec._SignInOutput(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSignInOutput2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐSignInOutput(ctx context.Context, sel ast.SelectionSet, v *model.SignInOutput) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._SignInOutput(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -11911,6 +13296,22 @@ func (ec *executionContext) marshalNfederation__Scope2ᚕᚕstringᚄ(ctx contex
 	return ret
 }
 
+func (ec *executionContext) unmarshalOAccessType2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐAccessType(ctx context.Context, v interface{}) (*model.AccessType, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.AccessType)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOAccessType2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐAccessType(ctx context.Context, sel ast.SelectionSet, v *model.AccessType) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
 func (ec *executionContext) marshalOAddDatabaseUserRoleError2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐAddDatabaseUserRoleError(ctx context.Context, sel ast.SelectionSet, v *model.AddDatabaseUserRoleError) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -12071,6 +13472,34 @@ func (ec *executionContext) marshalODatabaseInfo2ᚖgithubᚗcomᚋbigmikesoluti
 	return ec._DatabaseInfo(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalODatabaseResource2ᚕᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐDatabaseResource(ctx context.Context, v interface{}) ([]*model.DatabaseResource, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.DatabaseResource, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalODatabaseResource2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐDatabaseResource(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalODatabaseResource2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐDatabaseResource(ctx context.Context, v interface{}) (*model.DatabaseResource, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputDatabaseResource(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalODatabaseTableAccess2ᚕᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐDatabaseTableAccessᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.DatabaseTableAccess) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -12146,6 +13575,13 @@ func (ec *executionContext) unmarshalODatabaseTableAccessInput2ᚖgithubᚗcom�
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalOEnvGrantError2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐEnvGrantError(ctx context.Context, sel ast.SelectionSet, v *model.EnvGrantError) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._EnvGrantError(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalOEnvironment2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐEnvironment(ctx context.Context, sel ast.SelectionSet, v *model.Environment) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -12190,6 +13626,34 @@ func (ec *executionContext) marshalONamespace2ᚖgithubᚗcomᚋbigmikesolutions
 		return graphql.Null
 	}
 	return ec._Namespace(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalONamespaceResource2ᚕᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐNamespaceResource(ctx context.Context, v interface{}) ([]*model.NamespaceResource, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.NamespaceResource, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalONamespaceResource2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐNamespaceResource(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalONamespaceResource2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐNamespaceResource(ctx context.Context, v interface{}) (*model.NamespaceResource, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputNamespaceResource(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOPod2ᚕᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐPodᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Pod) graphql.Marshaler {
@@ -12244,6 +13708,41 @@ func (ec *executionContext) marshalOPod2ᚖgithubᚗcomᚋbigmikesolutionsᚋwin
 		return graphql.Null
 	}
 	return ec._Pod(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOResourceGrantInput2ᚕᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐResourceGrantInput(ctx context.Context, v interface{}) ([]*model.ResourceGrantInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.ResourceGrantInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOResourceGrantInput2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐResourceGrantInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOResourceGrantInput2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐResourceGrantInput(ctx context.Context, v interface{}) (*model.ResourceGrantInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputResourceGrantInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOSignInError2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐSignInError(ctx context.Context, sel ast.SelectionSet, v *model.SignInError) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._SignInError(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
@@ -12395,6 +13894,34 @@ func (ec *executionContext) unmarshalOTableFilter2ᚖgithubᚗcomᚋbigmikesolut
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputTableFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOTableResource2ᚕᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐTableResource(ctx context.Context, v interface{}) ([]*model.TableResource, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.TableResource, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOTableResource2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐTableResource(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalOTableResource2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐTableResource(ctx context.Context, v interface{}) (*model.TableResource, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputTableResource(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

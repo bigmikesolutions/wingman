@@ -30,8 +30,6 @@ func CtxUser(ctx context.Context) (UserCtx, error) {
 	if u, ok := ctx.Value(userCtxKey).(UserCtx); ok {
 		return u, nil
 	} else {
-		return UserCtx{}, nil
-		// TODO finish this
-		// return UserCtx{}, ErrUserNotAuthenticated
+		return UserCtx{}, ErrUserNotAuthenticated
 	}
 }

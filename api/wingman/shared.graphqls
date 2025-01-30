@@ -38,7 +38,6 @@ directive @withDeprecatedArgs(
     newArg: String
 ) on FIELD
 
-
 schema {
     query: Query
     mutation: Mutation
@@ -50,4 +49,10 @@ Meta-info about connection, returned by query, holding information about paginat
 type ConnectionInfo @shareable {
     endCursor: Cursor!
     hasNextPage: Boolean!
+}
+
+enum AccessType {
+    ReadOnly
+    WriteOnly
+    ReadWrite
 }

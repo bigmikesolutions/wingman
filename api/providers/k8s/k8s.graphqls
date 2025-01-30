@@ -1,5 +1,7 @@
-extend schema @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
-extend schema @link(url: "../../wingman/shared.graphqls")
+extend schema
+    @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
+    @link(url: "../../wingman/shared.graphqls")
+    @link(url: "../../wingman/env.graphqls")
 
 extend type Environment {
     k8s(id: String!): Cluster @goField(forceResolver: true)
@@ -23,4 +25,18 @@ type Pod @key (fields: "id") {
     name: String!
     namespace: String!
     image: String!
+}
+
+extend input ResourceGrantInput {
+    k8s: [NamespaceResource] @goField(forceResolver: true)
+}
+
+input K8sResource {
+    id: String
+    namespace: [NamespaceResource]
+}
+
+input NamespaceResource {
+    name: String!
+    pods: [String]
 }
