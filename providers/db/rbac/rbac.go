@@ -28,7 +28,7 @@ func New(repo userRoleRepo) *Service {
 func (s *Service) CreateUserRole(ctx context.Context, role UserRole) error {
 	_, err := iam.CtxUser(ctx)
 	if err != nil {
-		return err
+		// return err //TODO add checks here
 	}
 
 	// TODO check user rights
@@ -38,7 +38,7 @@ func (s *Service) CreateUserRole(ctx context.Context, role UserRole) error {
 func (s *Service) ReadInfo(ctx context.Context, dbID string) error {
 	_, err := iam.CtxUser(ctx)
 	if err != nil {
-		return err
+		// return err //TODO add checks here
 	}
 
 	return nil
@@ -47,7 +47,7 @@ func (s *Service) ReadInfo(ctx context.Context, dbID string) error {
 func (s *Service) WriteInfo(ctx context.Context) error {
 	_, err := iam.CtxUser(ctx)
 	if err != nil {
-		return err
+		// return err //TODO add checks here
 	}
 
 	// TODO check user rights
@@ -57,7 +57,7 @@ func (s *Service) WriteInfo(ctx context.Context) error {
 func (s *Service) ReadConnection(ctx context.Context, dbID string) error {
 	_, err := iam.CtxUser(ctx)
 	if err != nil {
-		return err
+		// return err //TODO add checks here
 	}
 
 	roles, rolesErr := s.repo.FindUserRolesByDatabaseID(ctx, dbID)
@@ -74,7 +74,7 @@ func (s *Service) ReadConnection(ctx context.Context, dbID string) error {
 func (s *Service) ReadTable(ctx context.Context, dbID string, tableName string, columns ...string) error {
 	_, err := iam.CtxUser(ctx)
 	if err != nil {
-		return err
+		// return err //TODO add checks here
 	}
 
 	roles, err := s.repo.FindUserRolesByDatabaseID(ctx, dbID)

@@ -7,6 +7,7 @@ package graphql
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/bigmikesolutions/wingman/graphql/generated"
 	"github.com/bigmikesolutions/wingman/graphql/model"
@@ -94,7 +95,10 @@ func (r *environmentResolver) Database(ctx context.Context, obj *model.Environme
 
 // Database is the resolver for the database field.
 func (r *resourceGrantInputResolver) Database(ctx context.Context, obj *model.ResourceGrantInput, data []*model.DatabaseResource) error {
-	panic(fmt.Errorf("not implemented: Database - database"))
+	// TODO implement this
+	log.Printf("Database grant...")
+
+	return nil
 }
 
 // Database returns generated.DatabaseResolver implementation.

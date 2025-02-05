@@ -143,7 +143,7 @@ type ComplexityRoot struct {
 		Message func(childComplexity int) int
 	}
 
-	EnvGrantOutput struct {
+	EnvGrantPayload struct {
 		Error      func(childComplexity int) int
 		MutationID func(childComplexity int) int
 		Token      func(childComplexity int) int
@@ -272,7 +272,7 @@ type EnvironmentResolver interface {
 	Database(ctx context.Context, obj *model.Environment, id string) (*model.Database, error)
 }
 type MutationResolver interface {
-	EnvGrant(ctx context.Context, input model.EnvGrantInput) (*model.EnvGrantOutput, error)
+	EnvGrant(ctx context.Context, input model.EnvGrantInput) (*model.EnvGrantPayload, error)
 	AddUserRoleBinding(ctx context.Context, input model.AddUserRoleBindingInput) (*model.AddUserRoleBindingPayload, error)
 	SignIn(ctx context.Context, input model.SignInInput) (*model.SignInOutput, error)
 	AddK8sUserRole(ctx context.Context, input model.AddK8sUserRoleInput) (*model.AddK8sUserRolePayload, error)
@@ -657,26 +657,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.EnvGrantError.Message(childComplexity), true
 
-	case "EnvGrantOutput.error":
-		if e.complexity.EnvGrantOutput.Error == nil {
+	case "EnvGrantPayload.error":
+		if e.complexity.EnvGrantPayload.Error == nil {
 			break
 		}
 
-		return e.complexity.EnvGrantOutput.Error(childComplexity), true
+		return e.complexity.EnvGrantPayload.Error(childComplexity), true
 
-	case "EnvGrantOutput.mutationId":
-		if e.complexity.EnvGrantOutput.MutationID == nil {
+	case "EnvGrantPayload.mutationId":
+		if e.complexity.EnvGrantPayload.MutationID == nil {
 			break
 		}
 
-		return e.complexity.EnvGrantOutput.MutationID(childComplexity), true
+		return e.complexity.EnvGrantPayload.MutationID(childComplexity), true
 
-	case "EnvGrantOutput.token":
-		if e.complexity.EnvGrantOutput.Token == nil {
+	case "EnvGrantPayload.token":
+		if e.complexity.EnvGrantPayload.Token == nil {
 			break
 		}
 
-		return e.complexity.EnvGrantOutput.Token(childComplexity), true
+		return e.complexity.EnvGrantPayload.Token(childComplexity), true
 
 	case "Environment.createdAt":
 		if e.complexity.Environment.CreatedAt == nil {
@@ -1275,7 +1275,7 @@ extend type Query {
 }
 
 extend type Mutation {
-    envGrant(input: EnvGrantInput!): EnvGrantOutput!
+    envGrant(input: EnvGrantInput!): EnvGrantPayload!
 }
 
 type Environment @key (fields: "id") {
@@ -1297,7 +1297,7 @@ input ResourceGrantInput {
     env: EnvironmentID!
 }
 
-type EnvGrantOutput {
+type EnvGrantPayload {
     mutationId: ID
     token: String
     error: EnvGrantError
@@ -4747,8 +4747,8 @@ func (ec *executionContext) fieldContext_EnvGrantError_message(_ context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _EnvGrantOutput_mutationId(ctx context.Context, field graphql.CollectedField, obj *model.EnvGrantOutput) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EnvGrantOutput_mutationId(ctx, field)
+func (ec *executionContext) _EnvGrantPayload_mutationId(ctx context.Context, field graphql.CollectedField, obj *model.EnvGrantPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EnvGrantPayload_mutationId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -4772,9 +4772,9 @@ func (ec *executionContext) _EnvGrantOutput_mutationId(ctx context.Context, fiel
 	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_EnvGrantOutput_mutationId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_EnvGrantPayload_mutationId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "EnvGrantOutput",
+		Object:     "EnvGrantPayload",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -4785,8 +4785,8 @@ func (ec *executionContext) fieldContext_EnvGrantOutput_mutationId(_ context.Con
 	return fc, nil
 }
 
-func (ec *executionContext) _EnvGrantOutput_token(ctx context.Context, field graphql.CollectedField, obj *model.EnvGrantOutput) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EnvGrantOutput_token(ctx, field)
+func (ec *executionContext) _EnvGrantPayload_token(ctx context.Context, field graphql.CollectedField, obj *model.EnvGrantPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EnvGrantPayload_token(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -4810,9 +4810,9 @@ func (ec *executionContext) _EnvGrantOutput_token(ctx context.Context, field gra
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_EnvGrantOutput_token(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_EnvGrantPayload_token(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "EnvGrantOutput",
+		Object:     "EnvGrantPayload",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -4823,8 +4823,8 @@ func (ec *executionContext) fieldContext_EnvGrantOutput_token(_ context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _EnvGrantOutput_error(ctx context.Context, field graphql.CollectedField, obj *model.EnvGrantOutput) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_EnvGrantOutput_error(ctx, field)
+func (ec *executionContext) _EnvGrantPayload_error(ctx context.Context, field graphql.CollectedField, obj *model.EnvGrantPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EnvGrantPayload_error(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -4848,9 +4848,9 @@ func (ec *executionContext) _EnvGrantOutput_error(ctx context.Context, field gra
 	return ec.marshalOEnvGrantError2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐEnvGrantError(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_EnvGrantOutput_error(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_EnvGrantPayload_error(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "EnvGrantOutput",
+		Object:     "EnvGrantPayload",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -5160,9 +5160,9 @@ func (ec *executionContext) _Mutation_envGrant(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.EnvGrantOutput)
+	res := resTmp.(*model.EnvGrantPayload)
 	fc.Result = res
-	return ec.marshalNEnvGrantOutput2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐEnvGrantOutput(ctx, field.Selections, res)
+	return ec.marshalNEnvGrantPayload2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐEnvGrantPayload(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_envGrant(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5174,13 +5174,13 @@ func (ec *executionContext) fieldContext_Mutation_envGrant(ctx context.Context, 
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "mutationId":
-				return ec.fieldContext_EnvGrantOutput_mutationId(ctx, field)
+				return ec.fieldContext_EnvGrantPayload_mutationId(ctx, field)
 			case "token":
-				return ec.fieldContext_EnvGrantOutput_token(ctx, field)
+				return ec.fieldContext_EnvGrantPayload_token(ctx, field)
 			case "error":
-				return ec.fieldContext_EnvGrantOutput_error(ctx, field)
+				return ec.fieldContext_EnvGrantPayload_error(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type EnvGrantOutput", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type EnvGrantPayload", field.Name)
 		},
 	}
 	defer func() {
@@ -10840,23 +10840,23 @@ func (ec *executionContext) _EnvGrantError(ctx context.Context, sel ast.Selectio
 	return out
 }
 
-var envGrantOutputImplementors = []string{"EnvGrantOutput"}
+var envGrantPayloadImplementors = []string{"EnvGrantPayload"}
 
-func (ec *executionContext) _EnvGrantOutput(ctx context.Context, sel ast.SelectionSet, obj *model.EnvGrantOutput) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, envGrantOutputImplementors)
+func (ec *executionContext) _EnvGrantPayload(ctx context.Context, sel ast.SelectionSet, obj *model.EnvGrantPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, envGrantPayloadImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("EnvGrantOutput")
+			out.Values[i] = graphql.MarshalString("EnvGrantPayload")
 		case "mutationId":
-			out.Values[i] = ec._EnvGrantOutput_mutationId(ctx, field, obj)
+			out.Values[i] = ec._EnvGrantPayload_mutationId(ctx, field, obj)
 		case "token":
-			out.Values[i] = ec._EnvGrantOutput_token(ctx, field, obj)
+			out.Values[i] = ec._EnvGrantPayload_token(ctx, field, obj)
 		case "error":
-			out.Values[i] = ec._EnvGrantOutput_error(ctx, field, obj)
+			out.Values[i] = ec._EnvGrantPayload_error(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -12431,18 +12431,18 @@ func (ec *executionContext) unmarshalNEnvGrantInput2githubᚗcomᚋbigmikesoluti
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNEnvGrantOutput2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐEnvGrantOutput(ctx context.Context, sel ast.SelectionSet, v model.EnvGrantOutput) graphql.Marshaler {
-	return ec._EnvGrantOutput(ctx, sel, &v)
+func (ec *executionContext) marshalNEnvGrantPayload2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐEnvGrantPayload(ctx context.Context, sel ast.SelectionSet, v model.EnvGrantPayload) graphql.Marshaler {
+	return ec._EnvGrantPayload(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNEnvGrantOutput2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐEnvGrantOutput(ctx context.Context, sel ast.SelectionSet, v *model.EnvGrantOutput) graphql.Marshaler {
+func (ec *executionContext) marshalNEnvGrantPayload2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐEnvGrantPayload(ctx context.Context, sel ast.SelectionSet, v *model.EnvGrantPayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._EnvGrantOutput(ctx, sel, v)
+	return ec._EnvGrantPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNEnvironment2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐEnvironment(ctx context.Context, sel ast.SelectionSet, v model.Environment) graphql.Marshaler {

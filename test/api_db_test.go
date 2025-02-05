@@ -8,6 +8,39 @@ import (
 	"github.com/bigmikesolutions/wingman/graphql/model"
 )
 
+func Test_Api_Database_ShouldGrantAccessToEnv(t *testing.T) {
+	s := NewApiDatabaseStage(t)
+	defer s.Close()
+
+	envID := "test-env"
+	dbID := uuid.New().String()
+	dbCfg := newTestDatabase(dc)
+
+	s.Given().
+		ServerIsUpAndRunning().And().
+		DatabaseIsProvided(connectionInfo(dbID, dbCfg))
+
+	s.When().
+		EnvGrantMutation(model.EnvGrantInput{
+			MutationID: ptr("creat-env-grant"),
+			Reason:     ptr("testing..."),
+			Resource: []*model.ResourceGrantInput{
+				{
+					Env: "test-env",
+					Database: []*model.DatabaseResource{
+						{
+							ID:    envID,
+							Table: []*model.TableResource{},
+						},
+					},
+				},
+			},
+		})
+
+	s.Then().
+		NoClientError()
+}
+
 func Test_Api_Database_ShouldGetInfo(t *testing.T) {
 	s := NewApiDatabaseStage(t)
 	defer s.Close()

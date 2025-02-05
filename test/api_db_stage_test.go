@@ -218,7 +218,16 @@ func (s *ApiDatabaseStage) DatabaseUserRoleIsCreated(input model.AddDatabaseUser
 	ctx, cancel := testContext()
 	defer cancel()
 	payload, err := s.server.CreateDatabaseUserRoleMutation(ctx, input)
-	require.Nil(s.t, err, "server error create database user role")
-	require.Nil(s.t, payload.Error, "client error create database user role")
+	require.Nil(s.t, err, "server error")
+	require.Nil(s.t, payload.Error, "client error")
+	return s
+}
+
+func (s *ApiDatabaseStage) EnvGrantMutation(input model.EnvGrantInput) *ApiDatabaseStage {
+	ctx, cancel := testContext()
+	defer cancel()
+	payload, err := s.server.EnvGrantMutation(ctx, input)
+	require.Nil(s.t, err, "server error")
+	require.Nil(s.t, payload.Error, "client error")
 	return s
 }

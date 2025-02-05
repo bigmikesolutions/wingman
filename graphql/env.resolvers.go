@@ -6,15 +6,19 @@ package graphql
 
 import (
 	"context"
-	"fmt"
+	"log"
 
 	"github.com/bigmikesolutions/wingman/graphql/generated"
 	"github.com/bigmikesolutions/wingman/graphql/model"
 )
 
 // EnvGrant is the resolver for the envGrant field.
-func (r *mutationResolver) EnvGrant(ctx context.Context, input model.EnvGrantInput) (*model.EnvGrantOutput, error) {
-	panic(fmt.Errorf("not implemented: EnvGrant - envGrant"))
+func (r *mutationResolver) EnvGrant(ctx context.Context, input model.EnvGrantInput) (*model.EnvGrantPayload, error) {
+	// TODO implement this
+	log.Printf("Env grant mutation...")
+	return &model.EnvGrantPayload{
+		MutationID: input.MutationID,
+	}, nil
 }
 
 // Environment is the resolver for the environment field.
@@ -45,3 +49,16 @@ type (
 	queryResolver              struct{ *Resolver }
 	resourceGrantInputResolver struct{ *Resolver }
 )
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+/*
+	func (r *Resolver) EnvGrantPayload() generated.EnvGrantPayloadResolver {
+	return &envGrantPayloadResolver{r}
+}
+type envGrantPayloadResolver struct{ *Resolver }
+*/

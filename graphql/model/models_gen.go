@@ -140,7 +140,7 @@ type EnvGrantInput struct {
 	Resource   []*ResourceGrantInput `json:"resource,omitempty"`
 }
 
-type EnvGrantOutput struct {
+type EnvGrantPayload struct {
 	MutationID *string        `json:"mutationId,omitempty"`
 	Token      *string        `json:"token,omitempty"`
 	Error      *EnvGrantError `json:"error,omitempty"`
