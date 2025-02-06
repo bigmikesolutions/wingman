@@ -96,11 +96,13 @@ func (Database) IsEntity() {}
 
 type DatabaseAccess struct {
 	ID     string                 `json:"id"`
+	Info   *AccessType            `json:"info,omitempty"`
 	Tables []*DatabaseTableAccess `json:"tables,omitempty"`
 }
 
 type DatabaseAccessInput struct {
 	ID     string                      `json:"id"`
+	Info   *AccessType                 `json:"info,omitempty"`
 	Tables []*DatabaseTableAccessInput `json:"tables,omitempty"`
 }
 
@@ -113,6 +115,7 @@ type DatabaseInfo struct {
 
 type DatabaseResource struct {
 	ID    string           `json:"id"`
+	Info  *AccessType      `json:"info,omitempty"`
 	Table []*TableResource `json:"table,omitempty"`
 }
 

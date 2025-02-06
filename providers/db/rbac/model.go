@@ -8,7 +8,7 @@ import (
 )
 
 type (
-	AccessType uint8
+	AccessType string
 	RoleID     = string
 
 	TableScope struct {
@@ -27,16 +27,18 @@ type (
 		UpdatedAt time.Time `db:"updated_at"`
 		UpdatedBy string    `db:"updated_by"`
 
-		Description *string      `db:"description"`
-		DatabaseID  string       `db:"database_id"`
-		Tables      TablesScopes `json:"tables"`
+		Description *string `db:"description"`
+		DatabaseID  string  `db:"database_id"`
+
+		Info   *AccessType  `json:"info"`
+		Tables TablesScopes `json:"tables"`
 	}
 )
 
 const (
-	ReadOnlyAccess AccessType = iota
-	WriteOnlyAccess
-	ReadWriteAccess
+	ReadOnlyAccess  AccessType = "read_only"
+	WriteOnlyAccess            = "write_only"
+	ReadWriteAccess            = "read_write"
 )
 
 func (a *UserRole) CanReadTable(name string, columns ...string) bool {

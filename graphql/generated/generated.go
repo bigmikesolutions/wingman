@@ -111,6 +111,7 @@ type ComplexityRoot struct {
 
 	DatabaseAccess struct {
 		ID     func(childComplexity int) int
+		Info   func(childComplexity int) int
 		Tables func(childComplexity int) int
 	}
 
@@ -490,6 +491,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.DatabaseAccess.ID(childComplexity), true
+
+	case "DatabaseAccess.info":
+		if e.complexity.DatabaseAccess.Info == nil {
+			break
+		}
+
+		return e.complexity.DatabaseAccess.Info(childComplexity), true
 
 	case "DatabaseAccess.tables":
 		if e.complexity.DatabaseAccess.Tables == nil {
@@ -1594,6 +1602,7 @@ extend input ResourceGrantInput {
 
 input DatabaseResource {
     id: String!
+    info: AccessType
     table: [TableResource]
 }
 
@@ -1647,6 +1656,7 @@ type DatabaseTableAccess  {
 
 type DatabaseAccess  {
     id: String!
+    info: AccessType
     tables: [DatabaseTableAccess!]
 }
 
@@ -1658,6 +1668,7 @@ input DatabaseTableAccessInput  {
 
 input DatabaseAccessInput  {
     id: String!
+    info: AccessType
     tables: [DatabaseTableAccessInput]
 }
 
@@ -3819,6 +3830,44 @@ func (ec *executionContext) fieldContext_DatabaseAccess_id(_ context.Context, fi
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DatabaseAccess_info(ctx context.Context, field graphql.CollectedField, obj *model.DatabaseAccess) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_DatabaseAccess_info(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Info, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.AccessType)
+	fc.Result = res
+	return ec.marshalOAccessType2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐAccessType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_DatabaseAccess_info(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DatabaseAccess",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type AccessType does not have child fields")
 		},
 	}
 	return fc, nil
@@ -7312,6 +7361,8 @@ func (ec *executionContext) fieldContext_UserRole_databases(_ context.Context, f
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_DatabaseAccess_id(ctx, field)
+			case "info":
+				return ec.fieldContext_DatabaseAccess_info(ctx, field)
 			case "tables":
 				return ec.fieldContext_DatabaseAccess_tables(ctx, field)
 			}
@@ -9484,7 +9535,7 @@ func (ec *executionContext) unmarshalInputDatabaseAccessInput(ctx context.Contex
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "tables"}
+	fieldsInOrder := [...]string{"id", "info", "tables"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -9498,6 +9549,13 @@ func (ec *executionContext) unmarshalInputDatabaseAccessInput(ctx context.Contex
 				return it, err
 			}
 			it.ID = data
+		case "info":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("info"))
+			data, err := ec.unmarshalOAccessType2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐAccessType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Info = data
 		case "tables":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tables"))
 			data, err := ec.unmarshalODatabaseTableAccessInput2ᚕᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐDatabaseTableAccessInput(ctx, v)
@@ -9518,7 +9576,7 @@ func (ec *executionContext) unmarshalInputDatabaseResource(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "table"}
+	fieldsInOrder := [...]string{"id", "info", "table"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -9532,6 +9590,13 @@ func (ec *executionContext) unmarshalInputDatabaseResource(ctx context.Context, 
 				return it, err
 			}
 			it.ID = data
+		case "info":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("info"))
+			data, err := ec.unmarshalOAccessType2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐAccessType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Info = data
 		case "table":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("table"))
 			data, err := ec.unmarshalOTableResource2ᚕᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐTableResource(ctx, v)
@@ -10456,6 +10521,8 @@ func (ec *executionContext) _DatabaseAccess(ctx context.Context, sel ast.Selecti
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "info":
+			out.Values[i] = ec._DatabaseAccess_info(ctx, field, obj)
 		case "tables":
 			out.Values[i] = ec._DatabaseAccess_tables(ctx, field, obj)
 		default:

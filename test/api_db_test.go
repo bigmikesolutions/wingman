@@ -8,53 +8,51 @@ import (
 	"github.com/bigmikesolutions/wingman/graphql/model"
 )
 
-func Test_Api_Database_ShouldGrantAccessToEnv(t *testing.T) {
+func Test_Api_Database_ShouldGetInfo(t *testing.T) {
 	s := NewApiDatabaseStage(t)
 	defer s.Close()
 
 	envID := "test-env"
+	roleID := uuid.New().String()
 	dbID := uuid.New().String()
 	dbCfg := newTestDatabase(dc)
 
 	s.Given().
 		ServerIsUpAndRunning().And().
-		DatabaseIsProvided(connectionInfo(dbID, dbCfg))
-
-	s.When().
+		DatabaseIsProvided(connectionInfo(dbID, dbCfg)).And().
+		DatabaseUserRoleIsCreated(model.AddDatabaseUserRoleInput{
+			MutationID: ptr(t.Name()),
+			UserRoles: []*model.AddDatabaseUserRole{
+				{
+					ID:          ptr(roleID),
+					Description: ptr("read-only info access"),
+					DatabaseAccess: []*model.DatabaseAccessInput{
+						{
+							ID:   dbID,
+							Info: ptr(model.AccessTypeReadOnly),
+						},
+					},
+				},
+			},
+		}).And().
 		EnvGrantMutation(model.EnvGrantInput{
 			MutationID: ptr("creat-env-grant"),
 			Reason:     ptr("testing..."),
 			Resource: []*model.ResourceGrantInput{
 				{
-					Env: "test-env",
+					Env: envID,
 					Database: []*model.DatabaseResource{
 						{
-							ID:    envID,
-							Table: []*model.TableResource{},
+							ID:   dbID,
+							Info: ptr(model.AccessTypeReadOnly),
 						},
 					},
 				},
 			},
 		})
 
-	s.Then().
-		NoClientError()
-}
-
-func Test_Api_Database_ShouldGetInfo(t *testing.T) {
-	s := NewApiDatabaseStage(t)
-	defer s.Close()
-
-	envID := "test-env"
-	dbID := uuid.New().String()
-	dbCfg := newTestDatabase(dc)
-
-	s.Given().
-		ServerIsUpAndRunning().And().
-		DatabaseIsProvided(connectionInfo(dbID, dbCfg))
-
 	s.When().
-		QueryDatabase(envID, dbID)
+		DatabaseInfoQuery(envID, dbID)
 
 	s.Then().
 		NoClientError().And().

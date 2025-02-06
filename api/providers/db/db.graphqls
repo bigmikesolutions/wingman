@@ -26,6 +26,7 @@ extend input ResourceGrantInput {
 
 input DatabaseResource {
     id: String!
+    info: AccessType
     table: [TableResource]
 }
 

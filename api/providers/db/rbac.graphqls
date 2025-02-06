@@ -18,6 +18,7 @@ type DatabaseTableAccess  {
 
 type DatabaseAccess  {
     id: String!
+    info: AccessType
     tables: [DatabaseTableAccess!]
 }
 
@@ -29,6 +30,7 @@ input DatabaseTableAccessInput  {
 
 input DatabaseAccessInput  {
     id: String!
+    info: AccessType
     tables: [DatabaseTableAccessInput]
 }
 

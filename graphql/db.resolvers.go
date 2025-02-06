@@ -97,7 +97,19 @@ func (r *environmentResolver) Database(ctx context.Context, obj *model.Environme
 func (r *resourceGrantInputResolver) Database(ctx context.Context, obj *model.ResourceGrantInput, data []*model.DatabaseResource) error {
 	// TODO implement this
 	log.Printf("Database grant...")
+	for _, d := range data {
+		if d.Info != nil {
+			switch *d.Info {
+			case model.AccessTypeReadOnly:
+				if err := r.Providers.DbRbac.ReadInfo(ctx, d.ID); err != nil {
+					log.Printf("Database grant - read info access denied!")
+					return err
+				}
+			}
+		}
+	}
 
+	log.Printf("Database grant - access granted!")
 	return nil
 }
 

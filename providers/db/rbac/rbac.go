@@ -41,6 +41,23 @@ func (s *Service) ReadInfo(ctx context.Context, dbID string) error {
 		// return err //TODO add checks here
 	}
 
+	roles, err := s.repo.FindUserRolesByDatabaseID(ctx, dbID)
+	if err != nil {
+		return ErrDatabaseAccessDenied
+	}
+
+	canRead := false
+	for _, role := range roles {
+		if role.Info != nil && *role.Info == ReadOnlyAccess {
+			canRead = true
+			break
+		}
+	}
+
+	if !canRead {
+		return ErrTableAccessDenied
+	}
+
 	return nil
 }
 

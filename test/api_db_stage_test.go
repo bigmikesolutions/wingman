@@ -92,13 +92,13 @@ func (s *ApiDatabaseStage) ServerIsUpAndRunning() *ApiDatabaseStage {
 	return s
 }
 
-func (s *ApiDatabaseStage) QueryDatabase(
+func (s *ApiDatabaseStage) DatabaseInfoQuery(
 	env string,
 	id string,
 ) *ApiDatabaseStage {
 	ctx, cancel := testContext()
 	defer cancel()
-	s.queryDatabase, s.err = s.server.DatabaseQuery(ctx, env, id)
+	s.queryDatabase, s.err = s.server.DatabaseInfoQuery(ctx, env, id)
 	return s
 }
 

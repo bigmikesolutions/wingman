@@ -9,7 +9,7 @@ import (
 	"github.com/bigmikesolutions/wingman/graphql/model"
 )
 
-func (s *HTTPServer) DatabaseQuery(ctx context.Context, env string, id string) (*model.Database, error) {
+func (s *HTTPServer) DatabaseInfoQuery(ctx context.Context, env string, id string) (*model.Database, error) {
 	query := `
 query($env: EnvironmentID!, $databaseID:String!) {
 	environment(id: $env) {

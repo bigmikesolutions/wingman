@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS "user_role" (
 
     description TEXT,
     database_id TEXT,
+    info VARCHAR(50),
     tables JSONB
 );
 
