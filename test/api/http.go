@@ -2,8 +2,12 @@ package api
 
 import (
 	"fmt"
+	"github.com/bigmikesolutions/wingman/service/auth"
+	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"time"
 
 	gql "github.com/shurcooL/graphql"
 
@@ -27,8 +31,27 @@ func New(prov *providers.Providers) (*HTTPServer, error) {
 		return nil, err
 	}
 
+	privateKey, err := os.Open("./api/private.pem")
+	if err != nil {
+		return nil, fmt.Errorf("could not open private key: %v", err)
+	}
+
+	publicKey, err := os.Open("./api/public.pem")
+	if err != nil {
+		return nil, fmt.Errorf("could not open public key: %v", err)
+	}
+
+	token, err := auth.New(privateKey, publicKey, auth.Settings{
+		SigningMethod: jwt.SigningMethodRS256,
+		ExpTime:       5 * time.Minute,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	resolver := &graphql.Resolver{
 		Providers: prov,
+		Auth:      token,
 	}
 
 	handler, err := service.NewHttpHandler(cfg.HTTP, resolver)

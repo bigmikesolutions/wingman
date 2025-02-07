@@ -9,4 +9,12 @@ import (
 // Resolver holds the state and allows dependency injection.
 type Resolver struct {
 	Providers *providers.Providers
+	Auth      Auth
 }
+
+type (
+	Auth interface {
+		Create(attributes map[string]any) (string, error)
+		Validate(token string) (map[string]any, error)
+	}
+)
