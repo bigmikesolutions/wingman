@@ -2,18 +2,18 @@ package api
 
 import (
 	"fmt"
-	"github.com/bigmikesolutions/wingman/service/auth"
-	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	gql "github.com/shurcooL/graphql"
 
 	"github.com/bigmikesolutions/wingman/graphql"
 	"github.com/bigmikesolutions/wingman/providers"
 	"github.com/bigmikesolutions/wingman/service"
+	"github.com/bigmikesolutions/wingman/service/auth"
 )
 
 type HTTPServer struct {

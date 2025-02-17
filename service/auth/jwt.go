@@ -3,9 +3,10 @@ package auth
 import (
 	"crypto/rsa"
 	"fmt"
-	"github.com/golang-jwt/jwt/v5"
 	"io"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type (
@@ -57,7 +58,7 @@ func New(privateReader, pubReader io.Reader, settings Settings) (*JWT, error) {
 }
 
 func (s *JWT) Create(attributes TokenValues) (string, error) {
-	t := jwt.New(jwt.SigningMethodRS256)
+	t := jwt.New(s.settings.SigningMethod)
 	now := time.Now()
 	t.Claims = claims{
 		RegisteredClaims: jwt.RegisteredClaims{
