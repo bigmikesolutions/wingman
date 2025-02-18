@@ -312,7 +312,7 @@ func (e AccessType) String() string {
 	return string(e)
 }
 
-func (e *AccessType) UnmarshalGQL(v interface{}) error {
+func (e *AccessType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -359,7 +359,7 @@ func (e AddDatabaseUserRoleClientErrorCode) String() string {
 	return string(e)
 }
 
-func (e *AddDatabaseUserRoleClientErrorCode) UnmarshalGQL(v interface{}) error {
+func (e *AddDatabaseUserRoleClientErrorCode) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -406,7 +406,7 @@ func (e AddK8sUserRoleClientErrorCode) String() string {
 	return string(e)
 }
 
-func (e *AddK8sUserRoleClientErrorCode) UnmarshalGQL(v interface{}) error {
+func (e *AddK8sUserRoleClientErrorCode) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -453,7 +453,7 @@ func (e AddUserRoleBindingClientErrorCode) String() string {
 	return string(e)
 }
 
-func (e *AddUserRoleBindingClientErrorCode) UnmarshalGQL(v interface{}) error {
+func (e *AddUserRoleBindingClientErrorCode) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -494,7 +494,7 @@ func (e DriverType) String() string {
 	return string(e)
 }
 
-func (e *DriverType) UnmarshalGQL(v interface{}) error {
+func (e *DriverType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -537,7 +537,7 @@ func (e EnvGrantErrorCode) String() string {
 	return string(e)
 }
 
-func (e *EnvGrantErrorCode) UnmarshalGQL(v interface{}) error {
+func (e *EnvGrantErrorCode) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -578,7 +578,7 @@ func (e SignInErrorCode) String() string {
 	return string(e)
 }
 
-func (e *SignInErrorCode) UnmarshalGQL(v interface{}) error {
+func (e *SignInErrorCode) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
