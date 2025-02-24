@@ -49,8 +49,7 @@ func Test_Api_Database_ShouldGetInfo(t *testing.T) {
 					},
 				},
 			},
-		}).And().
-		EnvGrantTokenIsValid()
+		})
 
 	s.When().
 		DatabaseInfoQuery(envID, dbID)

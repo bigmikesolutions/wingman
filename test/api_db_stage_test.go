@@ -49,7 +49,6 @@ type ApiDatabaseStage struct {
 
 	queryDatabase *model.Database
 	err           error
-	envGrantToken *string
 }
 
 func NewApiDatabaseStage(t *testing.T) *ApiDatabaseStage {
@@ -231,19 +230,12 @@ func (s *ApiDatabaseStage) EnvGrantMutation(input model.EnvGrantInput) *ApiDatab
 	require.Nil(s.t, err, "server error")
 	require.Nil(s.t, payload.Error, "client error")
 	if payload.Token != nil {
-		s.envGrantToken = payload.Token
-	}
-	return s
-}
-
-func (s *ApiDatabaseStage) EnvGrantTokenIsValid() *ApiDatabaseStage {
-	assert.NotNil(s.t, s.envGrantToken, "env grant token missing")
-	if s.envGrantToken != nil {
 		jwt, err := api.NewJWT()
 		require.Nil(s.t, err, "api jwt error")
-		values, err := jwt.Validate(*s.envGrantToken)
+		values, err := jwt.Validate(*payload.Token)
 		assert.Nil(s.t, err, "jwt env token invalid")
 		assert.NotEmpty(s.t, values, "jwt env token empty")
+		s.server.SetEnvToken(*payload.Token)
 	}
 	return s
 }

@@ -74,6 +74,6 @@ func (s *HTTPServer) Close() {
 	_ = s.providers.Close()
 }
 
-func (s *HTTPServer) SetEnvToken(t *string) {
-	s.rt.envGrantToken = t
+func (s *HTTPServer) SetEnvToken(t string) {
+	s.rt.envGrantToken = &t
 }
