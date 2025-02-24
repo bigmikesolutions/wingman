@@ -4,16 +4,17 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	gql "github.com/shurcooL/graphql"
 
 	"github.com/bigmikesolutions/wingman/graphql"
 	"github.com/bigmikesolutions/wingman/providers"
 	"github.com/bigmikesolutions/wingman/service"
-	"github.com/bigmikesolutions/wingman/service/auth"
+)
+
+const (
+	EnvGrantTokenDuration = 5 * time.Minute
 )
 
 type HTTPServer struct {
@@ -23,6 +24,7 @@ type HTTPServer struct {
 	graphqlURL string
 	Resolver   *graphql.Resolver
 	providers  *providers.Providers
+	rt         *a10nRoundTripper
 }
 
 func New(prov *providers.Providers) (*HTTPServer, error) {
@@ -31,20 +33,7 @@ func New(prov *providers.Providers) (*HTTPServer, error) {
 		return nil, err
 	}
 
-	privateKey, err := os.Open("./api/private.pem")
-	if err != nil {
-		return nil, fmt.Errorf("could not open private key: %v", err)
-	}
-
-	publicKey, err := os.Open("./api/public.pem")
-	if err != nil {
-		return nil, fmt.Errorf("could not open public key: %v", err)
-	}
-
-	token, err := auth.New(privateKey, publicKey, auth.Settings{
-		SigningMethod: jwt.SigningMethodRS256,
-		ExpTime:       5 * time.Minute,
-	})
+	token, err := NewJWT()
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +49,10 @@ func New(prov *providers.Providers) (*HTTPServer, error) {
 	}
 
 	server := httptest.NewServer(handler)
-	client := http.DefaultClient
+	rt := &a10nRoundTripper{}
+	client := &http.Client{
+		Transport: rt,
+	}
 	graphqlURL := fmt.Sprintf("%s%s", server.URL, service.GraphqlEndpoint)
 
 	return &HTTPServer{
@@ -73,10 +65,15 @@ func New(prov *providers.Providers) (*HTTPServer, error) {
 		graphqlURL: graphqlURL,
 		Resolver:   resolver,
 		providers:  prov,
+		rt:         rt,
 	}, nil
 }
 
 func (s *HTTPServer) Close() {
 	s.server.Close()
 	_ = s.providers.Close()
+}
+
+func (s *HTTPServer) SetEnvToken(t *string) {
+	s.rt.envGrantToken = t
 }
