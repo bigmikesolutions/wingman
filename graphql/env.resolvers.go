@@ -14,11 +14,8 @@ import (
 
 // EnvGrant is the resolver for the envGrant field.
 func (r *mutationResolver) EnvGrant(ctx context.Context, input model.EnvGrantInput) (*model.EnvGrantPayload, error) {
-	// TODO implement this
 	log.Printf("Env grant mutation...")
-	token, err := r.A10N.Create(map[string]any{
-		"input": input,
-	})
+	token, err := r.Tokens.Create(map[string]any{})
 	if err != nil {
 		log.Printf("Env grant mutation - token not creatd: %v", err)
 		return nil, err

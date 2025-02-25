@@ -4,17 +4,13 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"time"
 
 	gql "github.com/shurcooL/graphql"
 
 	"github.com/bigmikesolutions/wingman/graphql"
 	"github.com/bigmikesolutions/wingman/providers"
 	"github.com/bigmikesolutions/wingman/service"
-)
-
-const (
-	EnvGrantTokenDuration = 5 * time.Minute
+	"github.com/bigmikesolutions/wingman/service/env"
 )
 
 type HTTPServer struct {
@@ -40,10 +36,10 @@ func New(prov *providers.Providers) (*HTTPServer, error) {
 
 	resolver := &graphql.Resolver{
 		Providers: prov,
-		A10N:      token,
+		Tokens:    token,
 	}
 
-	handler, err := service.NewHttpHandler(cfg.HTTP, resolver)
+	handler, err := service.NewHttpHandler(cfg.HTTP, resolver, env.SessionReader(token))
 	if err != nil {
 		return nil, err
 	}

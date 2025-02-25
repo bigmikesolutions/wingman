@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/bigmikesolutions/wingman/service/auth"
+	"github.com/bigmikesolutions/wingman/service/env"
 )
 
 const (
-	A10NHeaderEnvToken = "X-A10N-Env-Token"
+	EnvGrantTokenDuration = 5 * time.Minute
 )
 
 type a10nRoundTripper struct {
@@ -37,7 +39,7 @@ func NewJWT() (*auth.JWT, error) {
 
 func (a a10nRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	if a.envGrantToken != nil {
-		req.Header.Set(A10NHeaderEnvToken, *a.envGrantToken)
+		req.Header.Set(env.A10NHeaderEnvToken, *a.envGrantToken)
 	}
 	return http.DefaultTransport.RoundTrip(req)
 }

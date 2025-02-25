@@ -4,15 +4,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/bigmikesolutions/wingman/graphql/directives"
-	middleware2 "github.com/bigmikesolutions/wingman/service/middleware"
-
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/bigmikesolutions/wingman/graphql"
+	"github.com/bigmikesolutions/wingman/graphql/directives"
 	"github.com/bigmikesolutions/wingman/graphql/generated"
 )
 
@@ -22,16 +20,20 @@ const (
 	pprofEndpoint        = "/pprof"
 )
 
-type HttpConfig struct {
-	Address       string        `envconfig:"HTTP_ADDRESS" default:"0.0.0.0:8080"`
-	WriteTimeout  time.Duration `envconfig:"HTTP_WRITE_TIMEOUT" default:"15s"`
-	ReadTimeout   time.Duration `envconfig:"HTTP_READ_TIMEOUT" default:"15s"`
-	ShutdownTime  time.Duration `envconfig:"HTTP_SHUTDOWN_TIME" default:"30s"`
-	PprofEnabled  bool          `envconfig:"HTTP_PPROF_ENABLED" default:"false"`
-	CompressLevel int           `envconfig:"HTTP_COMPRESS_LEVEL" default:"5"`
-}
+type (
+	HandlerWrapper = func(next http.Handler) http.Handler
 
-func NewHttpHandler(cfg HttpConfig, resolver *graphql.Resolver) (http.Handler, error) {
+	HttpConfig struct {
+		Address       string        `envconfig:"HTTP_ADDRESS" default:"0.0.0.0:8080"`
+		WriteTimeout  time.Duration `envconfig:"HTTP_WRITE_TIMEOUT" default:"15s"`
+		ReadTimeout   time.Duration `envconfig:"HTTP_READ_TIMEOUT" default:"15s"`
+		ShutdownTime  time.Duration `envconfig:"HTTP_SHUTDOWN_TIME" default:"30s"`
+		PprofEnabled  bool          `envconfig:"HTTP_PPROF_ENABLED" default:"false"`
+		CompressLevel int           `envconfig:"HTTP_COMPRESS_LEVEL" default:"5"`
+	}
+)
+
+func NewHttpHandler(cfg HttpConfig, resolver *graphql.Resolver, chain ...HandlerWrapper) (http.Handler, error) {
 	graphqlHandler := handler.New(
 		generated.NewExecutableSchema(
 			generated.Config{
@@ -46,9 +48,15 @@ func NewHttpHandler(cfg HttpConfig, resolver *graphql.Resolver) (http.Handler, e
 	graphqlHandler.AddTransport(transport.POST{})
 
 	router := newHttpRouter(cfg)
+
+	var mainHandler http.Handler = graphqlHandler
+	for _, h := range chain {
+		mainHandler = h(mainHandler)
+	}
+
 	router.Handle(
 		GraphqlEndpoint,
-		middleware2.EnvSession(resolver.A10N, graphqlHandler), // TODO handle it properly
+		mainHandler,
 	)
 
 	return router, nil
