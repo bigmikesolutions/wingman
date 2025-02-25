@@ -16,20 +16,12 @@ import (
 func (r *mutationResolver) EnvGrant(ctx context.Context, input model.EnvGrantInput) (*model.EnvGrantPayload, error) {
 	// TODO implement this
 	log.Printf("Env grant mutation...")
-	token, err := r.Auth.Create(map[string]any{
+	token, err := r.A10N.Create(map[string]any{
 		"input": input,
 	})
 	if err != nil {
 		log.Printf("Env grant mutation - token not creatd: %v", err)
 		return nil, err
-	}
-
-	log.Printf("Env grant mutation - token: %v", token)
-	claims, err := r.Auth.Validate(token)
-	if err != nil {
-		log.Printf("Token is not valid!: %v", err)
-	} else {
-		log.Printf("Token claims: %+v", claims)
 	}
 
 	return &model.EnvGrantPayload{

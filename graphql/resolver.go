@@ -4,17 +4,18 @@ package graphql
 
 import (
 	"github.com/bigmikesolutions/wingman/providers"
+	"github.com/bigmikesolutions/wingman/service/auth"
 )
 
 // Resolver holds the state and allows dependency injection.
 type Resolver struct {
 	Providers *providers.Providers
-	Auth      Auth
+	A10N      a10nService
 }
 
 type (
-	Auth interface {
-		Create(attributes map[string]any) (string, error)
-		Validate(token string) (map[string]any, error)
+	a10nService interface {
+		Create(attributes auth.TokenValues) (string, error)
+		Validate(token string) (*auth.Token, error)
 	}
 )

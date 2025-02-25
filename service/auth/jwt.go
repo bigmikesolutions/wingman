@@ -27,6 +27,11 @@ type (
 		jwt.RegisteredClaims
 		Attrs TokenValues
 	}
+
+	Token struct {
+		ExpiresAt time.Time
+		Values    TokenValues
+	}
 )
 
 func New(privateReader, pubReader io.Reader, settings Settings) (*JWT, error) {
@@ -71,7 +76,7 @@ func (s *JWT) Create(attributes TokenValues) (string, error) {
 	return t.SignedString(s.privateKey)
 }
 
-func (s *JWT) Validate(tokenString string) (TokenValues, error) {
+func (s *JWT) Validate(tokenString string) (*Token, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -90,9 +95,19 @@ func (s *JWT) Validate(tokenString string) (TokenValues, error) {
 	if !ok {
 		return nil, fmt.Errorf("invalid claims")
 	}
+
 	attrs, ok := claims["Attrs"].(TokenValues)
 	if !ok {
 		return nil, fmt.Errorf("invalid token values")
 	}
-	return attrs, nil
+
+	expTime, err := claims.GetExpirationTime()
+	if err != nil {
+		return nil, fmt.Errorf("invalid exp time")
+	}
+
+	return &Token{
+		ExpiresAt: expTime.Time,
+		Values:    attrs,
+	}, nil
 }

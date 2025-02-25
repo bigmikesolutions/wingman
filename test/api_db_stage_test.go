@@ -226,15 +226,20 @@ func (s *ApiDatabaseStage) DatabaseUserRoleIsCreated(input model.AddDatabaseUser
 func (s *ApiDatabaseStage) EnvGrantMutation(input model.EnvGrantInput) *ApiDatabaseStage {
 	ctx, cancel := testContext()
 	defer cancel()
+
 	payload, err := s.server.EnvGrantMutation(ctx, input)
 	require.Nil(s.t, err, "server error")
 	require.Nil(s.t, payload.Error, "client error")
+
 	if payload.Token != nil {
 		jwt, err := api.NewJWT()
 		require.Nil(s.t, err, "api jwt error")
+
 		values, err := jwt.Validate(*payload.Token)
 		assert.Nil(s.t, err, "jwt env token invalid")
 		assert.NotEmpty(s.t, values, "jwt env token empty")
+
+		s.t.Logf("Setting env token for further communication with HTTP server - claims: %+v", values)
 		s.server.SetEnvToken(*payload.Token)
 	}
 	return s

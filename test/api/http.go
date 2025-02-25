@@ -40,7 +40,7 @@ func New(prov *providers.Providers) (*HTTPServer, error) {
 
 	resolver := &graphql.Resolver{
 		Providers: prov,
-		Auth:      token,
+		A10N:      token,
 	}
 
 	handler, err := service.NewHttpHandler(cfg.HTTP, resolver)

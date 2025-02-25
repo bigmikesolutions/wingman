@@ -4,6 +4,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/bigmikesolutions/wingman/graphql/directives"
+	middleware2 "github.com/bigmikesolutions/wingman/service/middleware"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/go-chi/chi/v5"
@@ -32,8 +35,10 @@ func NewHttpHandler(cfg HttpConfig, resolver *graphql.Resolver) (http.Handler, e
 	graphqlHandler := handler.New(
 		generated.NewExecutableSchema(
 			generated.Config{
-				Resolvers:  resolver,
-				Directives: generated.DirectiveRoot{},
+				Resolvers: resolver,
+				Directives: generated.DirectiveRoot{
+					EnvSession: directives.EnvSession,
+				},
 			},
 		),
 	)
@@ -41,7 +46,10 @@ func NewHttpHandler(cfg HttpConfig, resolver *graphql.Resolver) (http.Handler, e
 	graphqlHandler.AddTransport(transport.POST{})
 
 	router := newHttpRouter(cfg)
-	router.Handle(GraphqlEndpoint, graphqlHandler)
+	router.Handle(
+		GraphqlEndpoint,
+		middleware2.EnvSession(resolver.A10N, graphqlHandler), // TODO handle it properly
+	)
 
 	return router, nil
 }

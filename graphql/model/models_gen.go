@@ -144,9 +144,10 @@ type EnvGrantInput struct {
 }
 
 type EnvGrantPayload struct {
-	MutationID *string        `json:"mutationId,omitempty"`
-	Token      *string        `json:"token,omitempty"`
-	Error      *EnvGrantError `json:"error,omitempty"`
+	MutationID  *string        `json:"mutationId,omitempty"`
+	Token       *string        `json:"token,omitempty"`
+	Permissions []string       `json:"permissions,omitempty"`
+	Error       *EnvGrantError `json:"error,omitempty"`
 }
 
 type Environment struct {
@@ -201,6 +202,7 @@ type Query struct {
 
 type ResourceGrantInput struct {
 	Env      string               `json:"env"`
+	AccessID string               `json:"accessId"`
 	K8s      []*NamespaceResource `json:"k8s,omitempty"`
 	Database []*DatabaseResource  `json:"database,omitempty"`
 }

@@ -56,6 +56,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	EnvSession         func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
 	WithDeprecatedArgs func(ctx context.Context, obj any, next graphql.Resolver, deprecatedArg *string, newArg *string) (res any, err error)
 }
 
@@ -145,9 +146,10 @@ type ComplexityRoot struct {
 	}
 
 	EnvGrantPayload struct {
-		Error      func(childComplexity int) int
-		MutationID func(childComplexity int) int
-		Token      func(childComplexity int) int
+		Error       func(childComplexity int) int
+		MutationID  func(childComplexity int) int
+		Permissions func(childComplexity int) int
+		Token       func(childComplexity int) int
 	}
 
 	Environment struct {
@@ -678,6 +680,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.EnvGrantPayload.MutationID(childComplexity), true
+
+	case "EnvGrantPayload.permissions":
+		if e.complexity.EnvGrantPayload.Permissions == nil {
+			break
+		}
+
+		return e.complexity.EnvGrantPayload.Permissions(childComplexity), true
 
 	case "EnvGrantPayload.token":
 		if e.complexity.EnvGrantPayload.Token == nil {
@@ -1274,7 +1283,10 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var sources = []*ast.Source{
 	{Name: "../../api/wingman/env.graphqls", Input: `extend schema
-    @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
+    @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable", "@composeDirective"])
+    @composeDirective(name: "@envSession")
+
+directive @envSession on SCALAR | OBJECT | FIELD_DEFINITION | ARGUMENT_DEFINITION | INPUT_OBJECT | ENUM_VALUE | ENUM | UNION | INTERFACE
 
 scalar EnvironmentID
 
@@ -1286,7 +1298,7 @@ extend type Mutation {
     envGrant(input: EnvGrantInput!): EnvGrantPayload!
 }
 
-type Environment @key (fields: "id") {
+type Environment @key (fields: "id") @envSession {
     id: EnvironmentID!
 
     description: String
@@ -1303,11 +1315,13 @@ input EnvGrantInput  {
 
 input ResourceGrantInput {
     env: EnvironmentID!
+    accessId: String!
 }
 
 type EnvGrantPayload {
     mutationId: ID
     token: String
+    permissions: [String!] @external
     error: EnvGrantError
 }
 
@@ -4262,8 +4276,30 @@ func (ec *executionContext) _Entity_findEnvironmentByID(ctx context.Context, fie
 		}
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Entity().FindEnvironmentByID(rctx, fc.Args["id"].(string))
+		directive0 := func(rctx context.Context) (any, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Entity().FindEnvironmentByID(rctx, fc.Args["id"].(string))
+		}
+
+		directive1 := func(ctx context.Context) (any, error) {
+			if ec.directives.EnvSession == nil {
+				var zeroVal *model.Environment
+				return zeroVal, errors.New("directive envSession is not implemented")
+			}
+			return ec.directives.EnvSession(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model.Environment); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/bigmikesolutions/wingman/graphql/model.Environment`, tmp)
 	})
 
 	if resTmp == nil {
@@ -4800,6 +4836,44 @@ func (ec *executionContext) fieldContext_EnvGrantPayload_token(_ context.Context
 	return fc, nil
 }
 
+func (ec *executionContext) _EnvGrantPayload_permissions(ctx context.Context, field graphql.CollectedField, obj *model.EnvGrantPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EnvGrantPayload_permissions(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Permissions, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	fc.Result = res
+	return ec.marshalOString2ᚕstringᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EnvGrantPayload_permissions(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EnvGrantPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _EnvGrantPayload_error(ctx context.Context, field graphql.CollectedField, obj *model.EnvGrantPayload) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_EnvGrantPayload_error(ctx, field)
 	if err != nil {
@@ -4857,8 +4931,30 @@ func (ec *executionContext) _Environment_id(ctx context.Context, field graphql.C
 		}
 	}()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
+		directive0 := func(rctx context.Context) (any, error) {
+			ctx = rctx // use context from middleware stack in children
+			return obj.ID, nil
+		}
+
+		directive1 := func(ctx context.Context) (any, error) {
+			if ec.directives.EnvSession == nil {
+				var zeroVal string
+				return zeroVal, errors.New("directive envSession is not implemented")
+			}
+			return ec.directives.EnvSession(ctx, obj, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(string); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
 	})
 
 	if resTmp == nil {
@@ -4898,8 +4994,30 @@ func (ec *executionContext) _Environment_description(ctx context.Context, field 
 		}
 	}()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Description, nil
+		directive0 := func(rctx context.Context) (any, error) {
+			ctx = rctx // use context from middleware stack in children
+			return obj.Description, nil
+		}
+
+		directive1 := func(ctx context.Context) (any, error) {
+			if ec.directives.EnvSession == nil {
+				var zeroVal *string
+				return zeroVal, errors.New("directive envSession is not implemented")
+			}
+			return ec.directives.EnvSession(ctx, obj, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*string); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
 	})
 
 	if resTmp == nil {
@@ -4936,8 +5054,30 @@ func (ec *executionContext) _Environment_createdAt(ctx context.Context, field gr
 		}
 	}()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CreatedAt, nil
+		directive0 := func(rctx context.Context) (any, error) {
+			ctx = rctx // use context from middleware stack in children
+			return obj.CreatedAt, nil
+		}
+
+		directive1 := func(ctx context.Context) (any, error) {
+			if ec.directives.EnvSession == nil {
+				var zeroVal time.Time
+				return zeroVal, errors.New("directive envSession is not implemented")
+			}
+			return ec.directives.EnvSession(ctx, obj, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(time.Time); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be time.Time`, tmp)
 	})
 
 	if resTmp == nil {
@@ -4977,8 +5117,30 @@ func (ec *executionContext) _Environment_modifiedAt(ctx context.Context, field g
 		}
 	}()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ModifiedAt, nil
+		directive0 := func(rctx context.Context) (any, error) {
+			ctx = rctx // use context from middleware stack in children
+			return obj.ModifiedAt, nil
+		}
+
+		directive1 := func(ctx context.Context) (any, error) {
+			if ec.directives.EnvSession == nil {
+				var zeroVal *time.Time
+				return zeroVal, errors.New("directive envSession is not implemented")
+			}
+			return ec.directives.EnvSession(ctx, obj, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*time.Time); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *time.Time`, tmp)
 	})
 
 	if resTmp == nil {
@@ -5015,8 +5177,30 @@ func (ec *executionContext) _Environment_k8s(ctx context.Context, field graphql.
 		}
 	}()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Environment().K8s(rctx, obj, fc.Args["id"].(string))
+		directive0 := func(rctx context.Context) (any, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Environment().K8s(rctx, obj, fc.Args["id"].(string))
+		}
+
+		directive1 := func(ctx context.Context) (any, error) {
+			if ec.directives.EnvSession == nil {
+				var zeroVal *model.Cluster
+				return zeroVal, errors.New("directive envSession is not implemented")
+			}
+			return ec.directives.EnvSession(ctx, obj, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model.Cluster); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/bigmikesolutions/wingman/graphql/model.Cluster`, tmp)
 	})
 
 	if resTmp == nil {
@@ -5070,8 +5254,30 @@ func (ec *executionContext) _Environment_database(ctx context.Context, field gra
 		}
 	}()
 	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Environment().Database(rctx, obj, fc.Args["id"].(string))
+		directive0 := func(rctx context.Context) (any, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Environment().Database(rctx, obj, fc.Args["id"].(string))
+		}
+
+		directive1 := func(ctx context.Context) (any, error) {
+			if ec.directives.EnvSession == nil {
+				var zeroVal *model.Database
+				return zeroVal, errors.New("directive envSession is not implemented")
+			}
+			return ec.directives.EnvSession(ctx, obj, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model.Database); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/bigmikesolutions/wingman/graphql/model.Database`, tmp)
 	})
 
 	if resTmp == nil {
@@ -5154,6 +5360,8 @@ func (ec *executionContext) fieldContext_Mutation_envGrant(ctx context.Context, 
 				return ec.fieldContext_EnvGrantPayload_mutationId(ctx, field)
 			case "token":
 				return ec.fieldContext_EnvGrantPayload_token(ctx, field)
+			case "permissions":
+				return ec.fieldContext_EnvGrantPayload_permissions(ctx, field)
 			case "error":
 				return ec.fieldContext_EnvGrantPayload_error(ctx, field)
 			}
@@ -5752,8 +5960,30 @@ func (ec *executionContext) _Query_environment(ctx context.Context, field graphq
 		}
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Environment(rctx, fc.Args["id"].(string))
+		directive0 := func(rctx context.Context) (any, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().Environment(rctx, fc.Args["id"].(string))
+		}
+
+		directive1 := func(ctx context.Context) (any, error) {
+			if ec.directives.EnvSession == nil {
+				var zeroVal *model.Environment
+				return zeroVal, errors.New("directive envSession is not implemented")
+			}
+			return ec.directives.EnvSession(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model.Environment); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/bigmikesolutions/wingman/graphql/model.Environment`, tmp)
 	})
 
 	if resTmp == nil {
@@ -9914,7 +10144,7 @@ func (ec *executionContext) unmarshalInputResourceGrantInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"env", "k8s", "database"}
+	fieldsInOrder := [...]string{"env", "accessId", "k8s", "database"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -9928,6 +10158,13 @@ func (ec *executionContext) unmarshalInputResourceGrantInput(ctx context.Context
 				return it, err
 			}
 			it.Env = data
+		case "accessId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accessId"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AccessID = data
 		case "k8s":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("k8s"))
 			data, err := ec.unmarshalONamespaceResource2ᚕᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐNamespaceResource(ctx, v)
@@ -11021,6 +11258,8 @@ func (ec *executionContext) _EnvGrantPayload(ctx context.Context, sel ast.Select
 			out.Values[i] = ec._EnvGrantPayload_mutationId(ctx, field, obj)
 		case "token":
 			out.Values[i] = ec._EnvGrantPayload_token(ctx, field, obj)
+		case "permissions":
+			out.Values[i] = ec._EnvGrantPayload_permissions(ctx, field, obj)
 		case "error":
 			out.Values[i] = ec._EnvGrantPayload_error(ctx, field, obj)
 		default:
