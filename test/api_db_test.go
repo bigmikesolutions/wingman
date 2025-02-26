@@ -12,7 +12,6 @@ func Test_Api_Database_ShouldGetInfo(t *testing.T) {
 	s := NewApiDatabaseStage(t)
 	defer s.Close()
 
-	accessID := uuid.New().String()
 	envID := "test-env"
 	roleID := uuid.New().String()
 	dbID := uuid.New().String()
@@ -41,8 +40,7 @@ func Test_Api_Database_ShouldGetInfo(t *testing.T) {
 			Reason:     ptr("testing..."),
 			Resource: []*model.ResourceGrantInput{
 				{
-					Env:      envID,
-					AccessID: accessID,
+					Env: envID,
 					Database: []*model.DatabaseResource{
 						{
 							ID:   dbID,

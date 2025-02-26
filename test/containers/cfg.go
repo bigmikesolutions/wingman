@@ -13,10 +13,11 @@ const (
 
 // Config represents configuration of docker compose with random ports.
 type Config struct {
-	Postgres  PostgresCfg
-	ToxiProxy ToxiProxyCfg
-	Vault     VaultCfg
-	uid       int
+	Postgres   PostgresCfg
+	ToxiProxy  ToxiProxyCfg
+	Vault      VaultCfg
+	Localstack LocalstackCfg
+	uid        int
 }
 
 // PostgresCfg keeps docker-compose config.
@@ -39,6 +40,11 @@ type VaultCfg struct {
 	RootToken string
 }
 
+// LocalstackCfg keeps docker-compose config.
+type LocalstackCfg struct {
+	Port int
+}
+
 func newCfg() Config {
 	return Config{
 		uid: rand.Int() % 1024,
@@ -56,6 +62,9 @@ func newCfg() Config {
 			Port:      randomPort(),
 			RootToken: "root",
 		},
+		Localstack: LocalstackCfg{
+			Port: randomPort(),
+		},
 	}
 }
 
@@ -71,6 +80,7 @@ func (c Config) Env() map[string]string {
 		"toxiPgPort":     strconv.Itoa(c.ToxiProxy.PostgresPort),
 		"vaultPort":      strconv.Itoa(c.Vault.Port),
 		"vaultRootToken": c.Vault.RootToken,
+		"localstackPort": strconv.Itoa(c.Localstack.Port),
 	}
 }
 

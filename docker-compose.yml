@@ -46,3 +46,15 @@ services:
       interval: 10s
       timeout: 20s
       retries: 3
+
+  localstack:
+    container_name: wingman_localstack
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+      - "4510-4559:4510-4559"
+    environment:
+      - SERVICES=cognito
+      - DEBUG=1
+      - AWS_DEFAULT_REGION=eu-west-1
+      - EDGE_PORT=4566

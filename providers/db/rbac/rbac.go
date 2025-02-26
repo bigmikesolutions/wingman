@@ -3,8 +3,6 @@ package rbac
 import (
 	"context"
 	"fmt"
-
-	"github.com/bigmikesolutions/wingman/service/iam"
 )
 
 type (
@@ -26,21 +24,11 @@ func New(repo userRoleRepo) *Service {
 }
 
 func (s *Service) CreateUserRole(ctx context.Context, role UserRole) error {
-	_, err := iam.CtxUser(ctx)
-	if err != nil {
-		// return err //TODO add checks here
-	}
-
 	// TODO check user rights
 	return s.repo.CreateUserRole(ctx, role)
 }
 
 func (s *Service) ReadInfo(ctx context.Context, dbID string) error {
-	_, err := iam.CtxUser(ctx)
-	if err != nil {
-		// return err //TODO add checks here
-	}
-
 	roles, err := s.repo.FindUserRolesByDatabaseID(ctx, dbID)
 	if err != nil {
 		return ErrDatabaseAccessDenied
@@ -62,21 +50,11 @@ func (s *Service) ReadInfo(ctx context.Context, dbID string) error {
 }
 
 func (s *Service) WriteInfo(ctx context.Context) error {
-	_, err := iam.CtxUser(ctx)
-	if err != nil {
-		// return err //TODO add checks here
-	}
-
 	// TODO check user rights
 	return nil
 }
 
 func (s *Service) ReadConnection(ctx context.Context, dbID string) error {
-	_, err := iam.CtxUser(ctx)
-	if err != nil {
-		// return err //TODO add checks here
-	}
-
 	roles, rolesErr := s.repo.FindUserRolesByDatabaseID(ctx, dbID)
 	if rolesErr != nil {
 		return fmt.Errorf("check database roles: %w", rolesErr)
@@ -89,11 +67,6 @@ func (s *Service) ReadConnection(ctx context.Context, dbID string) error {
 }
 
 func (s *Service) ReadTable(ctx context.Context, dbID string, tableName string, columns ...string) error {
-	_, err := iam.CtxUser(ctx)
-	if err != nil {
-		// return err //TODO add checks here
-	}
-
 	roles, err := s.repo.FindUserRolesByDatabaseID(ctx, dbID)
 	if err != nil {
 		return ErrDatabaseAccessDenied
