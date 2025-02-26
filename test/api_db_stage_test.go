@@ -2,6 +2,7 @@ package test
 
 import (
 	"fmt"
+	"github.com/bigmikesolutions/wingman/test/containers/tf"
 	"testing"
 
 	_ "github.com/jackc/pgx/v5/stdlib" // drivers
@@ -46,18 +47,22 @@ var dbCleanTables = []string{
 type ApiDatabaseStage struct {
 	t      *testing.T
 	server *api.HTTPServer
+	tfDown tf.TearDownFunc
 
 	queryDatabase *model.Database
 	err           error
 }
 
 func NewApiDatabaseStage(t *testing.T) *ApiDatabaseStage {
+	tfRemove := tf.Deploy(t, tf.NewCfg(dc.Config().Localstack))
+
 	server, err := api.New(newProviders())
 	require.Nil(t, err, "api server")
 
 	return &ApiDatabaseStage{
 		t:      t,
 		server: server,
+		tfDown: tfRemove,
 	}
 }
 
@@ -69,6 +74,11 @@ func (s *ApiDatabaseStage) Close() {
 		_ = dbx.Close()
 	}()
 	cleanTables(dbx, dbCleanTables)
+
+	if s.tfDown != nil {
+		s.tfDown()
+		s.tfDown = nil
+	}
 }
 
 func (s *ApiDatabaseStage) Given() *ApiDatabaseStage {

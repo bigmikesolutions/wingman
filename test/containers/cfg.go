@@ -42,7 +42,8 @@ type VaultCfg struct {
 
 // LocalstackCfg keeps docker-compose config.
 type LocalstackCfg struct {
-	Port int
+	Port   int
+	Region string
 }
 
 func newCfg() Config {
@@ -63,7 +64,8 @@ func newCfg() Config {
 			RootToken: "root",
 		},
 		Localstack: LocalstackCfg{
-			Port: randomPort(),
+			Port:   randomPort(),
+			Region: "eu-west-1",
 		},
 	}
 }
@@ -71,16 +73,17 @@ func newCfg() Config {
 // Env returns env variables.
 func (c Config) Env() map[string]string {
 	return map[string]string{
-		"uid":            strconv.Itoa(c.uid),
-		"pgPort":         strconv.Itoa(c.Postgres.Port),
-		"pgName":         c.Postgres.Name,
-		"pgUser":         c.Postgres.User,
-		"pgPass":         c.Postgres.Pass,
-		"toxiPort":       strconv.Itoa(c.ToxiProxy.Port),
-		"toxiPgPort":     strconv.Itoa(c.ToxiProxy.PostgresPort),
-		"vaultPort":      strconv.Itoa(c.Vault.Port),
-		"vaultRootToken": c.Vault.RootToken,
-		"localstackPort": strconv.Itoa(c.Localstack.Port),
+		"uid":              strconv.Itoa(c.uid),
+		"pgPort":           strconv.Itoa(c.Postgres.Port),
+		"pgName":           c.Postgres.Name,
+		"pgUser":           c.Postgres.User,
+		"pgPass":           c.Postgres.Pass,
+		"toxiPort":         strconv.Itoa(c.ToxiProxy.Port),
+		"toxiPgPort":       strconv.Itoa(c.ToxiProxy.PostgresPort),
+		"vaultPort":        strconv.Itoa(c.Vault.Port),
+		"vaultRootToken":   c.Vault.RootToken,
+		"localstackPort":   strconv.Itoa(c.Localstack.Port),
+		"localstackRegion": c.Localstack.Region,
 	}
 }
 
