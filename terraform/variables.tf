@@ -19,6 +19,26 @@ variable "aws_secret_key" {
   type        = string
 }
 
+variable "keycloak_endpoint" {
+  description = "Keycloak server end-point"
+  type        = string
+}
+
+variable "keycloak_user" {
+  description = "Keycloak admin user name"
+  type        = string
+}
+
+variable "keycloak_password" {
+  description = "Keycloak admin password"
+  type        = string
+}
+
+variable "keycloak_client_id" {
+  description = "Keycloak client ID"
+  type        = string
+}
+
 variable "cognito_user_pool_name" {
   description = "Name of Cognito User Pool"
   type        = string
