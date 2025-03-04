@@ -1,3 +1,5 @@
-env = "dev"
-cognito_app_client_name = "localstack"
-cognito_idp_endpoint = "http://localhost:4566"
+env = "local"
+keycloak_endpoint = "http://keycloak:8080"
+keycloak_user = "admin"
+keycloak_password = "pass"
+keycloak_client_id = "admin-cli"

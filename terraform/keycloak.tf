@@ -2,35 +2,14 @@ resource "keycloak_realm" "wingman" {
   realm = "wingman"
 }
 
-resource "keycloak_role" "admin" {
-  realm_id    = keycloak_realm.wingman.id
-  name        = "Admin"
-  description = "Wingman admin"
-  attributes = {
-    key = "value"
-    multivalue = "value1##value2"
-  }
-}
-
-resource "keycloak_group" "admins" {
-  realm_id = keycloak_realm.wingman.id
-  name     = "admins"
-}
-
-resource "keycloak_openid_client_scope" "openid_client_scope" {
-  realm_id               = keycloak_realm.wingman.id
-  name                   = "scope=1"
-  description            = "When requested, this scope will map a user's group memberships to a claim"
-  include_in_token_scope = true
-  gui_order              = 1
-}
-
 resource "keycloak_openid_client" "wingman" {
   realm_id  = keycloak_realm.wingman.id
   client_id = "wingman"
 
   name      = "Wingman"
   enabled   = true
+
+  standard_flow_enabled = true
 
   access_type = "CONFIDENTIAL"
   valid_redirect_uris = [
@@ -51,6 +30,20 @@ resource "keycloak_role" "wingman_api_read" {
   client_id = keycloak_openid_client.wingman.id
 }
 
+resource "keycloak_role" "wingman_api_write" {
+  realm_id  = keycloak_realm.wingman.id
+  name      = "write_read"
+  client_id = keycloak_openid_client.wingman.id
+}
+
+resource "keycloak_openid_client_scope" "wingman_scope" {
+  realm_id               = keycloak_realm.wingman.id
+  name                   = "wingman_scope"
+  description            = "When requested, this scope will map a user's group memberships to a claim"
+  include_in_token_scope = true
+  gui_order              = 1
+}
+
 resource "keycloak_openid_client_optional_scopes" "wingman_optional_scopes" {
   realm_id  = keycloak_realm.wingman.id
   client_id = keycloak_openid_client.wingman.id
@@ -60,6 +53,21 @@ resource "keycloak_openid_client_optional_scopes" "wingman_optional_scopes" {
     "phone",
     "offline_access",
     "microprofile-jwt",
-    keycloak_openid_client_scope.openid_client_scope.name
+    keycloak_openid_client_scope.wingman_scope.name
   ]
 }
+
+resource "keycloak_group" "admin" {
+  realm_id = keycloak_realm.wingman.id
+  name     = "Admins"
+}
+
+resource "keycloak_group_roles" "admin_roles" {
+  realm_id = keycloak_realm.wingman.id
+  group_id = keycloak_group.admin.id
+  role_ids = [
+    keycloak_role.wingman_api_read.id,
+    keycloak_role.wingman_api_write.id,
+  ]
+}
+

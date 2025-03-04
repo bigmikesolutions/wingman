@@ -47,14 +47,42 @@ services:
       timeout: 20s
       retries: 3
 
-  localstack:
-    container_name: wingman_localstack
-    image: localstack/localstack
-    ports:
-      - "4566:4566"
-      - "4510-4559:4510-4559"
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1
+    container_name: wingman_keycloak
+    command: ["start-dev"]
     environment:
-      - SERVICES=cognito
-      - DEBUG=1
-      - AWS_DEFAULT_REGION=eu-west-1
-      - EDGE_PORT=4566
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: pass
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: pass
+    healthcheck:
+      test: [ "CMD-SHELL", "echo > /dev/tcp/keycloak/8080 > /dev/null 2>&1"]
+      interval: 10s
+      timeout: 20s
+      retries: 3
+    ports:
+      - "8081:8080"
+
+  terraform:
+    image: hashicorp/terraform:latest
+    container_name: wingman_terraform
+    entrypoint: ["sh", "-c", "terraform init && terraform apply -var-file=vars/local.tfvars -auto-approve"]
+    working_dir: /workspace
+    volumes:
+      - ./terraform:/workspace
+    depends_on:
+      keycloak:
+        condition: service_healthy
+
+#  localstack:
+#    container_name: wingman_localstack
+#    image: localstack/localstack
+#    ports:
+#      - "4566:4566"
+#      - "4510-4559:4510-4559"
+#    environment:
+#      - SERVICES=cognito
+#      - DEBUG=1
+#      - AWS_DEFAULT_REGION=eu-west-1
+#      - EDGE_PORT=4566

@@ -24,3 +24,16 @@ GET /api/v1/pods?limit=500
 GET /postgres/db/{db_name}/tables/{table_name}?id=5&limit=10
  
 ```
+
+#### Keycloak
+
+Login command for docker-compose:
+
+```shell
+curl -X POST "http://localhost:8081/realms/master/protocol/openid-connect/token" \
+-H "Content-Type: application/x-www-form-urlencoded" \
+-d "client_id=admin-cli" \
+-d "username=admin" \
+-d "password=pass" \
+-d "grant_type=password"
+```
