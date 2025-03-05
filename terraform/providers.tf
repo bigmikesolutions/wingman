@@ -9,7 +9,7 @@ terraform {
 
 provider "keycloak" {
   url      = var.keycloak_endpoint
-  username = var.keycloak_user
-  password = var.keycloak_password
+  username = var.keycloak_cli_user
+  password = var.keycloak_cli_password
   client_id = var.keycloak_client_id
 }

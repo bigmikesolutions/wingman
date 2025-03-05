@@ -8,17 +8,40 @@ variable "keycloak_endpoint" {
   type        = string
 }
 
-variable "keycloak_user" {
-  description = "Keycloak admin user name"
+variable "keycloak_cli_user" {
+  description = "Keycloak CLI admin user name"
   type        = string
 }
 
-variable "keycloak_password" {
-  description = "Keycloak admin password"
+variable "keycloak_cli_password" {
+  description = "Keycloak CLI admin password"
   type        = string
 }
 
 variable "keycloak_client_id" {
   description = "Keycloak client ID"
   type        = string
+}
+
+variable "keycloak_admin_enabled" {
+  description = "Keycloak default global admin user creation enabled"
+  type        = bool
+  default     = false
+}
+
+variable "keycloak_admin_user" {
+  description = "Keycloak default global admin user"
+  type        = string
+  default     = "admin"
+}
+
+variable "keycloak_admin_password" {
+  description = "Keycloak default global admin user password"
+  type        = string
+}
+
+variable "keycloak_admin_password_temporary" {
+  description = "Make global admin password temporary"
+  type        = bool
+  default     = true
 }
