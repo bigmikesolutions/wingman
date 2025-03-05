@@ -8,3 +8,4 @@ keycloak_admin_user = "admin"
 keycloak_admin_password = "pass"
 keycloak_admin_password_temporary = false
 
+wingman_client_secret = "secret-123"

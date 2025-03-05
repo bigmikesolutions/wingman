@@ -41,13 +41,14 @@ test:
 local-run-api: build-api
 	@./bin/api
 
-local-docker: local-docker-stop local-docker-start
+local-docker: local-terraform-clean-up local-docker-down local-docker-up
 
-local-docker-start:
+local-docker-up:
 	@docker-compose up -d --build
-
-local-docker-stop:
-	@docker-compose stop
 
 local-docker-down:
 	@docker-compose down
+
+local-terraform-clean-up:
+	@rm -rf terraform/.terraform* 2>/dev/null || true
+	@rm terraform/terraform.tfstate 2>/dev/null || true

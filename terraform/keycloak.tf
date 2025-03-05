@@ -4,12 +4,15 @@ resource "keycloak_realm" "wingman" {
 
 resource "keycloak_openid_client" "wingman" {
   realm_id  = keycloak_realm.wingman.id
-  client_id = "wingman"
+
+  client_id = var.wingman_client_id
+  client_secret = var.wingman_client_secret
 
   name      = "Wingman"
   enabled   = true
 
   standard_flow_enabled = true
+  direct_access_grants_enabled = true
 
   access_type = "CONFIDENTIAL"
   valid_redirect_uris = [

@@ -45,3 +45,14 @@ variable "keycloak_admin_password_temporary" {
   type        = bool
   default     = true
 }
+
+variable "wingman_client_id" {
+  description = "Wingman client ID"
+  type        = string
+  default     = "wingman"
+}
+
+variable "wingman_client_secret" {
+  description = "Wingman client secret"
+  type        = string
+}
