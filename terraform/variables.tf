@@ -3,6 +3,12 @@ variable "env" {
   type        = string
 }
 
+variable "keycloak_realm" {
+  description = "Keycloak realm"
+  type        = string
+  default     = "wingman"
+}
+
 variable "keycloak_endpoint" {
   description = "Keycloak server end-point"
   type        = string

@@ -1,14 +1,18 @@
-package service
+package main
 
 import (
 	"fmt"
-
+	"github.com/bigmikesolutions/wingman/service"
+	"github.com/bigmikesolutions/wingman/service/vault"
 	"github.com/kelseyhightower/envconfig"
 )
 
 type Config struct {
 	LogLevel string `envconfig:"LOG_LEVEL" default:"info"`
-	HTTP     HTTPConfig
+	HTTP     service.HTTPConfig
+	Vault    vault.Config
+	Database DatabaseConfig
+	A10N     A10NConfig
 }
 
 func LoadCfg() (Config, error) {

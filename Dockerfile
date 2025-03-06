@@ -1,10 +1,10 @@
-FROM golang:1.23-alpine as builder
+FROM golang:1.24-alpine as builder
 ARG CMD_PATH
-ARG VER
+
 WORKDIR $GOPATH/src/github.com/bigmikesolutions/wingman
 COPY . .
+
 RUN go build -mod=vendor -v \
-    -ldflags "-X github.com/bigmikesolutions/wingman/service/build.Version=${VER}" \
     -o /go/bin/service \
     $CMD_PATH
 

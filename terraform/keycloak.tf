@@ -1,5 +1,5 @@
 resource "keycloak_realm" "wingman" {
-  realm = "wingman"
+  realm = var.keycloak_realm
 }
 
 resource "keycloak_openid_client" "wingman" {

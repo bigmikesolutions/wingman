@@ -23,7 +23,7 @@ const (
 type (
 	HandlerWrapper = func(next http.Handler) http.Handler
 
-	HttpConfig struct {
+	HTTPConfig struct {
 		Address       string        `envconfig:"HTTP_ADDRESS" default:"0.0.0.0:8080"`
 		WriteTimeout  time.Duration `envconfig:"HTTP_WRITE_TIMEOUT" default:"15s"`
 		ReadTimeout   time.Duration `envconfig:"HTTP_READ_TIMEOUT" default:"15s"`
@@ -33,7 +33,7 @@ type (
 	}
 )
 
-func NewHttpHandler(cfg HttpConfig, resolver *graphql.Resolver, chain ...HandlerWrapper) (http.Handler, error) {
+func NewHttpHandler(cfg HTTPConfig, resolver *graphql.Resolver, chain ...HandlerWrapper) (http.Handler, error) {
 	graphqlHandler := handler.New(
 		generated.NewExecutableSchema(
 			generated.Config{
@@ -62,7 +62,7 @@ func NewHttpHandler(cfg HttpConfig, resolver *graphql.Resolver, chain ...Handler
 	return router, nil
 }
 
-func newHttpRouter(cfg HttpConfig) *chi.Mux {
+func newHttpRouter(cfg HTTPConfig) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)

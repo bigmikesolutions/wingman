@@ -1,6 +1,35 @@
 version: "3"
 services:
 
+  wingman:
+    container_name: wingman_server
+    build:
+      context: .
+      args:
+        CMD_PATH: "./cmd/server"
+    ports:
+      - "8081:8080"
+    environment:
+      - LOG_LEVEL=debug
+      - HTTP_PORT=8080
+      - DB_HOST=postgres
+      - DB_DATABASE=wingman
+      - DB_USERNAME=admin
+      - DB_PASSWORD=pass
+      - A10N_PRIVATE_KEY_PATH=/certs/private.pem
+      - A10N_PUBLIC_KEY_PATH=/certs/public.pem
+      - VAULT_ADDRESS=http://vault:8200
+      - VAULT_TOKEN=root
+    volumes:
+      - ./test/api:/certs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      vault:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+
   postgres:
     container_name: wingman_postgres
     image: postgres
@@ -10,7 +39,7 @@ services:
       - POSTGRES_PASSWORD=pass
       - listen_addresses='*'
     ports:
-      - 5432:5432
+      - "5432:5432"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U admin -d wingman" ]
       interval: 10s
@@ -62,7 +91,7 @@ services:
       timeout: 20s
       retries: 3
     ports:
-      - "8081:8080"
+      - "8082:8080"
 
   terraform:
     image: hashicorp/terraform:latest
@@ -75,14 +104,24 @@ services:
       keycloak:
         condition: service_healthy
 
-#  localstack:
-#    container_name: wingman_localstack
-#    image: localstack/localstack
-#    ports:
-#      - "4566:4566"
-#      - "4510-4559:4510-4559"
-#    environment:
-#      - SERVICES=cognito
-#      - DEBUG=1
-#      - AWS_DEFAULT_REGION=eu-west-1
-#      - EDGE_PORT=4566
+  oauth2-proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:latest
+    container_name: wingman_oauth2_proxy
+    environment:
+      OAUTH2_PROXY_PROVIDER: "oidc"
+      OAUTH2_PROXY_OIDC_ISSUER_URL: "https://keycloak:8080/realms/wingman"
+      OAUTH2_PROXY_CLIENT_ID: "wingman"
+      OAUTH2_PROXY_CLIENT_SECRET: "secret-123"
+      OAUTH2_PROXY_REDIRECT_URL: "http://localhost:4180/oauth2/callback"
+      OAUTH2_PROXY_UPSTREAMS: "http://wingman:8081"
+      OAUTH2_PROXY_SCOPE: "openid profile email"
+      OAUTH2_PROXY_HTTP_ADDRESS: "0.0.0.0:4180"
+      OAUTH2_PROXY_COOKIE_SECURE: "false"
+      OAUTH2_PROXY_COOKIE_SECRET: "supersecretkey-1"
+      OAUTH2_PROXY_SKIP_AUTHENTICATED_EMAILS: "true"
+      OAUTH2_PROXY_EMAIL_DOMAINS: "*"
+    ports:
+      - "4180:4180"
+    depends_on:
+      keycloak:
+        condition: service_healthy
