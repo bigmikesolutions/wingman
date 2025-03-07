@@ -22,6 +22,11 @@ services:
       - VAULT_TOKEN=root
     volumes:
       - ./test/api:/certs
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:8080/probes/health || exit 1"]
+      interval: 10s
+      timeout: 20s
+      retries: 3
     depends_on:
       postgres:
         condition: service_healthy
@@ -109,7 +114,8 @@ services:
     container_name: wingman_oauth2_proxy
     environment:
       OAUTH2_PROXY_PROVIDER: "oidc"
-      OAUTH2_PROXY_OIDC_ISSUER_URL: "https://keycloak:8080/realms/wingman"
+      OAUTH2_PROXY_OIDC_ISSUER_URL: "http://keycloak:8080/realms/wingman"
+      OAUTH2_PROXY_OIDC_INSECURE_SKIP_VERIFY: "true"
       OAUTH2_PROXY_CLIENT_ID: "wingman"
       OAUTH2_PROXY_CLIENT_SECRET: "secret-123"
       OAUTH2_PROXY_REDIRECT_URL: "http://localhost:4180/oauth2/callback"
@@ -122,6 +128,7 @@ services:
       OAUTH2_PROXY_EMAIL_DOMAINS: "*"
     ports:
       - "4180:4180"
+    restart: unless-stopped
     depends_on:
       keycloak:
         condition: service_healthy

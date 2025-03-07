@@ -1,6 +1,6 @@
 #!/bin/bash
 
-curl -X POST "http://localhost:8081/realms/wingman/protocol/openid-connect/token" \
+curl -X POST "http://localhost:8082/realms/wingman/protocol/openid-connect/token" \
      -H "Content-Type: application/x-www-form-urlencoded" \
      -d "grant_type=password" \
      -d "client_id=wingman" \

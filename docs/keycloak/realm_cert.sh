@@ -1,3 +1,3 @@
 #!/bin/bash
 
-curl "http://localhost:8081/realms/wingman/protocol/openid-connect/certs"
+curl "http://localhost:8082/realms/wingman/protocol/openid-connect/certs"
