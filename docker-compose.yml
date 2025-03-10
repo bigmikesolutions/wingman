@@ -126,6 +126,11 @@ services:
       OAUTH2_PROXY_COOKIE_SECRET: "supersecretkey-1"
       OAUTH2_PROXY_SKIP_AUTHENTICATED_EMAILS: "true"
       OAUTH2_PROXY_EMAIL_DOMAINS: "*"
+      OAUTH2_PROXY_PASS_ACCESS_TOKEN: "true"
+      OAUTH2_PROXY_PASS_AUTHORIZATION_HEADER: "true"
+      OAUTH2_PROXY_SHOW_DEBUG_ON_ERROR: "true"
+      OAUTH2_PROXY_AUTH_LOGGING: "true"
+      OAUTH2_PROXY_LOG_LEVEL: "debug"
     ports:
       - "4180:4180"
     restart: unless-stopped
