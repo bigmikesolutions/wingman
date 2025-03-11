@@ -63,6 +63,17 @@ services:
       - FLYWAY_USER=admin
       - FLYWAY_PASSWORD=pass
 
+  terraform:
+    image: hashicorp/terraform:latest
+    container_name: wingman_terraform
+    entrypoint: ["sh", "-c", "terraform init && terraform apply -var-file=vars/local.tfvars -auto-approve"]
+    working_dir: /workspace
+    volumes:
+      - ./terraform:/workspace
+    depends_on:
+      keycloak:
+        condition: service_healthy
+
   vault:
     container_name: wingman_vault
     image: hashicorp/vault:1.18
@@ -93,47 +104,36 @@ services:
     healthcheck:
       test: [ "CMD-SHELL", "echo > /dev/tcp/keycloak/8080 > /dev/null 2>&1"]
       interval: 10s
-      timeout: 20s
       retries: 3
+      timeout: 10s
     ports:
-      - "8082:8080"
-
-  terraform:
-    image: hashicorp/terraform:latest
-    container_name: wingman_terraform
-    entrypoint: ["sh", "-c", "terraform init && terraform apply -var-file=vars/local.tfvars -auto-approve"]
-    working_dir: /workspace
-    volumes:
-      - ./terraform:/workspace
-    depends_on:
-      keycloak:
-        condition: service_healthy
+      - "8080:8080"
 
   oauth2-proxy:
     image: quay.io/oauth2-proxy/oauth2-proxy:latest
     container_name: wingman_oauth2_proxy
-    environment:
-      OAUTH2_PROXY_PROVIDER: "oidc"
-      OAUTH2_PROXY_OIDC_ISSUER_URL: "http://keycloak:8080/realms/wingman"
-      OAUTH2_PROXY_OIDC_INSECURE_SKIP_VERIFY: "true"
-      OAUTH2_PROXY_CLIENT_ID: "wingman"
-      OAUTH2_PROXY_CLIENT_SECRET: "secret-123"
-      OAUTH2_PROXY_REDIRECT_URL: "http://localhost:4180/oauth2/callback"
-      OAUTH2_PROXY_UPSTREAMS: "http://wingman:8081"
-      OAUTH2_PROXY_SCOPE: "openid profile email"
-      OAUTH2_PROXY_HTTP_ADDRESS: "0.0.0.0:4180"
-      OAUTH2_PROXY_COOKIE_SECURE: "false"
-      OAUTH2_PROXY_COOKIE_SECRET: "supersecretkey-1"
-      OAUTH2_PROXY_SKIP_AUTHENTICATED_EMAILS: "true"
-      OAUTH2_PROXY_EMAIL_DOMAINS: "*"
-      OAUTH2_PROXY_PASS_ACCESS_TOKEN: "true"
-      OAUTH2_PROXY_PASS_AUTHORIZATION_HEADER: "true"
-      OAUTH2_PROXY_SHOW_DEBUG_ON_ERROR: "true"
-      OAUTH2_PROXY_AUTH_LOGGING: "true"
-      OAUTH2_PROXY_LOG_LEVEL: "debug"
+    command:
+      - --provider=oidc
+      - --oidc-issuer-url=http://keycloak:8080/realms/wingman
+      - --code-challenge-method=S256
+      - --client-id=wingman
+      - --client-secret=secret-123
+      - --redirect-url=http://oauth2-proxy:4180/oauth2/callback
+      - --upstream=http://wingman:8081
+      - --scope=openid profile email
+      - --http-address=0.0.0.0:4180
+      - --cookie-secure=false
+      - --cookie-secret=supersecretkey-1
+      - --email-domain=*
+      - --pass-access-token=true
+      - --pass-authorization-header=true
+      - --show-debug-on-error=true
+      - --auth-logging=true
+      - --request-logging=true
+      - --reverse-proxy=false
+    restart: unless-stopped
     ports:
       - "4180:4180"
-    restart: unless-stopped
     depends_on:
       keycloak:
         condition: service_healthy

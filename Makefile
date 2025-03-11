@@ -44,10 +44,10 @@ local-run-api: build-api
 local-docker: local-terraform-clean-up local-docker-down local-docker-up
 
 local-docker-up:
-	@docker-compose up -d --build
+	@docker compose up -d --build
 
 local-docker-down:
-	@docker-compose down
+	@docker compose down
 
 local-terraform-clean-up:
 	@rm -rf terraform/.terraform* 2>/dev/null || true

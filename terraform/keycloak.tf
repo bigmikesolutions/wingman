@@ -16,7 +16,8 @@ resource "keycloak_openid_client" "wingman" {
 
   access_type = "CONFIDENTIAL"
   valid_redirect_uris = [
-    "http://localhost:8080/openid-callback"
+    "http://localhost:4180/oauth2/callback",
+    "http://oauth2-proxy:4180/oauth2/callback"
   ]
 
   login_theme = "keycloak"
