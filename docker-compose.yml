@@ -107,11 +107,15 @@ services:
       retries: 3
       timeout: 10s
     ports:
-      - "8080:8080"
+      - "8082:8080"
 
   oauth2-proxy:
     image: quay.io/oauth2-proxy/oauth2-proxy:latest
     container_name: wingman_oauth2_proxy
+    environment:
+      - OAUTH2_PROXY_LOG_LEVEL=debug
+      - OAUTH2_PROXY_SET_XAUTHREQUEST=true
+      - OAUTH2_PROXY_XAUTHREQUEST_HEADER=X-Authorization
     command:
       - --provider=oidc
       - --oidc-issuer-url=http://keycloak:8080/realms/wingman
@@ -128,9 +132,12 @@ services:
       - --pass-access-token=true
       - --pass-authorization-header=true
       - --show-debug-on-error=true
+      - --standard-logging=true
       - --auth-logging=true
       - --request-logging=true
-      - --reverse-proxy=false
+      - --reverse-proxy=true
+      - --errors-to-info-log=true
+      - --skip-provider-button=true
     restart: unless-stopped
     ports:
       - "4180:4180"

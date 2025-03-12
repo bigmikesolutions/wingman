@@ -1,4 +1,4 @@
 #!/bin/bash
 
-curl -v http://localhost:4180/oauth2/auth \
+curl -v http://localhost:4180/probes/health \
   -H "Authorization: Bearer ${TOKEN}"

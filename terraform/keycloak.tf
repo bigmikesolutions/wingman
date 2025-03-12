@@ -11,13 +11,17 @@ resource "keycloak_openid_client" "wingman" {
   name      = "Wingman"
   enabled   = true
 
-  standard_flow_enabled = true
-  direct_access_grants_enabled = true
+  access_type = "PUBLIC"
 
-  access_type = "CONFIDENTIAL"
+  service_accounts_enabled = false      # required for confidential access type
+  standard_flow_enabled = true          # required for Authorization Code Flow
+  direct_access_grants_enabled = true   # required for password grant
+  implicit_flow_enabled = false
+
   valid_redirect_uris = [
+    "http://localhost:8080/oauth2/callback",
     "http://localhost:4180/oauth2/callback",
-    "http://oauth2-proxy:4180/oauth2/callback"
+    "http://oauth2-proxy:4180/oauth2/callback",
   ]
 
   login_theme = "keycloak"
