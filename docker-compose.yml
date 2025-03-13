@@ -38,7 +38,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.wingman.rule=Host(`wingman`)"
       - "traefik.http.services.wingman.loadbalancer.server.port=8080"
-#      - "traefik.http.routers.wingman.middlewares=traefik-auth"
+      - "traefik.http.routers.wingman.middlewares=traefik-auth"
 
   postgres:
     container_name: wingman_postgres
@@ -152,7 +152,6 @@ services:
       - --providers.oidc.issuer-url=http://keycloak:8080/realms/wingman
       - --providers.oidc.client-id=wingman
       - --providers.oidc.client-secret=secret-123
-#      - --default-action=allow
     restart: unless-stopped
     depends_on:
       keycloak:
@@ -164,22 +163,4 @@ services:
       - "traefik.http.services.traefik-auth.loadbalancer.server.port=4181"
       - "traefik.http.middlewares.traefik-auth.forwardauth.address=http://traefik-auth:4181/oauth2/callback"
       - "traefik.http.middlewares.traefik-auth.forwardauth.trustForwardHeader=true"
-      - "traefik.http.middlewares.traefik-auth.forwardauth.authResponseHeaders=X-Auth-User,X-Auth-Email,X-Forwarded-User,X-Forwarded-Proto, and X-Forwarded-Host"
-
-  whoami:
-    image: containous/whoami
-    container_name: wingman_whoami
-    ports:
-      - "8090:80"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host(`whoami`)"
-      - "traefik.http.services.whoami.loadbalancer.server.port=80"
-      - "traefik.http.routers.whoami.middlewares=traefik-auth"
-
-  sh:
-    image: alpine:latest
-    container_name: wingman_sh
-    command: sleep infinity
-    stdin_open: true
-    tty: true
+      - "traefik.http.middlewares.traefik-auth.forwardauth.authResponseHeaders=X-Auth-User,X-Auth-Email,X-Forwarded-User,X-Forwarded-Proto,X-Forwarded-Host"

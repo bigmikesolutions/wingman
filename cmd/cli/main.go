@@ -103,7 +103,18 @@ func handleProtected(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Access token: %s\n", tokenCookie.Value)
 
 	client := oauth2Config.Client(context.Background(), &oauth2.Token{AccessToken: tokenCookie.Value})
-	resp, err := client.Get("http://localhost:4180/probes/health")
+
+	url := "http://localhost:8084/probes/health"
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		http.Error(w, "Failed to create request: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	req.Header.Set("X-Forwarded-Host", "wingman")
+	req.Header.Set("Host", "wingman")
+
+	resp, err := client.Do(req)
 	if err != nil {
 		http.Error(w, "Failed to access protected resource: "+err.Error(), http.StatusInternalServerError)
 		return

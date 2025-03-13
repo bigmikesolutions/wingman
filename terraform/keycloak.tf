@@ -22,6 +22,7 @@ resource "keycloak_openid_client" "wingman" {
   valid_redirect_uris = [
     "http://traefik-auth:4181/oauth2/callback",
     "http://localhost:8088/oauth2/callback",
+    "http://wingman/oauth2/callback",
   ]
 
   web_origins = [
