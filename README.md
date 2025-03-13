@@ -37,3 +37,7 @@ curl -X POST "http://localhost:8081/realms/master/protocol/openid-connect/token"
 -d "password=pass" \
 -d "grant_type=password"
 ```
+
+```shell
+docker exec -it wingman_server sh -c "wget -S -O - --header='X-Forwarded-Proto:http' --header='X-Forwarded-Host:traefik-auth:4181'  'http://traefik-auth:4181'"
+```

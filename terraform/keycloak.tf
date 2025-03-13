@@ -12,6 +12,7 @@ resource "keycloak_openid_client" "wingman" {
   enabled   = true
 
   access_type = "PUBLIC"
+  access_token_lifespan = var.wingman_access_token_lifespan
 
   service_accounts_enabled = false      # required for confidential access type
   standard_flow_enabled = true          # required for Authorization Code Flow
@@ -19,9 +20,12 @@ resource "keycloak_openid_client" "wingman" {
   implicit_flow_enabled = false
 
   valid_redirect_uris = [
-    "http://localhost:8080/oauth2/callback",
-    "http://localhost:4180/oauth2/callback",
-    "http://oauth2-proxy:4180/oauth2/callback",
+    "http://traefik-auth:4181/oauth2/callback",
+    "http://localhost:8088/oauth2/callback",
+  ]
+
+  web_origins = [
+    "*"
   ]
 
   login_theme = "keycloak"

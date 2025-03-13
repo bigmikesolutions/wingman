@@ -34,6 +34,11 @@ services:
         condition: service_healthy
       migrations:
         condition: service_completed_successfully
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wingman.rule=Host(`wingman`)"
+      - "traefik.http.services.wingman.loadbalancer.server.port=8080"
+#      - "traefik.http.routers.wingman.middlewares=traefik-auth"
 
   postgres:
     container_name: wingman_postgres
@@ -107,40 +112,74 @@ services:
       retries: 3
       timeout: 10s
     ports:
-      - "8082:8080"
+      - "8080:8080"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.keycloak.rule=Host(`keycloak`)"
+      - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
 
-  oauth2-proxy:
-    image: quay.io/oauth2-proxy/oauth2-proxy:latest
-    container_name: wingman_oauth2_proxy
-    environment:
-      - OAUTH2_PROXY_LOG_LEVEL=debug
-      - OAUTH2_PROXY_SET_XAUTHREQUEST=true
-      - OAUTH2_PROXY_XAUTHREQUEST_HEADER=X-Authorization
+  traefik:
+    image: traefik:v2.10
+    container_name: wingman_traefik
     command:
-      - --provider=oidc
-      - --oidc-issuer-url=http://keycloak:8080/realms/wingman
-      - --code-challenge-method=S256
-      - --client-id=wingman
-      - --client-secret=secret-123
-      - --redirect-url=http://oauth2-proxy:4180/oauth2/callback
-      - --upstream=http://wingman:8081
-      - --scope=openid profile email
-      - --http-address=0.0.0.0:4180
-      - --cookie-secure=false
-      - --cookie-secret=supersecretkey-1
-      - --email-domain=*
-      - --pass-access-token=true
-      - --pass-authorization-header=true
-      - --show-debug-on-error=true
-      - --standard-logging=true
-      - --auth-logging=true
-      - --request-logging=true
-      - --reverse-proxy=true
-      - --errors-to-info-log=true
-      - --skip-provider-button=true
-    restart: unless-stopped
+      - "--api.insecure=true"
+      - "--entryPoints.web.address=:80"
+      - "--entryPoints.web.forwardedHeaders.trustedIPs=0.0.0.0/0"
+      - "--providers.docker"
+      - "--log.level=DEBUG"
+      - "--accessLog=true"
     ports:
-      - "4180:4180"
+      - "8084:80"
+      - "8085:8080"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`traefik.localhost`)"
+      - "traefik.http.routers.api.entrypoints=web"
+    restart: unless-stopped
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+  traefik-auth:
+    image: thomseddon/traefik-forward-auth
+    container_name: wingman_traefik-auth
+    command:
+      - --log-level=debug
+      - --insecure-cookie
+      - --secret=secret-123
+      - --default-provider=oidc
+      - --auth-host="traefik-auth:4181"
+      - --url-path=/oauth2/callback
+      - --providers.oidc.issuer-url=http://keycloak:8080/realms/wingman
+      - --providers.oidc.client-id=wingman
+      - --providers.oidc.client-secret=secret-123
+#      - --default-action=allow
+    restart: unless-stopped
     depends_on:
       keycloak:
         condition: service_healthy
+    ports:
+      - "4181:4181"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.traefik-auth.loadbalancer.server.port=4181"
+      - "traefik.http.middlewares.traefik-auth.forwardauth.address=http://traefik-auth:4181/oauth2/callback"
+      - "traefik.http.middlewares.traefik-auth.forwardauth.trustForwardHeader=true"
+      - "traefik.http.middlewares.traefik-auth.forwardauth.authResponseHeaders=X-Auth-User,X-Auth-Email,X-Forwarded-User,X-Forwarded-Proto, and X-Forwarded-Host"
+
+  whoami:
+    image: containous/whoami
+    container_name: wingman_whoami
+    ports:
+      - "8090:80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami`)"
+      - "traefik.http.services.whoami.loadbalancer.server.port=80"
+      - "traefik.http.routers.whoami.middlewares=traefik-auth"
+
+  sh:
+    image: alpine:latest
+    container_name: wingman_sh
+    command: sleep infinity
+    stdin_open: true
+    tty: true

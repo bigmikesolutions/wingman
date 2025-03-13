@@ -9,3 +9,4 @@ keycloak_admin_password = "pass"
 keycloak_admin_password_temporary = false
 
 wingman_client_secret = "secret-123"
+wingman_access_token_lifespan = 604800 # 7 days

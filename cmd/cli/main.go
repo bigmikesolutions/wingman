@@ -15,9 +15,9 @@ import (
 var (
 	oauth2Config oauth2.Config
 	oauth2State  = "randomstate"
-	redirectURL  = "http://localhost:8080/oauth2/callback"
+	redirectURL  = "http://localhost:8088/oauth2/callback"
 	clientID     = "wingman"
-	issuerURL    = "http://localhost:8082/realms/wingman"
+	issuerURL    = "http://localhost:8080/realms/wingman"
 )
 
 func main() {
@@ -35,8 +35,8 @@ func main() {
 	http.HandleFunc("/oauth2/callback", handleCallback)
 	http.HandleFunc("/protected", handleProtected)
 
-	log.Printf("Server is starting at http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Printf("Server is starting at http://localhost:8088")
+	log.Fatal(http.ListenAndServe(":8088", nil))
 }
 
 var codeVerifier string

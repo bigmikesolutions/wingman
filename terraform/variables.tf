@@ -62,3 +62,9 @@ variable "wingman_client_secret" {
   description = "Wingman client secret"
   type        = string
 }
+
+variable "wingman_access_token_lifespan" {
+  description = "Access token lifespan"
+  type = number
+  default = 3600
+}
