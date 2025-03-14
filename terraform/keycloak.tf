@@ -20,6 +20,8 @@ resource "keycloak_openid_client" "wingman" {
   implicit_flow_enabled = false
 
   valid_redirect_uris = [
+    "http://oauth2-proxy:4180/oauth2/callback",
+    "http://localhost:8084/oauth2/callback",
     "http://traefik-auth:4181/oauth2/callback",
     "http://localhost:8088/oauth2/callback",
     "http://wingman/oauth2/callback",
