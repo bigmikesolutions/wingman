@@ -111,8 +111,8 @@ func handleProtected(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req.Header.Set("X-Forwarded-Host", "wingman")
-	req.Header.Set("Host", "wingman")
+	//req.Header.Set("X-Forwarded-Host", "wingman")
+	//req.Header.Set("Host", "wingman")
 
 	resp, err := client.Do(req)
 	if err != nil {

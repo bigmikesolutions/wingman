@@ -135,8 +135,14 @@ services:
       - "8085:8080"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.api.rule=Host(`traefik.localhost`)"
-      - "traefik.http.routers.api.entrypoints=web"
+#      - "traefik.http.routers.api.entrypoints=web"
+#      - "traefik.http.routers.api.rule=Host(`traefik`)"
+      - "traefik.http.routers.traefik.rule=(PathPrefix(`/traefik`) || HeadersRegexp(`Referer`, `.*/traefik/.*`))"
+      #### set traefik dashboard
+      - "traefik.http.routers.traefik.service=api@internal"
+      #### set middlewares: stripprefix for dashboard
+      - "traefik.http.routers.traefik.middlewares=mystrip"
+      - "traefik.http.middlewares.mystrip.stripprefix.prefixes=/traefik"
     restart: unless-stopped
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
@@ -168,9 +174,9 @@ services:
       - --auth-logging=true
       - --request-logging=true
       - --errors-to-info-log=true
-      - --whitelist-domain=localhost
-      - --whitelist-domain=wingman
-      - --whitelist-domain=traefik-auth
+      - --whitelist-domain=localhost:8084
+      - --whitelist-domain=wingman:8081
+      - --whitelist-domain=traefik:8080
     restart: unless-stopped
     ports:
       - "4180:4180"
@@ -185,3 +191,5 @@ services:
       - "traefik.http.middlewares.oauth2-proxy.forwardauth.authResponseHeaders=Authorization"
       - "traefik.http.middlewares.oauth2-proxy.forwardauth.trustForwardHeader=true"
       - "traefik.http.routers.oauth2-proxy.rule=PathPrefix(`/oauth2`)"
+      - "traefik.http.middlewares.forward-headers.headers.customrequestheaders.X-Forwarded-Proto=http"
+      - "traefik.http.middlewares.forward-headers.headers.customrequestheaders.X-Forwarded-Host=traefik:8084"
