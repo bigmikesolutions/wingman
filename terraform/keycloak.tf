@@ -11,10 +11,10 @@ resource "keycloak_openid_client" "wingman" {
   name      = "Wingman"
   enabled   = true
 
-  access_type = "PUBLIC"
+  access_type = "CONFIDENTIAL"
   access_token_lifespan = var.wingman_access_token_lifespan
 
-  service_accounts_enabled = false      # required for confidential access type
+  service_accounts_enabled = true       # required for confidential access type
   standard_flow_enabled = true          # required for Authorization Code Flow
   direct_access_grants_enabled = true   # required for password grant
   implicit_flow_enabled = false
