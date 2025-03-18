@@ -18,7 +18,7 @@ var (
 	oauth2State  = "randomstate"
 	redirectURL  = "http://localhost:8088/oauth2/callback"
 	clientID     = "wingman"
-	issuerURL    = "http://localhost:8080/realms/wingman"
+	issuerURL    = "http://keycloak:8080/realms/wingman"
 )
 
 func main() {
