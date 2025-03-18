@@ -10,7 +10,7 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/bigmikesolutions/wingman/providers"
-	"github.com/bigmikesolutions/wingman/service/vault"
+	"github.com/bigmikesolutions/wingman/server/vault"
 	"github.com/bigmikesolutions/wingman/test/containers"
 )
 

@@ -2,17 +2,19 @@ package main
 
 import (
 	"context"
-	"github.com/bigmikesolutions/wingman/graphql"
-	"github.com/bigmikesolutions/wingman/providers"
-	"github.com/bigmikesolutions/wingman/service"
-	"github.com/bigmikesolutions/wingman/service/env"
-	"github.com/bigmikesolutions/wingman/service/vault"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+
+	"github.com/bigmikesolutions/wingman/graphql"
+	"github.com/bigmikesolutions/wingman/providers"
+	"github.com/bigmikesolutions/wingman/server"
+	"github.com/bigmikesolutions/wingman/service/env"
+	"github.com/bigmikesolutions/wingman/service/vault"
 )
 
 func main() {
@@ -69,7 +71,7 @@ func mustHTTPHandler(logger zerolog.Logger, cfg Config) http.Handler {
 		logger.Fatal().Err(err).Msg("failed to create vault secrets service")
 	}
 
-	handler, err := service.NewHttpHandler(
+	handler, err := server.NewHttpHandler(
 		cfg.HTTP,
 		&graphql.Resolver{
 			Providers: providers.NewProviders(dbx, secrets),

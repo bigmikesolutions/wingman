@@ -1,4 +1,4 @@
-package service
+package server
 
 // Version git commit hash injected during compilation.
 const Version = "unknown"

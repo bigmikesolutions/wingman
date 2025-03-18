@@ -9,11 +9,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/bigmikesolutions/wingman/service"
+	"github.com/bigmikesolutions/wingman/server"
 )
 
 func AssertHeartbeat(t *testing.T, s *HTTPServer) {
-	resp, err := s.client.Get(fmt.Sprintf("%s%s", s.server.URL, service.ProbesHealthEndpoint))
+	resp, err := s.client.Get(fmt.Sprintf("%s%s", s.server.URL, server.ProbesHealthEndpoint))
 	require.NoError(t, err, "heartbeat")
 
 	defer func() {

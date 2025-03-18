@@ -1,6 +1,5 @@
 #!/bin/bash
 
-curl -v http://localhost:8084/probes/health \
-  -L \
-  -H "Host: traefik:8080" \
+curl -v http://localhost:8084/ \
+  -i -L \
   -H "Authorization: Bearer ${TOKEN}"

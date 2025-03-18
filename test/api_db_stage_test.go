@@ -2,8 +2,9 @@ package test
 
 import (
 	"fmt"
-	"github.com/bigmikesolutions/wingman/test/containers/tf"
 	"testing"
+
+	"github.com/bigmikesolutions/wingman/test/containers/tf"
 
 	_ "github.com/jackc/pgx/v5/stdlib" // drivers
 	"github.com/jmoiron/sqlx"

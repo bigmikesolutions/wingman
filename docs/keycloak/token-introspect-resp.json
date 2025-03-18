@@ -1,0 +1,48 @@
+{
+  "exp": 1742323669,
+  "iat": 1742287669,
+  "jti": "15cd6a64-c142-4ab3-a10b-5d302ba2c455",
+  "iss": "http://localhost:8080/realms/wingman",
+  "aud": "account",
+  "sub": "12f7a8d3-3d22-4f8b-84f2-41cc4f542133",
+  "typ": "Bearer",
+  "azp": "wingman",
+  "sid": "077ee9ad-32bd-4708-85cb-adb7fbe51029",
+  "acr": "1",
+  "allowed-origins": [
+    "*"
+  ],
+  "realm_access": {
+    "roles": [
+      "default-roles-wingman",
+      "offline_access",
+      "uma_authorization"
+    ]
+  },
+  "resource_access": {
+    "account": {
+      "roles": [
+        "manage-account",
+        "manage-account-links",
+        "view-profile"
+      ]
+    },
+    "wingman": {
+      "roles": [
+        "write_read",
+        "api_read"
+      ]
+    }
+  },
+  "scope": "email profile",
+  "email_verified": false,
+  "name": "Wingman Bot",
+  "preferred_username": "admin",
+  "given_name": "Wingman",
+  "family_name": "Bot",
+  "email": "admin@wingman.com",
+  "client_id": "wingman",
+  "username": "admin",
+  "token_type": "Bearer",
+  "active": true
+}

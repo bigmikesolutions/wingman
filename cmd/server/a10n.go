@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/bigmikesolutions/wingman/service/auth"
-	"github.com/golang-jwt/jwt/v5"
 	"os"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+
+	"github.com/bigmikesolutions/wingman/service/auth"
 )
 
 type A10NConfig struct {

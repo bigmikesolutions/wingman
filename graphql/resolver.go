@@ -4,7 +4,7 @@ package graphql
 
 import (
 	"github.com/bigmikesolutions/wingman/providers"
-	"github.com/bigmikesolutions/wingman/service/auth"
+	"github.com/bigmikesolutions/wingman/server/auth"
 )
 
 // Resolver holds the state and allows dependency injection.

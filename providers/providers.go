@@ -7,7 +7,7 @@ import (
 
 	"github.com/bigmikesolutions/wingman/providers/db"
 	"github.com/bigmikesolutions/wingman/providers/db/repo"
-	"github.com/bigmikesolutions/wingman/service/vault"
+	"github.com/bigmikesolutions/wingman/server/vault"
 )
 
 type Providers struct {

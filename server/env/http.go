@@ -3,7 +3,7 @@ package env
 import (
 	"net/http"
 
-	"github.com/bigmikesolutions/wingman/service/auth"
+	"github.com/bigmikesolutions/wingman/server/auth"
 )
 
 const (

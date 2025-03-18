@@ -6,10 +6,11 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
-	"golang.org/x/oauth2"
 	"io"
 	"log"
 	"net/http"
+
+	"golang.org/x/oauth2"
 )
 
 var (
@@ -111,8 +112,8 @@ func handleProtected(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//req.Header.Set("X-Forwarded-Host", "wingman")
-	//req.Header.Set("Host", "wingman")
+	// req.Header.Set("X-Forwarded-Host", "wingman")
+	// req.Header.Set("Host", "wingman")
 
 	resp, err := client.Do(req)
 	if err != nil {

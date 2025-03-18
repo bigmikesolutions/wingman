@@ -9,8 +9,8 @@ import (
 
 	"github.com/bigmikesolutions/wingman/graphql"
 	"github.com/bigmikesolutions/wingman/providers"
-	"github.com/bigmikesolutions/wingman/service"
-	"github.com/bigmikesolutions/wingman/service/env"
+	"github.com/bigmikesolutions/wingman/server"
+	"github.com/bigmikesolutions/wingman/server/env"
 )
 
 type HTTPServer struct {
@@ -24,7 +24,7 @@ type HTTPServer struct {
 }
 
 func New(prov *providers.Providers) (*HTTPServer, error) {
-	cfg, err := service.LoadCfg()
+	cfg, err := server.LoadCfg()
 	if err != nil {
 		return nil, err
 	}
@@ -39,20 +39,20 @@ func New(prov *providers.Providers) (*HTTPServer, error) {
 		Tokens:    token,
 	}
 
-	handler, err := service.NewHttpHandler(cfg.HTTP, resolver, env.SessionReader(token))
+	handler, err := server.NewHttpHandler(cfg.HTTP, resolver, env.SessionReader(token))
 	if err != nil {
 		return nil, err
 	}
 
-	server := httptest.NewServer(handler)
+	svc := httptest.NewServer(handler)
 	rt := &a10nRoundTripper{}
 	client := &http.Client{
 		Transport: rt,
 	}
-	graphqlURL := fmt.Sprintf("%s%s", server.URL, service.GraphqlEndpoint)
+	graphqlURL := fmt.Sprintf("%s%s", svc.URL, server.GraphqlEndpoint)
 
 	return &HTTPServer{
-		server: server,
+		server: svc,
 		client: client,
 		graphql: gql.NewClient(
 			graphqlURL,

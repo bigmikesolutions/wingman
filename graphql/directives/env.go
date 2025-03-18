@@ -3,7 +3,7 @@ package directives
 import (
 	"context"
 
-	"github.com/bigmikesolutions/wingman/service/env"
+	"github.com/bigmikesolutions/wingman/server/env"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/vektah/gqlparser/v2/gqlerror"
