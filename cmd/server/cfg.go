@@ -6,7 +6,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 
 	"github.com/bigmikesolutions/wingman/server"
-	"github.com/bigmikesolutions/wingman/service/vault"
+	"github.com/bigmikesolutions/wingman/server/vault"
 )
 
 type Config struct {

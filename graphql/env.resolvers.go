@@ -6,7 +6,6 @@ package graphql
 
 import (
 	"context"
-	"log"
 
 	"github.com/bigmikesolutions/wingman/graphql/generated"
 	"github.com/bigmikesolutions/wingman/graphql/model"
@@ -14,10 +13,9 @@ import (
 
 // EnvGrant is the resolver for the envGrant field.
 func (r *mutationResolver) EnvGrant(ctx context.Context, input model.EnvGrantInput) (*model.EnvGrantPayload, error) {
-	log.Printf("Env grant mutation...")
 	token, err := r.Tokens.Create(map[string]any{})
 	if err != nil {
-		log.Printf("Env grant mutation - token not creatd: %v", err)
+		r.Logger.Error().Err(err).Msg("Env grant error")
 		return nil, err
 	}
 

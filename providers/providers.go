@@ -3,9 +3,8 @@ package providers
 import (
 	"github.com/jmoiron/sqlx"
 
-	"github.com/bigmikesolutions/wingman/providers/db/rbac"
-
 	"github.com/bigmikesolutions/wingman/providers/db"
+	"github.com/bigmikesolutions/wingman/providers/db/rbac"
 	"github.com/bigmikesolutions/wingman/providers/db/repo"
 	"github.com/bigmikesolutions/wingman/server/vault"
 )

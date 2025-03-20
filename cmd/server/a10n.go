@@ -7,7 +7,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/bigmikesolutions/wingman/service/auth"
+	"github.com/bigmikesolutions/wingman/server/auth"
 )
 
 type A10NConfig struct {

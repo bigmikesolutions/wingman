@@ -41,34 +41,3 @@ curl -X POST "http://localhost:8081/realms/master/protocol/openid-connect/token"
 ```shell
 docker exec -it wingman_server sh -c "wget -S -O - --header='X-Forwarded-Proto:http' --header='X-Forwarded-Host:traefik-auth:4181'  'http://traefik-auth:4181'"
 ```
-
-
-#  traefik-auth:
-#    image: thomseddon/traefik-forward-auth
-#    container_name: wingman_traefik_auth
-#    command:
-#      - --log-level=debug
-#      - --insecure-cookie
-#      - --secret=secret-123
-#      - --default-provider=oidc
-#      - --auth-host="traefik-auth:4181"
-#      - --url-path=/oauth2/callback
-#      - --providers.oidc.issuer-url=http://keycloak:8080/realms/wingman
-#      - --providers.oidc.client-id=wingman
-#      - --providers.oidc.client-secret=secret-123
-#      - --cookie-domain=wingman
-##      - --default-action=allow
-#    restart: unless-stopped
-#    depends_on:
-#      keycloak:
-#        condition: service_healthy
-#    ports:
-#      - "4181:4181"
-#    labels:
-#      - "traefik.enable=true"
-#      - "traefik.http.services.traefik-auth.loadbalancer.server.port=4181"
-#      - "traefik.http.routers.traefik-auth.entrypoints=web"
-#      - "traefik.http.routers.traefik-auth.rule=PathPrefix(`/oauth2`)"
-#      - "traefik.http.middlewares.traefik-auth.forwardauth.address=http://traefik-auth:4181"
-#      - "traefik.http.middlewares.traefik-auth.forwardauth.trustForwardHeader=true"
-#      - "traefik.http.middlewares.traefik-auth.forwardauth.authResponseHeaders=X-Auth-User,X-Auth-Email,X-Forwarded-User,X-Forwarded-Proto,X-Forwarded-Host,Authorization"

@@ -71,7 +71,6 @@ func newHttpRouter(cfg HTTPConfig) *chi.Mux {
 	r.Use(middleware.Timeout(cfg.ReadTimeout))
 	r.Use(middleware.Compress(cfg.CompressLevel))
 	r.Use(middleware.Heartbeat(ProbesHealthEndpoint))
-	r.Use(middleware.Heartbeat("/"))
 
 	if cfg.PprofEnabled {
 		r.Mount(pprofEndpoint, pprofRouter())

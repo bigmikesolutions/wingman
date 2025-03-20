@@ -13,8 +13,8 @@ import (
 	"github.com/bigmikesolutions/wingman/graphql"
 	"github.com/bigmikesolutions/wingman/providers"
 	"github.com/bigmikesolutions/wingman/server"
-	"github.com/bigmikesolutions/wingman/service/env"
-	"github.com/bigmikesolutions/wingman/service/vault"
+	"github.com/bigmikesolutions/wingman/server/env"
+	"github.com/bigmikesolutions/wingman/server/vault"
 )
 
 func main() {
@@ -74,6 +74,7 @@ func mustHTTPHandler(logger zerolog.Logger, cfg Config) http.Handler {
 	handler, err := server.NewHttpHandler(
 		cfg.HTTP,
 		&graphql.Resolver{
+			Logger:    logger.With().Str("component", "graphql").Logger(),
 			Providers: providers.NewProviders(dbx, secrets),
 			Tokens:    a10n,
 		},
