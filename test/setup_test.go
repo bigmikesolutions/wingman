@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/rs/zerolog"
+
 	"github.com/jmoiron/sqlx"
 
 	"github.com/bigmikesolutions/wingman/providers"
@@ -21,6 +23,9 @@ const (
 var dc *containers.Service
 
 func TestMain(m *testing.M) {
+	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	zerolog.TimeFieldFormat = time.RFC3339
+
 	ctx, cancel := context.WithTimeout(context.Background(), dockerSetupTimeout)
 	defer cancel()
 

@@ -52,3 +52,7 @@ local-docker-down:
 local-terraform-clean-up:
 	@rm -rf terraform/.terraform* 2>/dev/null || true
 	@rm terraform/terraform.tfstate 2>/dev/null || true
+
+local-docker-wingman:
+	@docker compose build
+	@docker compose up -d  --force-recreate wingman

@@ -8,10 +8,13 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/rs/zerolog"
 
 	"github.com/bigmikesolutions/wingman/graphql"
 	"github.com/bigmikesolutions/wingman/graphql/directives"
 	"github.com/bigmikesolutions/wingman/graphql/generated"
+	"github.com/bigmikesolutions/wingman/server/auth"
+	"github.com/bigmikesolutions/wingman/server/httpmiddleware"
 )
 
 const (
@@ -64,13 +67,16 @@ func NewHttpHandler(cfg HTTPConfig, resolver *graphql.Resolver, chain ...Handler
 
 func newHttpRouter(cfg HTTPConfig) *chi.Mux {
 	r := chi.NewRouter()
+
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(cfg.ReadTimeout))
 	r.Use(middleware.Compress(cfg.CompressLevel))
+	r.Use(httpmiddleware.RedirectProxy)
 	r.Use(middleware.Heartbeat(ProbesHealthEndpoint))
+	r.Use(httpmiddleware.Logger(zerolog.InfoLevel))
+	r.Use(auth.UserIdentity(zerolog.InfoLevel))
 
 	if cfg.PprofEnabled {
 		r.Mount(pprofEndpoint, pprofRouter())

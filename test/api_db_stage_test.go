@@ -55,7 +55,7 @@ type ApiDatabaseStage struct {
 }
 
 func NewApiDatabaseStage(t *testing.T) *ApiDatabaseStage {
-	tfRemove := tf.Deploy(t, tf.NewCfg(dc.Config().Localstack))
+	// tfRemove := tf.Deploy(t, tf.NewCfg(dc.Config().Localstack))
 
 	server, err := api.New(newProviders())
 	require.Nil(t, err, "api server")
@@ -63,7 +63,7 @@ func NewApiDatabaseStage(t *testing.T) *ApiDatabaseStage {
 	return &ApiDatabaseStage{
 		t:      t,
 		server: server,
-		tfDown: tfRemove,
+		// tfDown: tfRemove,
 	}
 }
 
