@@ -3,7 +3,7 @@ package env
 import (
 	"net/http"
 
-	"github.com/bigmikesolutions/wingman/server/auth"
+	"github.com/bigmikesolutions/wingman/server/token"
 )
 
 const (
@@ -12,7 +12,7 @@ const (
 
 type (
 	a10nService interface {
-		Validate(token string) (*auth.Token, error)
+		Validate(token string) (*token.Token, error)
 	}
 )
 

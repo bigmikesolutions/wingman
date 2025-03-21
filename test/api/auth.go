@@ -8,8 +8,8 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/bigmikesolutions/wingman/server/auth"
 	"github.com/bigmikesolutions/wingman/server/env"
+	"github.com/bigmikesolutions/wingman/server/token"
 )
 
 const (
@@ -20,7 +20,7 @@ type a10nRoundTripper struct {
 	envGrantToken *string
 }
 
-func NewJWT() (*auth.JWT, error) {
+func NewJWT() (*token.JWT, error) {
 	privateKey, err := os.Open("./api/private.pem")
 	if err != nil {
 		return nil, fmt.Errorf("could not open private key: %v", err)
@@ -31,7 +31,7 @@ func NewJWT() (*auth.JWT, error) {
 		return nil, fmt.Errorf("could not open public key: %v", err)
 	}
 
-	return auth.New(privateKey, publicKey, auth.Settings{
+	return token.New(privateKey, publicKey, token.Settings{
 		SigningMethod: jwt.SigningMethodRS256,
 		ExpTime:       EnvGrantTokenDuration,
 	})

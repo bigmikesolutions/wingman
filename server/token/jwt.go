@@ -1,4 +1,4 @@
-package auth
+package token
 
 import (
 	"crypto/rsa"
@@ -10,7 +10,7 @@ import (
 )
 
 type (
-	TokenValues = map[string]any
+	Values = map[string]any
 
 	Settings struct {
 		SigningMethod jwt.SigningMethod
@@ -25,12 +25,12 @@ type (
 
 	claims struct {
 		jwt.RegisteredClaims
-		Attrs TokenValues
+		Attrs Values
 	}
 
 	Token struct {
 		ExpiresAt time.Time
-		Values    TokenValues
+		Values    Values
 	}
 )
 
@@ -62,7 +62,7 @@ func New(privateReader, pubReader io.Reader, settings Settings) (*JWT, error) {
 	}, nil
 }
 
-func (s *JWT) Create(attributes TokenValues) (string, error) {
+func (s *JWT) Create(attributes Values) (string, error) {
 	t := jwt.New(s.settings.SigningMethod)
 	now := time.Now()
 	t.Claims = claims{
@@ -96,7 +96,7 @@ func (s *JWT) Validate(tokenString string) (*Token, error) {
 		return nil, fmt.Errorf("invalid claims")
 	}
 
-	attrs, ok := claims["Attrs"].(TokenValues)
+	attrs, ok := claims["Attrs"].(Values)
 	if !ok {
 		return nil, fmt.Errorf("invalid token values")
 	}

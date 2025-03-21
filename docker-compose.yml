@@ -173,9 +173,6 @@ services:
       - --auth-logging=true
       - --request-logging=true
       - --errors-to-info-log=true
-      - --whitelist-domain=localhost:8084
-      - --whitelist-domain=wingman:8080
-      - --whitelist-domain=traefik:8080
     restart: unless-stopped
     ports:
       - "4180:4180"
@@ -190,4 +187,3 @@ services:
       - "traefik.http.middlewares.oauth2-proxy.forwardauth.authResponseHeaders=Authorization"
       - "traefik.http.middlewares.oauth2-proxy.forwardauth.trustForwardHeader=true"
       - "traefik.http.routers.oauth2-proxy.rule=PathPrefix(`/oauth2`)"
-

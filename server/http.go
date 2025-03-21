@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/bigmikesolutions/wingman/server/token"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/go-chi/chi/v5"
@@ -13,7 +15,7 @@ import (
 	"github.com/bigmikesolutions/wingman/graphql"
 	"github.com/bigmikesolutions/wingman/graphql/directives"
 	"github.com/bigmikesolutions/wingman/graphql/generated"
-	"github.com/bigmikesolutions/wingman/server/auth"
+	"github.com/bigmikesolutions/wingman/server/a10n"
 	"github.com/bigmikesolutions/wingman/server/httpmiddleware"
 )
 
@@ -73,10 +75,11 @@ func newHttpRouter(cfg HTTPConfig) *chi.Mux {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(cfg.ReadTimeout))
 	r.Use(middleware.Compress(cfg.CompressLevel))
+	r.Use(token.ExtractJWTRoles)
 	r.Use(httpmiddleware.RedirectProxy)
 	r.Use(middleware.Heartbeat(ProbesHealthEndpoint))
 	r.Use(httpmiddleware.Logger(zerolog.InfoLevel))
-	r.Use(auth.UserIdentity(zerolog.InfoLevel))
+	r.Use(a10n.UserIdentity(zerolog.InfoLevel))
 
 	if cfg.PprofEnabled {
 		r.Mount(pprofEndpoint, pprofRouter())

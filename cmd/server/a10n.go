@@ -7,7 +7,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/bigmikesolutions/wingman/server/auth"
+	"github.com/bigmikesolutions/wingman/server/token"
 )
 
 type A10NConfig struct {
@@ -16,7 +16,7 @@ type A10NConfig struct {
 	TokenDuration  time.Duration `envconfig:"A10N_TOKEN_DURATION" default:"15m"`
 }
 
-func newA10N(cfg A10NConfig) (*auth.JWT, error) {
+func newA10N(cfg A10NConfig) (*token.JWT, error) {
 	privateKey, err := os.Open(cfg.PrivateKeyPath)
 	if err != nil {
 		return nil, fmt.Errorf("load private key: %w", err)
@@ -27,7 +27,7 @@ func newA10N(cfg A10NConfig) (*auth.JWT, error) {
 		return nil, fmt.Errorf("load public key: %w", err)
 	}
 
-	return auth.New(privateKey, publicKey, auth.Settings{
+	return token.New(privateKey, publicKey, token.Settings{
 		SigningMethod: jwt.SigningMethodRS256,
 		ExpTime:       cfg.TokenDuration,
 	})

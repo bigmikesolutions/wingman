@@ -5,8 +5,9 @@ package graphql
 import (
 	"github.com/rs/zerolog"
 
+	"github.com/bigmikesolutions/wingman/server/token"
+
 	"github.com/bigmikesolutions/wingman/providers"
-	"github.com/bigmikesolutions/wingman/server/auth"
 )
 
 // Resolver holds the state and allows dependency injection.
@@ -18,6 +19,6 @@ type Resolver struct {
 
 type (
 	TokenService interface {
-		Create(attributes auth.TokenValues) (string, error)
+		Create(attributes token.Values) (string, error)
 	}
 )

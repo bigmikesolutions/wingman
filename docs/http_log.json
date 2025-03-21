@@ -5,44 +5,41 @@
   "http.request.url": "/",
   "http.request.host": "oauth2-proxy:4180",
   "http.request.proto": "HTTP/1.1",
-  "http.request.headers.X-Forwarded-Email": [
-    "admin@wingman.com"
-  ],
-  "http.request.headers.X-Forwarded-Host": [
-    "localhost:8084"
-  ],
-  "http.request.headers.X-Forwarded-Method": [
-    "GET"
-  ],
-  "http.request.headers.User-Agent": [
-    "curl/8.7.1"
-  ],
   "http.request.headers.X-Forwarded-For": [
     "172.18.0.1, 172.18.0.4"
-  ],
-  "http.request.headers.X-Forwarded-Preferred-Username": [
-    "admin"
-  ],
-  "http.request.headers.X-Forwarded-User": [
-    "ece6a773-317c-401a-ba2b-901c140b29f3"
   ],
   "http.request.headers.X-Forwarded-Port": [
     "8084"
   ],
+  "http.request.headers.X-Forwarded-User": [
+    "ece6a773-317c-401a-ba2b-901c140b29f3"
+  ],
   "http.request.headers.X-Real-Ip": [
     "172.18.0.1"
   ],
-  "http.request.headers.Accept": [
-    "*/*"
+  "http.request.headers.User-Agent": [
+    "curl/8.7.1"
   ],
   "http.request.headers.Accept-Encoding": [
     "gzip"
   ],
+  "http.request.headers.X-Forwarded-Preferred-Username": [
+    "admin"
+  ],
+  "http.request.headers.Accept": [
+    "*/*"
+  ],
   "http.request.headers.X-Forwarded-Access-Token": [
     "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJRam5LOTJPQ1A3TnRqZ24wR1BxMGFnU0RfaXMtd0pyMXRUZVJkU1d3VzEwIn0.eyJleHAiOjE3NDI0OTg1MDYsImlhdCI6MTc0MjQ2MjUwNiwianRpIjoiYjkyYmJiYmUtYTg3OC00MGIzLWJkMDctMmEyOTNiMWM3MDgxIiwiaXNzIjoiaHR0cDovL2tleWNsb2FrOjgwODAvcmVhbG1zL3dpbmdtYW4iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiZWNlNmE3NzMtMzE3Yy00MDFhLWJhMmItOTAxYzE0MGIyOWYzIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoid2luZ21hbiIsInNpZCI6ImQ4NDk1Zjk3LTI4NDctNDY0My1hNTA5LWJlMmMzOTcyMTdiNiIsImFjciI6IjEiLCJhbGxvd2VkLW9yaWdpbnMiOlsiKiJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsiZGVmYXVsdC1yb2xlcy13aW5nbWFuIiwib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfSwid2luZ21hbiI6eyJyb2xlcyI6WyJ3cml0ZV9yZWFkIiwiYXBpX3JlYWQiXX19LCJzY29wZSI6ImVtYWlsIHByb2ZpbGUiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJXaW5nbWFuIEJvdCIsInByZWZlcnJlZF91c2VybmFtZSI6ImFkbWluIiwiZ2l2ZW5fbmFtZSI6IldpbmdtYW4iLCJmYW1pbHlfbmFtZSI6IkJvdCIsImVtYWlsIjoiYWRtaW5Ad2luZ21hbi5jb20ifQ.gvBk95zlcLJwyVI_IP_ZtfEXCLhmnfM7Z5vkNGF81w4tIVsQDT_OQxPh8uRZLFMUhWZgiLvF-kW54AzvtcekunIEKzfoV5tdBnfkLGh-sN94CfMeJmnclgQDJPy8jomMJKKYxGlyZJQUHOBOdQDcfgRiP2gYmkZgDqzeynabGjen_ALYZT8_prhTEi3DMaDklfJo5huD4ddv3FHKPHzXVE36o7Q5gw-8vqAtV_Mome9wwOs87crt0F4gVdQ4eqCbKYATYlNXYzCM-WMc9gWuuWcG0Jh4qwQl4G9PlTAq7vYegXavcGWjY3gTQRs-EmqcaTQ_tnn3zh0EQiC_wf46cA"
   ],
+  "http.request.headers.X-Forwarded-Host": [
+    "localhost:8084"
+  ],
   "http.request.headers.X-Forwarded-Proto": [
     "http"
+  ],
+  "http.request.headers.X-Forwarded-Method": [
+    "GET"
   ],
   "http.request.headers.X-Forwarded-Server": [
     "7131cbd0a9fc"
@@ -53,10 +50,13 @@
   "http.request.headers.Authorization": [
     "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJRam5LOTJPQ1A3TnRqZ24wR1BxMGFnU0RfaXMtd0pyMXRUZVJkU1d3VzEwIn0.eyJleHAiOjE3NDI0OTg1MDYsImlhdCI6MTc0MjQ2MjUwNiwianRpIjoiYjkyYmJiYmUtYTg3OC00MGIzLWJkMDctMmEyOTNiMWM3MDgxIiwiaXNzIjoiaHR0cDovL2tleWNsb2FrOjgwODAvcmVhbG1zL3dpbmdtYW4iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiZWNlNmE3NzMtMzE3Yy00MDFhLWJhMmItOTAxYzE0MGIyOWYzIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoid2luZ21hbiIsInNpZCI6ImQ4NDk1Zjk3LTI4NDctNDY0My1hNTA5LWJlMmMzOTcyMTdiNiIsImFjciI6IjEiLCJhbGxvd2VkLW9yaWdpbnMiOlsiKiJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsiZGVmYXVsdC1yb2xlcy13aW5nbWFuIiwib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfSwid2luZ21hbiI6eyJyb2xlcyI6WyJ3cml0ZV9yZWFkIiwiYXBpX3JlYWQiXX19LCJzY29wZSI6ImVtYWlsIHByb2ZpbGUiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJXaW5nbWFuIEJvdCIsInByZWZlcnJlZF91c2VybmFtZSI6ImFkbWluIiwiZ2l2ZW5fbmFtZSI6IldpbmdtYW4iLCJmYW1pbHlfbmFtZSI6IkJvdCIsImVtYWlsIjoiYWRtaW5Ad2luZ21hbi5jb20ifQ.gvBk95zlcLJwyVI_IP_ZtfEXCLhmnfM7Z5vkNGF81w4tIVsQDT_OQxPh8uRZLFMUhWZgiLvF-kW54AzvtcekunIEKzfoV5tdBnfkLGh-sN94CfMeJmnclgQDJPy8jomMJKKYxGlyZJQUHOBOdQDcfgRiP2gYmkZgDqzeynabGjen_ALYZT8_prhTEi3DMaDklfJo5huD4ddv3FHKPHzXVE36o7Q5gw-8vqAtV_Mome9wwOs87crt0F4gVdQ4eqCbKYATYlNXYzCM-WMc9gWuuWcG0Jh4qwQl4G9PlTAq7vYegXavcGWjY3gTQRs-EmqcaTQ_tnn3zh0EQiC_wf46cA"
   ],
+  "http.request.headers.X-Forwarded-Email": [
+    "admin@wingman.com"
+  ],
   "http.request.body": "",
   "http.response.status_code": 200,
   "http.response.body": "wingman",
-  "http.duration": 0.007458,
-  "time": "2025-03-20T10:42:03Z",
-  "message": "GET / - 200 7.458µs"
+  "http.duration": 0.01725,
+  "time": "2025-03-20T11:47:22Z",
+  "message": "GET / - 200 17.25µs"
 }
