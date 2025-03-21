@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/bigmikesolutions/wingman/test/containers/tf"
-
 	_ "github.com/jackc/pgx/v5/stdlib" // drivers
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // drivers
@@ -48,7 +46,6 @@ var dbCleanTables = []string{
 type ApiDatabaseStage struct {
 	t      *testing.T
 	server *api.HTTPServer
-	tfDown tf.TearDownFunc
 
 	queryDatabase *model.Database
 	err           error
@@ -75,11 +72,6 @@ func (s *ApiDatabaseStage) Close() {
 		_ = dbx.Close()
 	}()
 	cleanTables(dbx, dbCleanTables)
-
-	if s.tfDown != nil {
-		s.tfDown()
-		s.tfDown = nil
-	}
 }
 
 func (s *ApiDatabaseStage) Given() *ApiDatabaseStage {

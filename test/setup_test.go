@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rs/zerolog"
-
 	"github.com/jmoiron/sqlx"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 
 	"github.com/bigmikesolutions/wingman/providers"
 	"github.com/bigmikesolutions/wingman/server/vault"
@@ -47,7 +47,7 @@ func newProviders() *providers.Providers {
 	}
 
 	vaultCfg := dc.Config().Vault
-	v, err := vault.New(context.Background(), vault.Config{
+	v, err := vault.New(context.Background(), log.Logger, vault.Config{
 		Address: fmt.Sprintf("http://localhost:%d", vaultCfg.Port),
 		Token:   vaultCfg.RootToken,
 	})

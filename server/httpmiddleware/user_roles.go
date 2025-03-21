@@ -28,7 +28,7 @@ func UserRoles(next http.Handler) http.Handler {
 
 			roles := extractRoles(tokenClaims)
 			if len(roles) > 0 {
-				r.Header.Set(headerUserRoles, strings.Join(roles, userRolesSeparator))
+				r.Header.Set(HeaderUserRoles, strings.Join(roles, RolesSeparator))
 			}
 
 		}

@@ -3,8 +3,9 @@ package vault
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
+
+	"github.com/rs/zerolog"
 
 	"github.com/hashicorp/vault-client-go"
 	"github.com/hashicorp/vault-client-go/schema"
@@ -12,29 +13,28 @@ import (
 
 type (
 	Secrets struct {
-		cfg   Config
-		vault *vault.Client
+		cfg    Config
+		vault  *vault.Client
+		logger zerolog.Logger
 	}
 )
 
 var secretMountPath = vault.WithMountPath("secret")
 
-func New(ctx context.Context, cfg Config) (*Secrets, error) {
-	client, err := newClient(ctx, cfg)
+func New(ctx context.Context, logger zerolog.Logger, cfg Config) (*Secrets, error) {
+	client, err := newClient(ctx, logger, cfg)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Secrets{
-		cfg:   cfg,
-		vault: client,
+		cfg:    cfg,
+		vault:  client,
+		logger: logger,
 	}, nil
 }
 
 func (s *Secrets) Read(ctx context.Context, path string, v any) error {
-	// TODO make it a debug
-	log.Printf("reading secret with a path %s", path)
-
 	sv, err := s.vault.Secrets.KvV2Read(ctx, path, secretMountPath)
 	if err != nil {
 		if vault.IsErrorStatus(err, http.StatusNotFound) {
@@ -44,7 +44,13 @@ func (s *Secrets) Read(ctx context.Context, path string, v any) error {
 		return fmt.Errorf("read secret: %w", err)
 	}
 
-	log.Printf("read secret: %v", sv.Data.Data)
+	t := s.logger.Trace()
+	if t.Enabled() {
+		t.Str("path", path).
+			Any("secret", sv.Data.Data).
+			Msg("read secret")
+	}
+
 	if err := unmarshall(sv.Data.Data, &v); err != nil {
 		return fmt.Errorf("read secret: %w", err)
 	}
@@ -58,8 +64,12 @@ func (s *Secrets) Write(ctx context.Context, path string, v any) error {
 		return err
 	}
 
-	// TODO make it a debug
-	log.Printf("writing secret %+v with a path %s", v, path)
+	t := s.logger.Trace()
+	if t.Enabled() {
+		t.Str("path", path).
+			Any("secret", v).
+			Msg("write secret")
+	}
 
 	_, err = s.vault.Secrets.KvV2Write(
 		ctx,

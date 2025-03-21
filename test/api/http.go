@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 
+	"github.com/bigmikesolutions/wingman/server/a10n"
+
 	gql "github.com/shurcooL/graphql"
 
 	"github.com/bigmikesolutions/wingman/graphql"
@@ -72,4 +74,8 @@ func (s *HTTPServer) Close() {
 
 func (s *HTTPServer) SetEnvToken(t string) {
 	s.rt.envGrantToken = &t
+}
+
+func (s *HTTPServer) SetUser(u a10n.UserIdentity) {
+	s.rt.user = &u
 }

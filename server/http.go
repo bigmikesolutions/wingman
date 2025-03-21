@@ -76,7 +76,7 @@ func newHttpRouter(cfg HTTPConfig) *chi.Mux {
 	r.Use(httpmiddleware.UserRoles)
 	r.Use(httpmiddleware.UserIdentity)
 	r.Use(middleware.Heartbeat(ProbesHealthEndpoint))
-	r.Use(httpmiddleware.Logger(zerolog.InfoLevel))
+	r.Use(httpmiddleware.Logger(zerolog.DebugLevel))
 
 	if cfg.PprofEnabled {
 		r.Mount(pprofEndpoint, pprofRouter())
