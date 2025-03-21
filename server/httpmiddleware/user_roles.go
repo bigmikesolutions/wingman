@@ -1,4 +1,4 @@
-package token
+package httpmiddleware
 
 import (
 	"fmt"
@@ -11,10 +11,10 @@ import (
 const (
 	headerXForwardedAccessToken = "X-Forwarded-Access-Token"
 	keyRoles                    = "roles"
-	A10NRolesHeader             = "X-A10-Roles"
 )
 
-func ExtractJWTRoles(next http.Handler) http.Handler {
+// UserRoles extract roles from JWT token and saves it as one of X headers.
+func UserRoles(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tokenHeader := r.Header.Get(headerXForwardedAccessToken)
 
@@ -28,7 +28,7 @@ func ExtractJWTRoles(next http.Handler) http.Handler {
 
 			roles := extractRoles(tokenClaims)
 			if len(roles) > 0 {
-				w.Header().Set(A10NRolesHeader, strings.Join(roles, ","))
+				r.Header.Set(headerUserRoles, strings.Join(roles, userRolesSeparator))
 			}
 
 		}
