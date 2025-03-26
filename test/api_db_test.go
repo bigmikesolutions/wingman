@@ -19,6 +19,8 @@ func Test_Api_Database_ShouldGetInfo(t *testing.T) {
 
 	s.Given().
 		ServerIsUpAndRunning().And().
+		EnvironmentIsCreated(envID).And().
+		// User has env admin role
 		DatabaseIsProvided(connectionInfo(dbID, dbCfg)).And().
 		DatabaseUserRoleIsCreated(model.AddDatabaseUserRoleInput{
 			MutationID: ptr(t.Name()),
@@ -36,7 +38,7 @@ func Test_Api_Database_ShouldGetInfo(t *testing.T) {
 			},
 		}).And().
 		EnvGrantMutation(model.EnvGrantInput{
-			MutationID: ptr("creat-env-grant"),
+			MutationID: ptr(t.Name()),
 			Reason:     ptr("testing..."),
 			Resource: []*model.ResourceGrantInput{
 				{
@@ -57,6 +59,57 @@ func Test_Api_Database_ShouldGetInfo(t *testing.T) {
 	s.Then().
 		NoClientError().And().
 		DatabaseInfoIsReturned(dbID, expDriverPostgres)
+}
+
+func Test_Api_Database_ShouldNotGetInfoForNonExistingEnv(t *testing.T) {
+	s := NewApiDatabaseStage(t)
+	defer s.Close()
+
+	envID := "test-env"
+	roleID := uuid.New().String()
+	dbID := uuid.New().String()
+	dbCfg := newTestDatabase(dc)
+
+	s.Given().
+		ServerIsUpAndRunning().And().
+		// User has env admin role
+		DatabaseIsProvided(connectionInfo(dbID, dbCfg)).And().
+		DatabaseUserRoleIsCreated(model.AddDatabaseUserRoleInput{
+			MutationID: ptr(t.Name()),
+			UserRoles: []*model.AddDatabaseUserRole{
+				{
+					ID:          ptr(roleID),
+					Description: ptr("read-only info access"),
+					DatabaseAccess: []*model.DatabaseAccessInput{
+						{
+							ID:   dbID,
+							Info: ptr(model.AccessTypeReadOnly),
+						},
+					},
+				},
+			},
+		}).And().
+		EnvGrantMutation(model.EnvGrantInput{
+			MutationID: ptr(t.Name()),
+			Reason:     ptr("testing..."),
+			Resource: []*model.ResourceGrantInput{
+				{
+					Env: envID,
+					Database: []*model.DatabaseResource{
+						{
+							ID:   dbID,
+							Info: ptr(model.AccessTypeReadOnly),
+						},
+					},
+				},
+			},
+		})
+
+	s.When().
+		DatabaseInfoQuery(envID, dbID)
+
+	s.Then().
+		ClientErrorIs("environment not found")
 }
 
 func Test_Api_Database_ShouldGetTableData(t *testing.T) {

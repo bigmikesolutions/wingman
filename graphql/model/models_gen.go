@@ -86,6 +86,23 @@ type ConnectionInfo struct {
 	HasNextPage bool          `json:"hasNextPage"`
 }
 
+type CreateEnvironmentError struct {
+	Code    CreateEnvironmentErrorCode `json:"code"`
+	Message *string                    `json:"message,omitempty"`
+}
+
+type CreateEnvironmentInput struct {
+	MutationID  *string `json:"mutationId,omitempty"`
+	Env         string  `json:"env"`
+	Description *string `json:"description,omitempty"`
+}
+
+type CreateEnvironmentPayload struct {
+	MutationID *string                 `json:"mutationId,omitempty"`
+	Env        string                  `json:"env"`
+	Error      *CreateEnvironmentError `json:"error,omitempty"`
+}
+
 type Database struct {
 	ID    string               `json:"id"`
 	Info  *DatabaseInfo        `json:"info,omitempty"`
@@ -202,7 +219,6 @@ type Query struct {
 
 type ResourceGrantInput struct {
 	Env      string               `json:"env"`
-	AccessID string               `json:"accessId"`
 	K8s      []*NamespaceResource `json:"k8s,omitempty"`
 	Database []*DatabaseResource  `json:"database,omitempty"`
 }
@@ -469,6 +485,49 @@ func (e *AddUserRoleBindingClientErrorCode) UnmarshalGQL(v any) error {
 }
 
 func (e AddUserRoleBindingClientErrorCode) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type CreateEnvironmentErrorCode string
+
+const (
+	CreateEnvironmentErrorCodeInvalidInput  CreateEnvironmentErrorCode = "INVALID_INPUT"
+	CreateEnvironmentErrorCodeUnauthorized  CreateEnvironmentErrorCode = "UNAUTHORIZED"
+	CreateEnvironmentErrorCodeAlreadyExists CreateEnvironmentErrorCode = "ALREADY_EXISTS"
+)
+
+var AllCreateEnvironmentErrorCode = []CreateEnvironmentErrorCode{
+	CreateEnvironmentErrorCodeInvalidInput,
+	CreateEnvironmentErrorCodeUnauthorized,
+	CreateEnvironmentErrorCodeAlreadyExists,
+}
+
+func (e CreateEnvironmentErrorCode) IsValid() bool {
+	switch e {
+	case CreateEnvironmentErrorCodeInvalidInput, CreateEnvironmentErrorCodeUnauthorized, CreateEnvironmentErrorCodeAlreadyExists:
+		return true
+	}
+	return false
+}
+
+func (e CreateEnvironmentErrorCode) String() string {
+	return string(e)
+}
+
+func (e *CreateEnvironmentErrorCode) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = CreateEnvironmentErrorCode(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid CreateEnvironmentErrorCode", str)
+	}
+	return nil
+}
+
+func (e CreateEnvironmentErrorCode) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

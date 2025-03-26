@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS "user_role" (
 
     created_at TIMESTAMP WITH TIME ZONE,
     created_by TEXT,
-    updated_AT TIMESTAMP WITH TIME ZONE,
+    updated_at TIMESTAMP WITH TIME ZONE,
     updated_by TEXT,
 
     description TEXT,

@@ -5,16 +5,17 @@ package graphql
 import (
 	"github.com/rs/zerolog"
 
-	"github.com/bigmikesolutions/wingman/server/token"
-
 	"github.com/bigmikesolutions/wingman/providers"
+	"github.com/bigmikesolutions/wingman/server/env"
+	"github.com/bigmikesolutions/wingman/server/token"
 )
 
 // Resolver holds the state and allows dependency injection.
 type Resolver struct {
-	Logger    zerolog.Logger
-	Providers *providers.Providers
-	Tokens    TokenService
+	Logger       zerolog.Logger
+	Providers    *providers.Providers
+	Tokens       TokenService
+	Environments *env.Service
 }
 
 type (

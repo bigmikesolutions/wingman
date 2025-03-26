@@ -46,32 +46,29 @@ var dbCleanTables = []string{
 type ApiDatabaseStage struct {
 	t      *testing.T
 	server *api.HTTPServer
+	dbx    *sqlx.DB
 
 	queryDatabase *model.Database
 	err           error
 }
 
 func NewApiDatabaseStage(t *testing.T) *ApiDatabaseStage {
-	// tfRemove := tf.Deploy(t, tf.NewCfg(dc.Config().Localstack))
-
-	server, err := api.New(newProviders())
+	dbx := mustDB()
+	server, err := api.New(dbx, newProviders(dbx))
 	require.Nil(t, err, "api server")
 
 	return &ApiDatabaseStage{
 		t:      t,
 		server: server,
-		// tfDown: tfRemove,
+		dbx:    dbx,
 	}
 }
 
 func (s *ApiDatabaseStage) Close() {
 	s.server.Close()
 
-	dbx := mustDB()
-	defer func() {
-		_ = dbx.Close()
-	}()
-	cleanTables(dbx, dbCleanTables)
+	cleanTables(s.dbx, dbCleanTables)
+	_ = s.dbx.Close()
 }
 
 func (s *ApiDatabaseStage) Given() *ApiDatabaseStage {
@@ -245,5 +242,20 @@ func (s *ApiDatabaseStage) EnvGrantMutation(input model.EnvGrantInput) *ApiDatab
 		s.t.Logf("Setting env token for further communication with HTTP server - claims: %+v", values)
 		s.server.SetEnvToken(*payload.Token)
 	}
+	return s
+}
+
+func (s *ApiDatabaseStage) EnvironmentIsCreated(env string) *ApiDatabaseStage {
+	ctx, cancel := testContext()
+	defer cancel()
+
+	payload, err := s.server.CreateEnvironment(ctx, model.CreateEnvironmentInput{
+		MutationID:  ptr("test-db-env"),
+		Env:         env,
+		Description: ptr("test-dv-env"),
+	})
+	require.Nil(s.t, err, "create env - server error")
+	require.Nil(s.t, payload.Error, "create env - client error")
+
 	return s
 }

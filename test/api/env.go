@@ -23,3 +23,21 @@ func (s *HTTPServer) EnvGrantMutation(
 
 	return &mutation.EnvGrantPayload, nil
 }
+
+func (s *HTTPServer) CreateEnvironment(
+	ctx context.Context,
+	input model.CreateEnvironmentInput,
+) (*model.CreateEnvironmentPayload, error) {
+	var mutation struct {
+		model.CreateEnvironmentPayload `graphql:"createEnvironment(input: $input)"`
+	}
+
+	err := s.graphql.Mutate(ctx, &mutation, map[string]interface{}{
+		"input": input,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &mutation.CreateEnvironmentPayload, nil
+}

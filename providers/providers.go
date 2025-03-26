@@ -26,7 +26,3 @@ func NewProviders(dbx *sqlx.DB, secrets *vault.Secrets) *Providers {
 		DbRbac: dbRbac,
 	}
 }
-
-func (p *Providers) Close() error {
-	return p.DB.Close()
-}

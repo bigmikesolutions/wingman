@@ -14,6 +14,7 @@ import (
 	"github.com/bigmikesolutions/wingman/providers"
 	"github.com/bigmikesolutions/wingman/server"
 	"github.com/bigmikesolutions/wingman/server/env"
+	"github.com/bigmikesolutions/wingman/server/env/repo"
 	"github.com/bigmikesolutions/wingman/server/vault"
 )
 
@@ -66,7 +67,7 @@ func mustHTTPHandler(logger zerolog.Logger, cfg Config) http.Handler {
 		logger.Fatal().Err(err).Msg("failed to create DB connection")
 	}
 
-	secrets, err := vault.New(context.Background(), cfg.Vault)
+	secrets, err := vault.New(context.Background(), logger, cfg.Vault)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("failed to create vault secrets service")
 	}
@@ -74,9 +75,10 @@ func mustHTTPHandler(logger zerolog.Logger, cfg Config) http.Handler {
 	handler, err := server.NewHttpHandler(
 		cfg.HTTP,
 		&graphql.Resolver{
-			Logger:    logger.With().Str("component", "graphql").Logger(),
-			Providers: providers.NewProviders(dbx, secrets),
-			Tokens:    a10n,
+			Logger:       logger.With().Str("component", "graphql").Logger(),
+			Providers:    providers.NewProviders(dbx, secrets),
+			Tokens:       a10n,
+			Environments: env.New(repo.NewEnvironments(dbx)),
 		},
 		env.SessionReader(a10n),
 	)

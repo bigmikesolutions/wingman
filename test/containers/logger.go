@@ -1,9 +1,14 @@
 package containers
 
-import "log"
+import (
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+)
 
-type logger struct{}
+type logger struct {
+	logger zerolog.Logger
+}
 
 func (c logger) Printf(format string, v ...interface{}) {
-	log.Printf(format, v...)
+	log.Logger.Debug().Msgf(format, v...)
 }

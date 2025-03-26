@@ -5,6 +5,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 
+	"github.com/jmoiron/sqlx"
+
+	"github.com/bigmikesolutions/wingman/server/env/repo"
+
 	"github.com/bigmikesolutions/wingman/server/a10n"
 
 	gql "github.com/shurcooL/graphql"
@@ -25,7 +29,7 @@ type HTTPServer struct {
 	rt         *a10nRoundTripper
 }
 
-func New(prov *providers.Providers) (*HTTPServer, error) {
+func New(dbx *sqlx.DB, prov *providers.Providers) (*HTTPServer, error) {
 	cfg, err := server.LoadCfg()
 	if err != nil {
 		return nil, err
@@ -37,8 +41,9 @@ func New(prov *providers.Providers) (*HTTPServer, error) {
 	}
 
 	resolver := &graphql.Resolver{
-		Providers: prov,
-		Tokens:    token,
+		Providers:    prov,
+		Tokens:       token,
+		Environments: env.New(repo.NewEnvironments(dbx)),
 	}
 
 	handler, err := server.NewHttpHandler(cfg.HTTP, resolver, env.SessionReader(token))
@@ -69,7 +74,6 @@ func New(prov *providers.Providers) (*HTTPServer, error) {
 
 func (s *HTTPServer) Close() {
 	s.server.Close()
-	_ = s.providers.Close()
 }
 
 func (s *HTTPServer) SetEnvToken(t string) {

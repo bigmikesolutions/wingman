@@ -40,12 +40,7 @@ func TestMain(m *testing.M) {
 	defer os.Exit(code)
 }
 
-func newProviders() *providers.Providers {
-	db, err := dc.DB(context.Background())
-	if err != nil {
-		panic(fmt.Errorf("could not connect to db: %w", err))
-	}
-
+func newProviders(dbx *sqlx.DB) *providers.Providers {
 	vaultCfg := dc.Config().Vault
 	v, err := vault.New(context.Background(), log.Logger, vault.Config{
 		Address: fmt.Sprintf("http://localhost:%d", vaultCfg.Port),
@@ -55,7 +50,7 @@ func newProviders() *providers.Providers {
 		panic(fmt.Errorf("could not connect to vault: %w", err))
 	}
 
-	return providers.NewProviders(db, v)
+	return providers.NewProviders(dbx, v)
 }
 
 func mustDB() *sqlx.DB {
