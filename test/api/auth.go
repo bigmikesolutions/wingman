@@ -49,6 +49,7 @@ func (a a10nRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 		req.Header.Set(httpmiddleware.HeaderUserID, a.user.UserID)
 		req.Header.Set(httpmiddleware.HeaderUserName, a.user.UserName)
 		req.Header.Set(httpmiddleware.HeaderUserEmail, a.user.Email)
+		req.Header.Set(httpmiddleware.HeaderOrgID, a.user.OrgID)
 		req.Header.Set(httpmiddleware.HeaderUserRoles, strings.Join(a.user.Roles, httpmiddleware.RolesSeparator))
 	}
 	return http.DefaultTransport.RoundTrip(req)

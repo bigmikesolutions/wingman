@@ -39,18 +39,6 @@ resource "keycloak_openid_client" "wingman" {
   }
 }
 
-resource "keycloak_role" "wingman_api_read" {
-  realm_id  = keycloak_realm.wingman.id
-  name      = "api_read"
-  client_id = keycloak_openid_client.wingman.id
-}
-
-resource "keycloak_role" "wingman_api_write" {
-  realm_id  = keycloak_realm.wingman.id
-  name      = "write_read"
-  client_id = keycloak_openid_client.wingman.id
-}
-
 resource "keycloak_openid_client_scope" "wingman_scope" {
   realm_id               = keycloak_realm.wingman.id
   name                   = "wingman_scope"
@@ -72,17 +60,11 @@ resource "keycloak_openid_client_optional_scopes" "wingman_optional_scopes" {
   ]
 }
 
-resource "keycloak_group" "admin" {
-  realm_id = keycloak_realm.wingman.id
-  name     = "Admins"
+resource "keycloak_openid_audience_protocol_mapper" "audience_mapper" {
+  realm_id    = keycloak_realm.wingman.id
+  client_id   = keycloak_openid_client.wingman.id
+  name        = "audience-mapper"
+  included_custom_audience = "wingman"
+  add_to_id_token = true
+  add_to_access_token = true
 }
-
-resource "keycloak_group_roles" "admin_roles" {
-  realm_id = keycloak_realm.wingman.id
-  group_id = keycloak_group.admin.id
-  role_ids = [
-    keycloak_role.wingman_api_read.id,
-    keycloak_role.wingman_api_write.id,
-  ]
-}
-

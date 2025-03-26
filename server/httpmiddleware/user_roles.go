@@ -11,10 +11,11 @@ import (
 const (
 	headerXForwardedAccessToken = "X-Forwarded-Access-Token"
 	keyRoles                    = "roles"
+	roleSeparator               = "-"
 )
 
-// UserRoles extract roles from JWT token and saves it as one of X headers.
-func UserRoles(next http.Handler) http.Handler {
+// UserOrgAndRoles extract org & role data from JWT token and saves it as one of X headers.
+func UserOrgAndRoles(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tokenHeader := r.Header.Get(headerXForwardedAccessToken)
 
@@ -27,6 +28,15 @@ func UserRoles(next http.Handler) http.Handler {
 			}
 
 			roles := extractRoles(tokenClaims)
+
+			for idx, role := range roles {
+				if strings.IndexAny(role, roleSeparator) == -1 {
+					r.Header.Set(HeaderOrgID, role)
+					roles = append(roles[:idx], roles[idx+1:]...)
+					break
+				}
+			}
+
 			if len(roles) > 0 {
 				r.Header.Set(HeaderUserRoles, strings.Join(roles, RolesSeparator))
 			}

@@ -73,7 +73,7 @@ func newHttpRouter(cfg HTTPConfig) *chi.Mux {
 	r.Use(middleware.Timeout(cfg.ReadTimeout))
 	r.Use(middleware.Compress(cfg.CompressLevel))
 	r.Use(httpmiddleware.RedirectProxy)
-	r.Use(httpmiddleware.UserRoles)
+	r.Use(httpmiddleware.UserOrgAndRoles)
 	r.Use(httpmiddleware.UserIdentity)
 	r.Use(middleware.Heartbeat(ProbesHealthEndpoint))
 	r.Use(httpmiddleware.Logger(zerolog.DebugLevel))

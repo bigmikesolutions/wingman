@@ -9,12 +9,26 @@ import (
 type (
 	contextKey struct{}
 
+	Role           = string
+	OrganisationID = string
+	UserID         = string
+
 	UserIdentity struct {
-		UserID   string
+		UserID   UserID
 		Email    string
 		UserName string
-		Roles    []string
+		OrgID    OrganisationID
+		Roles    []Role
 	}
+)
+
+const (
+	AdminRead      Role = "admin-read"
+	AdminWrite     Role = "admin-write"
+	ManagerRead    Role = "manager-read"
+	ManagerWrite   Role = "manager-write"
+	DeveloperRead  Role = "dev-read"
+	DeveloperWrite Role = "dev-write"
 )
 
 var (
@@ -24,7 +38,7 @@ var (
 )
 
 func deepClone(u UserIdentity) UserIdentity {
-	c := make([]string, len(u.Roles))
+	c := make([]Role, len(u.Roles))
 	copy(c, u.Roles)
 	u.Roles = c
 	return u
@@ -42,7 +56,12 @@ func GetIdentity(ctx context.Context) (UserIdentity, error) {
 	}
 }
 
-func Authorized(ctx context.Context, roles ...string) error {
+func UserAuthenticated(ctx context.Context) error {
+	_, err := GetIdentity(ctx)
+	return err
+}
+
+func UserAuthorized(ctx context.Context, roles ...Role) error {
 	u, err := GetIdentity(ctx)
 	if err != nil {
 		return err
@@ -51,7 +70,7 @@ func Authorized(ctx context.Context, roles ...string) error {
 	return u.HasRoles(roles...)
 }
 
-func (u *UserIdentity) HasRoles(roles ...string) error {
+func (u *UserIdentity) HasRoles(roles ...Role) error {
 	for _, r := range roles {
 		found := false
 

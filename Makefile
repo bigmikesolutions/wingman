@@ -16,12 +16,12 @@ fmt:
 	@goimports -local "github.com/bigmikesolutions/wingman" -l -w .
 	@gofumpt -l -w .
 
-build: generate build-api
+build: build-server
 
-build-api:
-	@CGO_ENABLED=0 go build -o bin/api \
+build-server:
+	@CGO_ENABLED=0 go build -o bin/server \
 		-ldflags "-X github.com/bigmikesolutions/wingman/service/build.Version=${VER}" \
-		./cmd/api
+		./cmd/server
 
 generate:
 	@go generate ./...
@@ -37,9 +37,6 @@ vendor:
 
 test:
 	@go test -short -race -count=1 -v ./...
-
-local-run-api: build-api
-	@./bin/api
 
 local-docker: local-terraform-clean-up local-docker-down local-docker-up
 

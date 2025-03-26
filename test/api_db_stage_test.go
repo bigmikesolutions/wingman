@@ -13,6 +13,7 @@ import (
 	"github.com/bigmikesolutions/wingman/graphql/model"
 	"github.com/bigmikesolutions/wingman/graphql/model/cursor"
 	"github.com/bigmikesolutions/wingman/providers/db"
+	"github.com/bigmikesolutions/wingman/server/a10n"
 	"github.com/bigmikesolutions/wingman/test/api"
 )
 
@@ -257,5 +258,10 @@ func (s *ApiDatabaseStage) EnvironmentIsCreated(env string) *ApiDatabaseStage {
 	require.Nil(s.t, err, "create env - server error")
 	require.Nil(s.t, payload.Error, "create env - client error")
 
+	return s
+}
+
+func (s *ApiDatabaseStage) UserIdentity(user a10n.UserIdentity) *ApiDatabaseStage {
+	s.server.SetUser(user)
 	return s
 }

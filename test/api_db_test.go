@@ -3,9 +3,9 @@ package test
 import (
 	"testing"
 
-	"github.com/google/uuid"
-
 	"github.com/bigmikesolutions/wingman/graphql/model"
+	"github.com/bigmikesolutions/wingman/server/a10n"
+	"github.com/google/uuid"
 )
 
 func Test_Api_Database_ShouldGetInfo(t *testing.T) {
@@ -19,6 +19,11 @@ func Test_Api_Database_ShouldGetInfo(t *testing.T) {
 
 	s.Given().
 		ServerIsUpAndRunning().And().
+		UserIdentity(a10n.UserIdentity{
+			UserID: "admin",
+			OrgID:  "bms",
+			Roles:  []a10n.Role{a10n.AdminWrite, a10n.AdminRead},
+		}).And().
 		EnvironmentIsCreated(envID).And().
 		// User has env admin role
 		DatabaseIsProvided(connectionInfo(dbID, dbCfg)).And().

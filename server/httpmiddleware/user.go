@@ -11,7 +11,8 @@ const (
 	HeaderUserID    = "X-Forwarded-User"
 	HeaderUserName  = "X-Forwarded-Preferred-Username"
 	HeaderUserEmail = "X-Forwarded-Email"
-	HeaderUserRoles = "X-A10-Roles"
+	HeaderOrgID     = "X-Forwarded-Organisation"
+	HeaderUserRoles = "X-Forwarded-Roles"
 	RolesSeparator  = ","
 )
 
@@ -22,6 +23,7 @@ func UserIdentity(next http.Handler) http.Handler {
 			UserID:   r.Header.Get(HeaderUserID),
 			Email:    r.Header.Get(HeaderUserEmail),
 			UserName: r.Header.Get(HeaderUserName),
+			OrgID:    r.Header.Get(HeaderOrgID),
 		}
 
 		roles := r.Header.Get(HeaderUserRoles)

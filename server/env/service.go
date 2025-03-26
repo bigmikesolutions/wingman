@@ -3,6 +3,8 @@ package env
 import (
 	"context"
 	"errors"
+
+	"github.com/bigmikesolutions/wingman/server/a10n"
 )
 
 type (
@@ -25,17 +27,17 @@ func New(repo repo) *Service {
 }
 
 func (s *Service) FindByID(ctx context.Context, id ID) (*Environment, error) {
-	//if err := a10n.Authorized(ctx, a10n.AgentRead); err != nil {
-	//	return nil, err
-	//}
+	if err := a10n.UserAuthenticated(ctx); err != nil {
+		return nil, err
+	}
 
 	return s.repo.FindByID(ctx, id)
 }
 
 func (s *Service) Create(ctx context.Context, env Environment) error {
-	//if err := a10n.Authorized(ctx, a10n.AgentWrite); err != nil {
-	//	return err
-	//}
+	if err := a10n.UserAuthorized(ctx, a10n.AdminWrite); err != nil {
+		return err
+	}
 
 	return s.repo.Create(ctx, env)
 }
