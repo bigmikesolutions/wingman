@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 )
 
 type (
@@ -67,24 +68,20 @@ func UserAuthorized(ctx context.Context, roles ...Role) error {
 		return err
 	}
 
-	return u.HasRoles(roles...)
+	return u.ContainsRole(roles...)
 }
 
-func (u *UserIdentity) HasRoles(roles ...Role) error {
+func (u *UserIdentity) ContainsRole(roles ...Role) error {
 	for _, r := range roles {
-		found := false
-
 		for _, role := range u.Roles {
 			if role == r {
-				found = true
-				break
+				return nil
 			}
-		}
-
-		if !found {
-			return fmt.Errorf("%w - missing scope: %s", ErrUserNotAuthorized, r)
 		}
 	}
 
-	return nil
+	return fmt.Errorf("%w - missing one scopes: %s",
+		ErrUserNotAuthorized,
+		strings.Join(roles, ","),
+	)
 }

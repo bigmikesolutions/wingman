@@ -12,7 +12,7 @@ import (
 func EnvSession(ctx context.Context, _ interface{}, next graphql.Resolver) (interface{}, error) {
 	if err := env.ValidateSession(ctx); err != nil {
 		return nil, &gqlerror.Error{
-			Message: ctx.Err().Error(),
+			Message: err.Error(),
 		}
 	}
 

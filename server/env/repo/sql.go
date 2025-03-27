@@ -3,12 +3,12 @@ package repo
 const (
 	createEnv = `
 INSERT INTO wingman.environments(
-	id, 
+	id, org_id,
 	created_at, created_by, updated_at, updated_by,
 	description
 )
 VALUES(
-    :id,
+    :id, :org_id,
     :created_at, :created_by, :updated_at, :updated_by,
 	:description
 )`
@@ -19,6 +19,7 @@ SELECT
 FROM
 	wingman.environments
 WHERE 
-	id = $1
+  	org_id = $1
+	and id = $2
 `
 )

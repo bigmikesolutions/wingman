@@ -41,10 +41,11 @@ INSERT INTO students(id,first_name,last_name,age) values
 )
 
 var dbCleanTables = []string{
+	"wingman.environments",
 	"provider_db.user_role",
 }
 
-type ApiDatabaseStage struct {
+type DatabaseStage struct {
 	t      *testing.T
 	server *api.HTTPServer
 	dbx    *sqlx.DB
@@ -53,82 +54,82 @@ type ApiDatabaseStage struct {
 	err           error
 }
 
-func NewApiDatabaseStage(t *testing.T) *ApiDatabaseStage {
+func NewDatabaseStage(t *testing.T) *DatabaseStage {
 	dbx := mustDB()
 	server, err := api.New(dbx, newProviders(dbx))
 	require.Nil(t, err, "api server")
 
-	return &ApiDatabaseStage{
+	return &DatabaseStage{
 		t:      t,
 		server: server,
 		dbx:    dbx,
 	}
 }
 
-func (s *ApiDatabaseStage) Close() {
+func (s *DatabaseStage) Close() {
 	s.server.Close()
 
 	cleanTables(s.dbx, dbCleanTables)
 	_ = s.dbx.Close()
 }
 
-func (s *ApiDatabaseStage) Given() *ApiDatabaseStage {
+func (s *DatabaseStage) Given() *DatabaseStage {
 	return s
 }
 
-func (s *ApiDatabaseStage) When() *ApiDatabaseStage {
+func (s *DatabaseStage) When() *DatabaseStage {
 	return s
 }
 
-func (s *ApiDatabaseStage) Then() *ApiDatabaseStage {
+func (s *DatabaseStage) Then() *DatabaseStage {
 	return s
 }
 
-func (s *ApiDatabaseStage) And() *ApiDatabaseStage {
+func (s *DatabaseStage) And() *DatabaseStage {
 	return s
 }
 
-func (s *ApiDatabaseStage) ServerIsUpAndRunning() *ApiDatabaseStage {
+func (s *DatabaseStage) ServerIsUpAndRunning() *DatabaseStage {
 	api.AssertHeartbeat(s.t, s.server)
 	return s
 }
 
-func (s *ApiDatabaseStage) DatabaseInfoQuery(
+func (s *DatabaseStage) DatabaseInfoQuery(
 	env string,
 	id string,
-) *ApiDatabaseStage {
+) *DatabaseStage {
 	ctx, cancel := testContext()
 	defer cancel()
 	s.queryDatabase, s.err = s.server.DatabaseInfoQuery(ctx, env, id)
 	return s
 }
 
-func (s *ApiDatabaseStage) QueryDatabaseTableData(
+func (s *DatabaseStage) QueryDatabaseTableData(
 	env string,
 	id string,
 	name string,
 	first int,
 	after cursor.Cursor,
 	where model.TableFilter,
-) *ApiDatabaseStage {
+) *DatabaseStage {
 	ctx, cancel := testContext()
 	defer cancel()
 	s.queryDatabase, s.err = s.server.DatabaseTableDataQuery(ctx, env, id, name, first, after, where)
 	return s
 }
 
-func (s *ApiDatabaseStage) NoClientError() *ApiDatabaseStage {
+func (s *DatabaseStage) NoClientError() *DatabaseStage {
 	assert.NoError(s.t, s.err, "query has failed")
 	return s
 }
 
-func (s *ApiDatabaseStage) ClientErrorIs(expMsg string) *ApiDatabaseStage {
+func (s *DatabaseStage) ClientErrorIs(expMsg string) *DatabaseStage {
 	require.Error(s.t, s.err, "client error expected", expMsg)
 	assert.Contains(s.t, s.err.Error(), expMsg, "unexpected client error")
 	return s
 }
 
-func (s *ApiDatabaseStage) DatabaseIsProvided(database db.ConnectionInfo) *ApiDatabaseStage {
+func (s *DatabaseStage) DatabaseIsProvided(database db.ConnectionInfo) *DatabaseStage {
 	ctx, cancel := testContext()
 	defer cancel()
 	err := s.server.Resolver.Providers.DB.Register(ctx, database)
@@ -136,7 +137,7 @@ func (s *ApiDatabaseStage) DatabaseIsProvided(database db.ConnectionInfo) *ApiDa
 	return s
 }
 
-func (s *ApiDatabaseStage) DatabaseStatement(dbID, statement string, args ...any) *ApiDatabaseStage {
+func (s *DatabaseStage) DatabaseStatement(dbID, statement string, args ...any) *DatabaseStage {
 	ctx, cancel := testContext()
 	defer cancel()
 
@@ -160,7 +161,7 @@ func (s *ApiDatabaseStage) DatabaseStatement(dbID, statement string, args ...any
 	return s
 }
 
-func (s *ApiDatabaseStage) DatabaseInfoIsReturned(dbID, driver string) *ApiDatabaseStage {
+func (s *DatabaseStage) DatabaseInfoIsReturned(dbID, driver string) *DatabaseStage {
 	require.NotNil(s.t, s.queryDatabase, "query database is nil")
 
 	assert.Equal(s.t, dbID, s.queryDatabase.ID, "database ID")
@@ -171,7 +172,7 @@ func (s *ApiDatabaseStage) DatabaseInfoIsReturned(dbID, driver string) *ApiDatab
 	return s
 }
 
-func (s *ApiDatabaseStage) TableQueryHasNextPage(nextPage bool) *ApiDatabaseStage {
+func (s *DatabaseStage) TableQueryHasNextPage(nextPage bool) *DatabaseStage {
 	require.NotNil(s.t, s.queryDatabase.Table, "table data must be returned")
 	require.NotNil(s.t, s.queryDatabase.Table.ConnectionInfo, "connection info must be returned")
 
@@ -182,7 +183,7 @@ func (s *ApiDatabaseStage) TableQueryHasNextPage(nextPage bool) *ApiDatabaseStag
 	return s
 }
 
-func (s *ApiDatabaseStage) TableHasRows(expRows ...model.TableRow) *ApiDatabaseStage {
+func (s *DatabaseStage) TableHasRows(expRows ...model.TableRow) *DatabaseStage {
 	require.NotNil(s.t, s.queryDatabase.Table, "table data must be returned")
 
 	for _, expRow := range expRows {
@@ -205,7 +206,7 @@ func (s *ApiDatabaseStage) TableHasRows(expRows ...model.TableRow) *ApiDatabaseS
 	return s
 }
 
-func (s *ApiDatabaseStage) NoTableRows() *ApiDatabaseStage {
+func (s *DatabaseStage) NoTableRows() *DatabaseStage {
 	require.NotNil(s.t, s.queryDatabase.Table, "table data must be returned")
 
 	for _, edge := range s.queryDatabase.Table.Edges {
@@ -215,7 +216,7 @@ func (s *ApiDatabaseStage) NoTableRows() *ApiDatabaseStage {
 	return s
 }
 
-func (s *ApiDatabaseStage) DatabaseUserRoleIsCreated(input model.AddDatabaseUserRoleInput) *ApiDatabaseStage {
+func (s *DatabaseStage) DatabaseUserRoleHasBeenCreated(input model.AddDatabaseUserRoleInput) *DatabaseStage {
 	ctx, cancel := testContext()
 	defer cancel()
 	payload, err := s.server.CreateDatabaseUserRoleMutation(ctx, input)
@@ -224,7 +225,7 @@ func (s *ApiDatabaseStage) DatabaseUserRoleIsCreated(input model.AddDatabaseUser
 	return s
 }
 
-func (s *ApiDatabaseStage) EnvGrantMutation(input model.EnvGrantInput) *ApiDatabaseStage {
+func (s *DatabaseStage) EnvGrantMutation(input model.EnvGrantInput) *DatabaseStage {
 	ctx, cancel := testContext()
 	defer cancel()
 
@@ -246,14 +247,14 @@ func (s *ApiDatabaseStage) EnvGrantMutation(input model.EnvGrantInput) *ApiDatab
 	return s
 }
 
-func (s *ApiDatabaseStage) EnvironmentIsCreated(env string) *ApiDatabaseStage {
+func (s *DatabaseStage) EnvironmentHasBeenCreated(env string) *DatabaseStage {
 	ctx, cancel := testContext()
 	defer cancel()
 
 	payload, err := s.server.CreateEnvironment(ctx, model.CreateEnvironmentInput{
-		MutationID:  ptr("test-db-env"),
+		MutationID:  ptr(s.t.Name()),
 		Env:         env,
-		Description: ptr("test-dv-env"),
+		Description: ptr(s.t.Name()),
 	})
 	require.Nil(s.t, err, "create env - server error")
 	require.Nil(s.t, payload.Error, "create env - client error")
@@ -261,7 +262,7 @@ func (s *ApiDatabaseStage) EnvironmentIsCreated(env string) *ApiDatabaseStage {
 	return s
 }
 
-func (s *ApiDatabaseStage) UserIdentity(user a10n.UserIdentity) *ApiDatabaseStage {
+func (s *DatabaseStage) UserIdentity(user a10n.UserIdentity) *DatabaseStage {
 	s.server.SetUser(user)
 	return s
 }

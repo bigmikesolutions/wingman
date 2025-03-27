@@ -12,6 +12,8 @@ func EnvInternalToPublic(v *env.Environment) *model.Environment {
 
 	return &model.Environment{
 		ID:          v.ID,
+		CreatedAt:   v.CreatedAt,
+		ModifiedAt:  v.UpdatedAt,
 		Description: v.Description,
 	}
 }

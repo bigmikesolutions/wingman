@@ -3,13 +3,14 @@ package test
 import (
 	"testing"
 
+	"github.com/google/uuid"
+
 	"github.com/bigmikesolutions/wingman/graphql/model"
 	"github.com/bigmikesolutions/wingman/server/a10n"
-	"github.com/google/uuid"
 )
 
-func Test_Api_Database_ShouldGetInfo(t *testing.T) {
-	s := NewApiDatabaseStage(t)
+func Test_Database_ShouldGetInfo(t *testing.T) {
+	s := NewDatabaseStage(t)
 	defer s.Close()
 
 	envID := "test-env"
@@ -24,10 +25,10 @@ func Test_Api_Database_ShouldGetInfo(t *testing.T) {
 			OrgID:  "bms",
 			Roles:  []a10n.Role{a10n.AdminWrite, a10n.AdminRead},
 		}).And().
-		EnvironmentIsCreated(envID).And().
+		EnvironmentHasBeenCreated(envID).And().
 		// User has env admin role
 		DatabaseIsProvided(connectionInfo(dbID, dbCfg)).And().
-		DatabaseUserRoleIsCreated(model.AddDatabaseUserRoleInput{
+		DatabaseUserRoleHasBeenCreated(model.AddDatabaseUserRoleInput{
 			MutationID: ptr(t.Name()),
 			UserRoles: []*model.AddDatabaseUserRole{
 				{
@@ -66,8 +67,8 @@ func Test_Api_Database_ShouldGetInfo(t *testing.T) {
 		DatabaseInfoIsReturned(dbID, expDriverPostgres)
 }
 
-func Test_Api_Database_ShouldNotGetInfoForNonExistingEnv(t *testing.T) {
-	s := NewApiDatabaseStage(t)
+func Test_Database_ShouldNotGetInfoForNonExistingEnv(t *testing.T) {
+	s := NewDatabaseStage(t)
 	defer s.Close()
 
 	envID := "test-env"
@@ -79,7 +80,7 @@ func Test_Api_Database_ShouldNotGetInfoForNonExistingEnv(t *testing.T) {
 		ServerIsUpAndRunning().And().
 		// User has env admin role
 		DatabaseIsProvided(connectionInfo(dbID, dbCfg)).And().
-		DatabaseUserRoleIsCreated(model.AddDatabaseUserRoleInput{
+		DatabaseUserRoleHasBeenCreated(model.AddDatabaseUserRoleInput{
 			MutationID: ptr(t.Name()),
 			UserRoles: []*model.AddDatabaseUserRole{
 				{
@@ -117,8 +118,8 @@ func Test_Api_Database_ShouldNotGetInfoForNonExistingEnv(t *testing.T) {
 		ClientErrorIs("environment not found")
 }
 
-func Test_Api_Database_ShouldGetTableData(t *testing.T) {
-	s := NewApiDatabaseStage(t)
+func Test_Database_ShouldGetTableData(t *testing.T) {
+	s := NewDatabaseStage(t)
 	defer s.Close()
 
 	envID := "test-env"
@@ -132,7 +133,7 @@ func Test_Api_Database_ShouldGetTableData(t *testing.T) {
 		DatabaseIsProvided(connectionInfo(dbID, dbCfg)).
 		DatabaseStatement(dbID, sqlCreateTableStudents).And().
 		DatabaseStatement(dbID, sqlInsertStudents).And().
-		DatabaseUserRoleIsCreated(model.AddDatabaseUserRoleInput{
+		DatabaseUserRoleHasBeenCreated(model.AddDatabaseUserRoleInput{
 			MutationID: ptr(t.Name()),
 			UserRoles: []*model.AddDatabaseUserRole{
 				{
@@ -183,8 +184,8 @@ func Test_Api_Database_ShouldGetTableData(t *testing.T) {
 		)
 }
 
-func Test_Api_Database_ShouldForbidGettingTableData(t *testing.T) {
-	s := NewApiDatabaseStage(t)
+func Test_Database_ShouldForbidGettingTableData(t *testing.T) {
+	s := NewDatabaseStage(t)
 	defer s.Close()
 
 	envID := "test-env"
@@ -198,7 +199,7 @@ func Test_Api_Database_ShouldForbidGettingTableData(t *testing.T) {
 		DatabaseIsProvided(connectionInfo(dbID, dbCfg)).
 		DatabaseStatement(dbID, sqlCreateTableStudents).And().
 		DatabaseStatement(dbID, sqlInsertStudents).And().
-		DatabaseUserRoleIsCreated(model.AddDatabaseUserRoleInput{
+		DatabaseUserRoleHasBeenCreated(model.AddDatabaseUserRoleInput{
 			MutationID: ptr(t.Name()),
 			UserRoles: []*model.AddDatabaseUserRole{
 				{

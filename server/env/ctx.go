@@ -10,13 +10,17 @@ type (
 	ctxKey struct{}
 )
 
-var ctxKeyValue ctxKey
+var (
+	ctxKeyValue ctxKey
+
+	errNoActiveEnvSession = errors.New("no active environment session")
+)
 
 func ValidateSession(ctx context.Context) error {
 	s, ok := FromContext(ctx)
 
 	if !ok {
-		return errors.New("no env session")
+		return errNoActiveEnvSession
 	}
 
 	if !s.ValidTill.After(time.Now()) {

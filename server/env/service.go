@@ -3,13 +3,14 @@ package env
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/bigmikesolutions/wingman/server/a10n"
 )
 
 type (
 	repo interface {
-		FindByID(ctx context.Context, id ID) (*Environment, error)
+		FindByID(ctx context.Context, orgID OrganisationID, id ID) (*Environment, error)
 		Create(ctx context.Context, env Environment) error
 	}
 
@@ -18,7 +19,7 @@ type (
 	}
 )
 
-var ErrNotFound = errors.New("environment not found")
+var ErrAlreadyExists = errors.New("environment already exists")
 
 func New(repo repo) *Service {
 	return &Service{
@@ -27,17 +28,29 @@ func New(repo repo) *Service {
 }
 
 func (s *Service) FindByID(ctx context.Context, id ID) (*Environment, error) {
-	if err := a10n.UserAuthenticated(ctx); err != nil {
+	user, err := a10n.GetIdentity(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := user.ContainsRole(a10n.AdminRead, a10n.DeveloperRead); err != nil {
 		return nil, err
 	}
 
-	return s.repo.FindByID(ctx, id)
+	return s.repo.FindByID(ctx, user.OrgID, id)
 }
 
-func (s *Service) Create(ctx context.Context, env Environment) error {
-	if err := a10n.UserAuthorized(ctx, a10n.AdminWrite); err != nil {
+func (s *Service) Create(ctx context.Context, e Environment) error {
+	user, err := a10n.GetIdentity(ctx)
+	if err != nil {
+		return err
+	}
+	if err := user.ContainsRole(a10n.AdminWrite); err != nil {
 		return err
 	}
 
-	return s.repo.Create(ctx, env)
+	e.OrgID = user.OrgID
+	e.CreatedAt = time.Now().UTC()
+	e.CreatedBy = user.UserID
+
+	return s.repo.Create(ctx, e)
 }

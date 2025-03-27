@@ -14,6 +14,9 @@ import (
 
 const (
 	clientTimeout = 5 * time.Second
+
+	testUserID = "admin"
+	testOrg    = "bms"
 )
 
 func testContext() (context.Context, context.CancelFunc) {
