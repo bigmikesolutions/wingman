@@ -3,6 +3,7 @@ package env
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/bigmikesolutions/wingman/server/a10n"
@@ -19,7 +20,10 @@ type (
 	}
 )
 
-var ErrAlreadyExists = errors.New("environment already exists")
+var (
+	ErrAlreadyExists = errors.New("environment already exists")
+	ErrInvalid       = errors.New("invalid")
+)
 
 func New(repo repo) *Service {
 	return &Service{
@@ -32,7 +36,12 @@ func (s *Service) FindByID(ctx context.Context, id ID) (*Environment, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if err := user.ContainsRole(a10n.AdminRead, a10n.DeveloperRead); err != nil {
+		return nil, err
+	}
+
+	if err := ValidateSession(ctx); err != nil {
 		return nil, err
 	}
 
@@ -44,6 +53,7 @@ func (s *Service) Create(ctx context.Context, e Environment) error {
 	if err != nil {
 		return err
 	}
+
 	if err := user.ContainsRole(a10n.AdminWrite); err != nil {
 		return err
 	}
@@ -51,6 +61,10 @@ func (s *Service) Create(ctx context.Context, e Environment) error {
 	e.OrgID = user.OrgID
 	e.CreatedAt = time.Now().UTC()
 	e.CreatedBy = user.UserID
+
+	if err := e.Validate(); err != nil {
+		return fmt.Errorf("%w: %s", ErrInvalid, err)
+	}
 
 	return s.repo.Create(ctx, e)
 }

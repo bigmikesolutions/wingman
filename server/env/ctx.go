@@ -13,14 +13,14 @@ type (
 var (
 	ctxKeyValue ctxKey
 
-	errNoActiveEnvSession = errors.New("no active environment session")
+	ErrNoActiveEnvSession = errors.New("no active environment session")
 )
 
 func ValidateSession(ctx context.Context) error {
 	s, ok := FromContext(ctx)
 
 	if !ok {
-		return errNoActiveEnvSession
+		return ErrNoActiveEnvSession
 	}
 
 	if !s.ValidTill.After(time.Now()) {

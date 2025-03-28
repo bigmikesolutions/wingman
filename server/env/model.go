@@ -1,6 +1,10 @@
 package env
 
-import "time"
+import (
+	"time"
+
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+)
 
 type (
 	ID             = string
@@ -18,3 +22,11 @@ type (
 		Description *string `db:"description"`
 	}
 )
+
+func (v Environment) Validate() error {
+	return validation.ValidateStruct(&v,
+		validation.Field(&v.ID, validation.Required, validation.Length(3, 255)),
+		validation.Field(&v.OrgID, validation.Required, validation.Length(3, 255)),
+		validation.Field(&v.Description, validation.NilOrNotEmpty),
+	)
+}

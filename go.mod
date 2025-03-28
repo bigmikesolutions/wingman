@@ -6,6 +6,7 @@ require (
 	github.com/99designs/gqlgen v0.17.68
 	github.com/Shopify/toxiproxy/v2 v2.12.0
 	github.com/go-chi/chi/v5 v5.2.1
+	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/vault-client-go v0.4.3
