@@ -34,14 +34,14 @@ type (
 
 	HandlerWrapper = func(next http.Handler) http.Handler
 
-	HTTPSettings struct {
+	settings struct {
 		ReadTimeout   time.Duration
 		CompressLevel int
 		PprofEnabled  bool
 		LogLevel      zerolog.Level
 	}
 
-	HTTPSetting func(*HTTPSettings)
+	Setting func(*settings)
 )
 
 func SetGraphQLHandler(router router, resolver *graphql.Resolver) {
@@ -64,10 +64,10 @@ func SetGraphQLHandler(router router, resolver *graphql.Resolver) {
 	)
 }
 
-func NewHTTPRouter(validator tokenValidator, settings ...HTTPSetting) *chi.Mux {
-	opts := newHTTPConfig()
-	for _, opt := range settings {
-		opt(&opts)
+func NewHTTPRouter(validator tokenValidator, opts ...Setting) *chi.Mux {
+	settings := newSettings()
+	for _, opt := range opts {
+		opt(&settings)
 	}
 
 	r := chi.NewRouter()
@@ -75,24 +75,24 @@ func NewHTTPRouter(validator tokenValidator, settings ...HTTPSetting) *chi.Mux {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
-	r.Use(middleware.Timeout(opts.ReadTimeout))
-	r.Use(middleware.Compress(opts.CompressLevel))
+	r.Use(middleware.Timeout(settings.ReadTimeout))
+	r.Use(middleware.Compress(settings.CompressLevel))
 	r.Use(httpmiddleware.RedirectProxy)
 	r.Use(httpmiddleware.UserOrgAndRoles)
 	r.Use(httpmiddleware.UserIdentity)
 	r.Use(httpmiddleware.SessionReader(validator))
 	r.Use(middleware.Heartbeat(ProbesHealthEndpoint))
-	r.Use(httpmiddleware.Logger(opts.LogLevel))
+	r.Use(httpmiddleware.Logger(settings.LogLevel))
 
-	if opts.PprofEnabled {
+	if settings.PprofEnabled {
 		r.Mount(pprofEndpoint, pprofRouter())
 	}
 
 	return r
 }
 
-func newHTTPConfig() HTTPSettings {
-	return HTTPSettings{
+func newSettings() settings {
+	return settings{
 		ReadTimeout:   15 * time.Second,
 		CompressLevel: 5,
 		PprofEnabled:  false,
@@ -100,26 +100,26 @@ func newHTTPConfig() HTTPSettings {
 	}
 }
 
-func WithReadTimeout(v time.Duration) HTTPSetting {
-	return func(s *HTTPSettings) {
+func WithReadTimeout(v time.Duration) Setting {
+	return func(s *settings) {
 		s.ReadTimeout = v
 	}
 }
 
-func WithCompressLevel(v int) HTTPSetting {
-	return func(s *HTTPSettings) {
+func WithCompressLevel(v int) Setting {
+	return func(s *settings) {
 		s.CompressLevel = v
 	}
 }
 
-func WithPPROF(v bool) HTTPSetting {
-	return func(s *HTTPSettings) {
+func WithPPROF(v bool) Setting {
+	return func(s *settings) {
 		s.PprofEnabled = v
 	}
 }
 
-func WithLogLevel(v zerolog.Level) HTTPSetting {
-	return func(s *HTTPSettings) {
+func WithLogLevel(v zerolog.Level) Setting {
+	return func(s *settings) {
 		s.LogLevel = v
 	}
 }
