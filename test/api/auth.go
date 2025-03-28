@@ -10,7 +10,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/bigmikesolutions/wingman/server/a10n"
-	"github.com/bigmikesolutions/wingman/server/env"
 	"github.com/bigmikesolutions/wingman/server/httpmiddleware"
 	"github.com/bigmikesolutions/wingman/server/token"
 )
@@ -43,7 +42,7 @@ func NewJWT() (*token.JWT, error) {
 
 func (a a10nRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	if a.envGrantToken != nil {
-		req.Header.Set(env.A10NHeaderEnvToken, *a.envGrantToken)
+		req.Header.Set(httpmiddleware.HeaderEnvToken, *a.envGrantToken)
 	}
 	if a.user != nil {
 		req.Header.Set(httpmiddleware.HeaderUserID, a.user.UserID)

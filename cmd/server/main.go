@@ -72,18 +72,16 @@ func mustHTTPHandler(logger zerolog.Logger, cfg Config) http.Handler {
 		logger.Fatal().Err(err).Msg("failed to create vault secrets service")
 	}
 
-	handler, err := server.NewHttpHandler(
-		cfg.HTTP,
+	router := server.NewHTTPRouter(cfg.HTTP, a10n)
+	server.SetGraphQLHandler(
+		router,
 		&graphql.Resolver{
 			Logger:       logger.With().Str("component", "graphql").Logger(),
 			Providers:    providers.NewProviders(dbx, secrets),
 			Tokens:       a10n,
 			Environments: env.New(repo.NewEnvironments(dbx)),
 		},
-		env.SessionReader(a10n),
 	)
-	if err != nil {
-		logger.Fatal().Err(err).Msg("failed to set-up HTTP handler")
-	}
-	return handler
+
+	return router
 }

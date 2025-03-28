@@ -14,6 +14,7 @@ import (
 	"github.com/bigmikesolutions/wingman/graphql/directives"
 	"github.com/bigmikesolutions/wingman/graphql/generated"
 	"github.com/bigmikesolutions/wingman/server/httpmiddleware"
+	"github.com/bigmikesolutions/wingman/server/token"
 )
 
 const (
@@ -23,6 +24,14 @@ const (
 )
 
 type (
+	router interface {
+		Handle(pattern string, handler http.Handler)
+	}
+
+	tokenValidator interface {
+		Validate(token string) (*token.Token, error)
+	}
+
 	HandlerWrapper = func(next http.Handler) http.Handler
 
 	HTTPConfig struct {
@@ -35,7 +44,7 @@ type (
 	}
 )
 
-func NewHttpHandler(cfg HTTPConfig, resolver *graphql.Resolver, chain ...HandlerWrapper) (http.Handler, error) {
+func SetGraphQLHandler(router router, resolver *graphql.Resolver) {
 	graphqlHandler := handler.New(
 		generated.NewExecutableSchema(
 			generated.Config{
@@ -49,22 +58,13 @@ func NewHttpHandler(cfg HTTPConfig, resolver *graphql.Resolver, chain ...Handler
 
 	graphqlHandler.AddTransport(transport.POST{})
 
-	router := newHttpRouter(cfg)
-
-	var mainHandler http.Handler = graphqlHandler
-	for _, h := range chain {
-		mainHandler = h(mainHandler)
-	}
-
 	router.Handle(
 		GraphqlEndpoint,
-		mainHandler,
+		graphqlHandler,
 	)
-
-	return router, nil
 }
 
-func newHttpRouter(cfg HTTPConfig) *chi.Mux {
+func NewHTTPRouter(cfg HTTPConfig, validator tokenValidator) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -75,6 +75,7 @@ func newHttpRouter(cfg HTTPConfig) *chi.Mux {
 	r.Use(httpmiddleware.RedirectProxy)
 	r.Use(httpmiddleware.UserOrgAndRoles)
 	r.Use(httpmiddleware.UserIdentity)
+	r.Use(httpmiddleware.SessionReader(validator))
 	r.Use(middleware.Heartbeat(ProbesHealthEndpoint))
 	r.Use(httpmiddleware.Logger(zerolog.DebugLevel))
 

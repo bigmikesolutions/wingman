@@ -6,17 +6,14 @@ import (
 	"net/http/httptest"
 
 	"github.com/jmoiron/sqlx"
-
-	"github.com/bigmikesolutions/wingman/server/env/repo"
-
-	"github.com/bigmikesolutions/wingman/server/a10n"
-
 	gql "github.com/shurcooL/graphql"
 
 	"github.com/bigmikesolutions/wingman/graphql"
 	"github.com/bigmikesolutions/wingman/providers"
 	"github.com/bigmikesolutions/wingman/server"
+	"github.com/bigmikesolutions/wingman/server/a10n"
 	"github.com/bigmikesolutions/wingman/server/env"
+	"github.com/bigmikesolutions/wingman/server/env/repo"
 )
 
 type HTTPServer struct {
@@ -46,12 +43,10 @@ func New(dbx *sqlx.DB, prov *providers.Providers) (*HTTPServer, error) {
 		Environments: env.New(repo.NewEnvironments(dbx)),
 	}
 
-	handler, err := server.NewHttpHandler(cfg.HTTP, resolver, env.SessionReader(token))
-	if err != nil {
-		return nil, err
-	}
+	router := server.NewHTTPRouter(cfg.HTTP, token)
+	server.SetGraphQLHandler(router, resolver)
 
-	svc := httptest.NewServer(handler)
+	svc := httptest.NewServer(router)
 	rt := &a10nRoundTripper{}
 	client := &http.Client{
 		Transport: rt,

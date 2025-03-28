@@ -1,13 +1,14 @@
-package env
+package httpmiddleware
 
 import (
 	"net/http"
 
+	"github.com/bigmikesolutions/wingman/server/env"
 	"github.com/bigmikesolutions/wingman/server/token"
 )
 
 const (
-	A10NHeaderEnvToken = "X-A10N-Env-Token"
+	HeaderEnvToken = "X-Forwarded-Env-Token"
 )
 
 type (
@@ -21,7 +22,7 @@ func SessionReader(a10n a10nService) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
 
-			headerToken := r.Header.Get(A10NHeaderEnvToken)
+			headerToken := r.Header.Get(HeaderEnvToken)
 			if headerToken != "" {
 				t, err := a10n.Validate(headerToken)
 				if err != nil {
@@ -31,11 +32,11 @@ func SessionReader(a10n a10nService) func(http.Handler) http.Handler {
 
 				}
 
-				ctx = WithSession(ctx, Session{
+				ctx = env.WithSession(ctx, env.Session{
 					ValidTill: t.ExpiresAt,
 				})
 
-				if err := ValidateSession(ctx); err != nil {
+				if err := env.ValidateSession(ctx); err != nil {
 					w.WriteHeader(http.StatusForbidden)
 					_, _ = w.Write([]byte(err.Error()))
 					return
