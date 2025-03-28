@@ -8,7 +8,7 @@ import (
 
 type Config struct {
 	LogLevel string `envconfig:"LOG_LEVEL" default:"info"`
-	HTTP     HTTPConfig
+	HTTP     HTTPSettings
 }
 
 func LoadCfg() (Config, error) {

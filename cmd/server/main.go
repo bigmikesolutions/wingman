@@ -72,7 +72,13 @@ func mustHTTPHandler(logger zerolog.Logger, cfg Config) http.Handler {
 		logger.Fatal().Err(err).Msg("failed to create vault secrets service")
 	}
 
-	router := server.NewHTTPRouter(cfg.HTTP, a10n)
+	router := server.NewHTTPRouter(
+		a10n,
+		server.WithCompressLevel(cfg.HTTP.CompressLevel),
+		server.WithReadTimeout(cfg.HTTP.ReadTimeout),
+		server.WithLogLevel(zerolog.DebugLevel), // TODO should come from cfg
+		server.WithPPROF(cfg.HTTP.PprofEnabled),
+	)
 	server.SetGraphQLHandler(
 		router,
 		&graphql.Resolver{

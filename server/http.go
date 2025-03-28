@@ -34,14 +34,14 @@ type (
 
 	HandlerWrapper = func(next http.Handler) http.Handler
 
-	HTTPConfig struct {
-		Address       string        `envconfig:"HTTP_ADDRESS" default:"0.0.0.0:8080"`
-		WriteTimeout  time.Duration `envconfig:"HTTP_WRITE_TIMEOUT" default:"15s"`
-		ReadTimeout   time.Duration `envconfig:"HTTP_READ_TIMEOUT" default:"15s"`
-		ShutdownTime  time.Duration `envconfig:"HTTP_SHUTDOWN_TIME" default:"30s"`
-		PprofEnabled  bool          `envconfig:"HTTP_PPROF_ENABLED" default:"false"`
-		CompressLevel int           `envconfig:"HTTP_COMPRESS_LEVEL" default:"5"`
+	HTTPSettings struct {
+		ReadTimeout   time.Duration
+		CompressLevel int
+		PprofEnabled  bool
+		LogLevel      zerolog.Level
 	}
+
+	HTTPSetting func(*HTTPSettings)
 )
 
 func SetGraphQLHandler(router router, resolver *graphql.Resolver) {
@@ -64,24 +64,62 @@ func SetGraphQLHandler(router router, resolver *graphql.Resolver) {
 	)
 }
 
-func NewHTTPRouter(cfg HTTPConfig, validator tokenValidator) *chi.Mux {
+func NewHTTPRouter(validator tokenValidator, settings ...HTTPSetting) *chi.Mux {
+	opts := newHTTPConfig()
+	for _, opt := range settings {
+		opt(&opts)
+	}
+
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
-	r.Use(middleware.Timeout(cfg.ReadTimeout))
-	r.Use(middleware.Compress(cfg.CompressLevel))
+	r.Use(middleware.Timeout(opts.ReadTimeout))
+	r.Use(middleware.Compress(opts.CompressLevel))
 	r.Use(httpmiddleware.RedirectProxy)
 	r.Use(httpmiddleware.UserOrgAndRoles)
 	r.Use(httpmiddleware.UserIdentity)
 	r.Use(httpmiddleware.SessionReader(validator))
 	r.Use(middleware.Heartbeat(ProbesHealthEndpoint))
-	r.Use(httpmiddleware.Logger(zerolog.DebugLevel))
+	r.Use(httpmiddleware.Logger(opts.LogLevel))
 
-	if cfg.PprofEnabled {
+	if opts.PprofEnabled {
 		r.Mount(pprofEndpoint, pprofRouter())
 	}
 
 	return r
+}
+
+func newHTTPConfig() HTTPSettings {
+	return HTTPSettings{
+		ReadTimeout:   15 * time.Second,
+		CompressLevel: 5,
+		PprofEnabled:  false,
+		LogLevel:      zerolog.DebugLevel,
+	}
+}
+
+func WithReadTimeout(v time.Duration) HTTPSetting {
+	return func(s *HTTPSettings) {
+		s.ReadTimeout = v
+	}
+}
+
+func WithCompressLevel(v int) HTTPSetting {
+	return func(s *HTTPSettings) {
+		s.CompressLevel = v
+	}
+}
+
+func WithPPROF(v bool) HTTPSetting {
+	return func(s *HTTPSettings) {
+		s.PprofEnabled = v
+	}
+}
+
+func WithLogLevel(v zerolog.Level) HTTPSetting {
+	return func(s *HTTPSettings) {
+		s.LogLevel = v
+	}
 }

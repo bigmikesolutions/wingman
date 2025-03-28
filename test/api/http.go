@@ -27,11 +27,6 @@ type HTTPServer struct {
 }
 
 func New(dbx *sqlx.DB, prov *providers.Providers) (*HTTPServer, error) {
-	cfg, err := server.LoadCfg()
-	if err != nil {
-		return nil, err
-	}
-
 	token, err := NewJWT()
 	if err != nil {
 		return nil, err
@@ -43,7 +38,7 @@ func New(dbx *sqlx.DB, prov *providers.Providers) (*HTTPServer, error) {
 		Environments: env.New(repo.NewEnvironments(dbx)),
 	}
 
-	router := server.NewHTTPRouter(cfg.HTTP, token)
+	router := server.NewHTTPRouter(token)
 	server.SetGraphQLHandler(router, resolver)
 
 	svc := httptest.NewServer(router)
