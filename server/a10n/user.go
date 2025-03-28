@@ -45,7 +45,7 @@ func deepClone(u UserIdentity) UserIdentity {
 	return u
 }
 
-func WithUserIdentity(ctx context.Context, user UserIdentity) context.Context {
+func WithIdentity(ctx context.Context, user UserIdentity) context.Context {
 	return context.WithValue(ctx, ctxKey, user)
 }
 

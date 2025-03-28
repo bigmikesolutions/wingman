@@ -21,9 +21,9 @@ func SessionReader(a10n a10nService) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
 
-			token := r.Header.Get(A10NHeaderEnvToken)
-			if token != "" {
-				token, err := a10n.Validate(token)
+			headerToken := r.Header.Get(A10NHeaderEnvToken)
+			if headerToken != "" {
+				t, err := a10n.Validate(headerToken)
 				if err != nil {
 					w.WriteHeader(http.StatusForbidden)
 					_, _ = w.Write([]byte("invalid env session token"))
@@ -31,8 +31,8 @@ func SessionReader(a10n a10nService) func(http.Handler) http.Handler {
 
 				}
 
-				ctx = CtxWithSession(ctx, Session{
-					ValidTill: token.ExpiresAt,
+				ctx = WithSession(ctx, Session{
+					ValidTill: t.ExpiresAt,
 				})
 
 				if err := ValidateSession(ctx); err != nil {

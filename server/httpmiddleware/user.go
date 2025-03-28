@@ -31,7 +31,7 @@ func UserIdentity(next http.Handler) http.Handler {
 			user.Roles = strings.Split(roles, RolesSeparator)
 		}
 
-		ctx := a10n.WithUserIdentity(r.Context(), user)
+		ctx := a10n.WithIdentity(r.Context(), user)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
