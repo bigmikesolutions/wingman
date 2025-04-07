@@ -4,29 +4,44 @@ import (
 	"time"
 
 	"github.com/hashicorp/vault-client-go"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
-type Config struct {
-	Address string        `envconfig:"VAULT_ADDRESS" default:""`
-	Timeout time.Duration `envconfig:"VAULT_TIMEOUT" default:"10s"`
+type (
+	settings struct {
+		Address string
+		Timeout time.Duration
 
-	// dev settings
-	Token string `envconfig:"VAULT_TOKEN" default:""`
+		// dev settings
+		Token string
 
-	// role auth
-	RoleID       string `envconfig:"VAULT_ROLE_ID" default:""`
-	RoleSecretID string `envconfig:"VAULT_ROLE_SECRET_ID" default:""`
-	RolePath     string `envconfig:"VAULT_ROLE_PATH" default:"approle"`
+		// role auth
+		RoleID       string
+		RoleSecretID string
+		RolePath     string
 
-	// TLS settings
-	ServerCert string `envconfig:"VAULT_SERVER_CERT" default:""`
+		// TLS settings
+		ServerCert string
 
-	// TLS with client-side cert auth
-	ClientCert string `envconfig:"VAULT_CLIENT_CERT" default:""`
-	ClientKey  string `envconfig:"VAULT_CLIENT_KEY" default:""`
+		// TLS with client-side cert auth
+		ClientCert string
+		ClientKey  string
+
+		Logger zerolog.Logger
+	}
+
+	Setting func(config *settings)
+)
+
+func newSettings() settings {
+	return settings{
+		Timeout: 10 * time.Second,
+		Logger:  log.Logger,
+	}
 }
 
-func (c Config) vaultOptions() []vault.ClientOption {
+func (c settings) vaultOptions() []vault.ClientOption {
 	opts := make([]vault.ClientOption, 0)
 	opts = append(opts, vault.WithAddress(c.Address))
 	opts = append(opts, vault.WithRequestTimeout(c.Timeout))
@@ -46,4 +61,22 @@ func (c Config) vaultOptions() []vault.ClientOption {
 	}
 
 	return opts
+}
+
+func WithAddress(v string) Setting {
+	return func(s *settings) {
+		s.Address = v
+	}
+}
+
+func WithToken(v string) Setting {
+	return func(s *settings) {
+		s.Token = v
+	}
+}
+
+func WithLogger(v zerolog.Logger) Setting {
+	return func(s *settings) {
+		s.Logger = v
+	}
 }

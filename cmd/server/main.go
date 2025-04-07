@@ -67,7 +67,12 @@ func mustHTTPHandler(logger zerolog.Logger, cfg Config) http.Handler {
 		logger.Fatal().Err(err).Msg("failed to create DB connection")
 	}
 
-	secrets, err := vault.New(context.Background(), logger, cfg.Vault)
+	secrets, err := vault.New(
+		context.Background(),
+		vault.WithAddress(cfg.Vault.Address),
+		vault.WithToken(cfg.Vault.Token),
+		vault.WithLogger(logger),
+	)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("failed to create vault secrets service")
 	}

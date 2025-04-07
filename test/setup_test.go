@@ -42,7 +42,7 @@ func TestMain(m *testing.M) {
 
 func newProviders(dbx *sqlx.DB) *providers.Providers {
 	vaultCfg := dc.Config().Vault
-	v, err := vault.New(context.Background(), log.Logger, vault.Config{
+	v, err := vault.New(context.Background(), log.Logger, vault.settings{
 		Address: fmt.Sprintf("http://localhost:%d", vaultCfg.Port),
 		Token:   vaultCfg.RootToken,
 	})

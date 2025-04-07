@@ -7,16 +7,15 @@ import (
 
 	"github.com/hashicorp/vault-client-go"
 	"github.com/hashicorp/vault-client-go/schema"
-	"github.com/rs/zerolog"
 )
 
-func newClient(ctx context.Context, logger zerolog.Logger, cfg Config) (*vault.Client, error) {
-	client, err := vault.New(cfg.vaultOptions()...)
+func newClient(ctx context.Context, settings settings) (*vault.Client, error) {
+	client, err := vault.New(settings.vaultOptions()...)
 	if err != nil {
 		return nil, fmt.Errorf("vault client: %w", err)
 	}
 	_ = client.SetRequestCallbacks(func(req *http.Request) {
-		t := logger.Trace()
+		t := settings.Logger.Trace()
 		if t.Enabled() {
 			t.
 				Any("request", *req).
@@ -24,7 +23,7 @@ func newClient(ctx context.Context, logger zerolog.Logger, cfg Config) (*vault.C
 		}
 	})
 	_ = client.SetResponseCallbacks(func(req *http.Request, resp *http.Response) {
-		t := logger.Trace()
+		t := settings.Logger.Trace()
 		if t.Enabled() {
 			t.
 				Any("response", *resp).
@@ -32,7 +31,7 @@ func newClient(ctx context.Context, logger zerolog.Logger, cfg Config) (*vault.C
 		}
 	})
 
-	token, err := vaultAuth(ctx, client, cfg)
+	token, err := vaultAuth(ctx, client, settings)
 	if err != nil {
 		return nil, fmt.Errorf("vault auth: %w", err)
 	}
@@ -44,7 +43,7 @@ func newClient(ctx context.Context, logger zerolog.Logger, cfg Config) (*vault.C
 	return client, nil
 }
 
-func vaultAuth(ctx context.Context, client *vault.Client, cfg Config) (string, error) {
+func vaultAuth(ctx context.Context, client *vault.Client, cfg settings) (string, error) {
 	if cfg.ClientCert != "" && cfg.ClientKey != "" {
 		resp, err := client.Auth.CertLogin(ctx, schema.CertLoginRequest{
 			Name: "my-cert",

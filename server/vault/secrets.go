@@ -13,7 +13,7 @@ import (
 
 type (
 	Secrets struct {
-		cfg    Config
+		cfg    settings
 		vault  *vault.Client
 		logger zerolog.Logger
 	}
@@ -21,16 +21,21 @@ type (
 
 var secretMountPath = vault.WithMountPath("secret")
 
-func New(ctx context.Context, logger zerolog.Logger, cfg Config) (*Secrets, error) {
-	client, err := newClient(ctx, logger, cfg)
+func New(ctx context.Context, opt ...Setting) (*Secrets, error) {
+	opts := newSettings()
+	for _, opt := range opt {
+		opt(&opts)
+	}
+
+	client, err := newClient(ctx, opts)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Secrets{
-		cfg:    cfg,
+		cfg:    opts,
 		vault:  client,
-		logger: logger,
+		logger: opts.Logger,
 	}, nil
 }
 
