@@ -1,14 +1,16 @@
-package client
+package main
 
 import (
 	"os"
 
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
-
-	"github.com/bigmikesolutions/wingman/client/a10n"
 )
 
-var token a10n.TokenResponse
+var (
+	logger zerolog.Logger
+	cfg    Config
+)
 
 var rootCmd = &cobra.Command{
 	Use:   "wingman",
@@ -19,15 +21,20 @@ Each grant has expiration date and limited access scopes which makes sure that a
 and needed to complete a task (i.e. solve production incident).
 Each access has audit traces so generating and reviewing proof of concept for each work & task is possible.'
 `,
-
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
 }
 
-func Execute() {
-	err := rootCmd.Execute()
+func Execute(log zerolog.Logger) {
+	logger = log
+
+	c, err := LoadCfg()
 	if err != nil {
+		logger.Panic().Err(err).Msg("failed to load config")
+	}
+	cfg = c
+
+	err = rootCmd.Execute()
+	if err != nil {
+		logger.Panic().Err(err).Msg("failed to execute command")
 		os.Exit(1)
 	}
 }
