@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"os"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -27,7 +28,8 @@ func main() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	token, err := a10nDev.Auth(ctx)
+
+	token, err := a10nDev.Auth(ctx, os.Stdout)
 	if err != nil {
 		logger.Panic().Err(err).Msg("failed to authenticate")
 	}

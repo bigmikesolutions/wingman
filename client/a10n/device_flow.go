@@ -111,14 +111,14 @@ func NewDevice(opt ...Setting) Device {
 	}
 }
 
-func (d *Device) Auth(ctx context.Context) (TokenResponse, error) {
+func (d *Device) Auth(ctx context.Context, out io.Writer) (TokenResponse, error) {
 	dev, err := d.requestDeviceCode(ctx)
 	if err != nil {
 		return TokenResponse{}, err
 	}
 
-	fmt.Printf("Login required! Statring device authentication flow...\n")
-	fmt.Printf("%s\n", dev.VerificationURIComplete)
+	_, _ = out.Write([]byte(fmt.Sprintf("Login required! Statring device authentication flow...\n")))
+	_, _ = out.Write([]byte(fmt.Sprintf("%s\n", dev.VerificationURIComplete)))
 
 	interval := d.settings.PollInterval
 	for {
