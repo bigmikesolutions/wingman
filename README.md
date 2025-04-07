@@ -41,3 +41,7 @@ curl -X POST "http://localhost:8081/realms/master/protocol/openid-connect/token"
 ```shell
 docker exec -it wingman_server sh -c "wget -S -O - --header='X-Forwarded-Proto:http' --header='X-Forwarded-Host:traefik-auth:4181'  'http://traefik-auth:4181'"
 ```
+
+## Documentation
+
+* [Keycloak - OAuth 2 - device flow](https://github.com/keycloak/keycloak-community/blob/main/design/oauth2-device-authorization-grant.md)

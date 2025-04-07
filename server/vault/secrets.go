@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/rs/zerolog"
-
 	"github.com/hashicorp/vault-client-go"
 	"github.com/hashicorp/vault-client-go/schema"
+	"github.com/rs/zerolog"
 )
 
 type (

@@ -19,6 +19,9 @@ resource "keycloak_openid_client" "wingman" {
   direct_access_grants_enabled = true   # required for password grant
   implicit_flow_enabled = false
 
+  oauth2_device_authorization_grant_enabled = true
+
+
   valid_redirect_uris = [
     "http://oauth2-proxy:4180/oauth2/callback",
     "http://localhost:8084/oauth2/callback",

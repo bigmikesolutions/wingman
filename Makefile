@@ -16,12 +16,16 @@ fmt:
 	@goimports -local "github.com/bigmikesolutions/wingman" -l -w .
 	@gofumpt -l -w .
 
-build: build-server
+build: build-server build-cli
 
 build-server:
 	@CGO_ENABLED=0 go build -o bin/server \
 		-ldflags "-X github.com/bigmikesolutions/wingman/service/build.Version=${VER}" \
 		./cmd/server
+
+build-cli:
+	@CGO_ENABLED=0 go build -o bin/cli \
+		./cmd/cli
 
 generate:
 	@go generate ./...
