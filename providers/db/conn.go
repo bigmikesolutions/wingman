@@ -7,11 +7,17 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+const (
+	PostgresDriverName = "pgx"
+)
+
 type (
 	ID = string
 
 	ConnectionInfo struct {
 		ID     ID     `json:"id"`
+		Env    ID     `json:"env"`
+		OrgID  ID     `json:"org_id"`
 		Driver string `json:"driver"`
 		Host   string `json:"host"`
 		Name   string `json:"name"`
@@ -21,6 +27,7 @@ type (
 	}
 
 	Connection struct {
+		env  string
 		dbID ID
 		db   *sqlx.DB
 		rbac rbac
@@ -28,7 +35,7 @@ type (
 )
 
 func (c *Connection) SelectFromTable(ctx context.Context, name string, first int) (*sqlx.Rows, error) {
-	if err := c.rbac.ReadTable(ctx, c.dbID, name); err != nil {
+	if err := c.rbac.ReadTable(ctx, c.env, c.dbID, name); err != nil {
 		return nil, err
 	}
 

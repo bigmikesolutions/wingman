@@ -9,7 +9,6 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 
 	"github.com/bigmikesolutions/wingman/providers"
 	"github.com/bigmikesolutions/wingman/server/vault"
@@ -42,10 +41,11 @@ func TestMain(m *testing.M) {
 
 func newProviders(dbx *sqlx.DB) *providers.Providers {
 	vaultCfg := dc.Config().Vault
-	v, err := vault.New(context.Background(), log.Logger, vault.settings{
-		Address: fmt.Sprintf("http://localhost:%d", vaultCfg.Port),
-		Token:   vaultCfg.RootToken,
-	})
+	v, err := vault.New(
+		context.Background(),
+		vault.WithAddress(fmt.Sprintf("http://localhost:%d", vaultCfg.Port)),
+		vault.WithToken(vaultCfg.RootToken),
+	)
 	if err != nil {
 		panic(fmt.Errorf("could not connect to vault: %w", err))
 	}

@@ -11,8 +11,31 @@ import (
 	"github.com/bigmikesolutions/wingman/graphql/model/cursor"
 )
 
+type AddDatabaseError struct {
+	Code    AddDatabaseClientErrorCode `json:"code"`
+	Message *string                    `json:"message,omitempty"`
+}
+
+type AddDatabaseInput struct {
+	MutationID *string    `json:"mutationId,omitempty"`
+	Env        string     `json:"env"`
+	ID         string     `json:"id"`
+	Name       string     `json:"name"`
+	User       string     `json:"user"`
+	Password   string     `json:"password"`
+	Host       string     `json:"host"`
+	Port       int        `json:"port"`
+	Driver     DriverType `json:"driver"`
+}
+
+type AddDatabasePayload struct {
+	MutationID *string           `json:"mutationId,omitempty"`
+	ID         string            `json:"id"`
+	Error      *AddDatabaseError `json:"error,omitempty"`
+}
+
 type AddDatabaseUserRole struct {
-	ID             *string                `json:"id,omitempty"`
+	ID             string                 `json:"id"`
 	Description    *string                `json:"description,omitempty"`
 	DatabaseAccess []*DatabaseAccessInput `json:"databaseAccess,omitempty"`
 }
@@ -23,8 +46,9 @@ type AddDatabaseUserRoleError struct {
 }
 
 type AddDatabaseUserRoleInput struct {
-	MutationID *string                `json:"mutationId,omitempty"`
-	UserRoles  []*AddDatabaseUserRole `json:"userRoles"`
+	MutationID  *string                `json:"mutationId,omitempty"`
+	Environment string                 `json:"environment"`
+	UserRoles   []*AddDatabaseUserRole `json:"userRoles"`
 }
 
 type AddDatabaseUserRolePayload struct {
@@ -344,6 +368,47 @@ func (e *AccessType) UnmarshalGQL(v any) error {
 }
 
 func (e AccessType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type AddDatabaseClientErrorCode string
+
+const (
+	AddDatabaseClientErrorCodeInvalidInput  AddDatabaseClientErrorCode = "INVALID_INPUT"
+	AddDatabaseClientErrorCodeAlreadyExists AddDatabaseClientErrorCode = "ALREADY_EXISTS"
+)
+
+var AllAddDatabaseClientErrorCode = []AddDatabaseClientErrorCode{
+	AddDatabaseClientErrorCodeInvalidInput,
+	AddDatabaseClientErrorCodeAlreadyExists,
+}
+
+func (e AddDatabaseClientErrorCode) IsValid() bool {
+	switch e {
+	case AddDatabaseClientErrorCodeInvalidInput, AddDatabaseClientErrorCodeAlreadyExists:
+		return true
+	}
+	return false
+}
+
+func (e AddDatabaseClientErrorCode) String() string {
+	return string(e)
+}
+
+func (e *AddDatabaseClientErrorCode) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AddDatabaseClientErrorCode(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AddDatabaseClientErrorCode", str)
+	}
+	return nil
+}
+
+func (e AddDatabaseClientErrorCode) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

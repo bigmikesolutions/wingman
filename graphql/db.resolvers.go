@@ -7,21 +7,21 @@ package graphql
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/bigmikesolutions/wingman/graphql/generated"
 	"github.com/bigmikesolutions/wingman/graphql/model"
 	"github.com/bigmikesolutions/wingman/graphql/model/cursor"
+	"github.com/bigmikesolutions/wingman/providers/db/conv"
 )
 
 // Info is the resolver for the info field.
 func (r *databaseResolver) Info(ctx context.Context, obj *model.Database) (*model.DatabaseInfo, error) {
-	info, err := r.Providers.DB.Info(ctx, obj.ID)
+	// TODO find env value here
+	info, err := r.Providers.DB.Info(ctx, "test-env", obj.ID)
 	if err != nil {
 		return nil, err
 	}
 	if info == nil {
-		// TODO return user friendly client error here
 		return nil, nil
 	}
 
@@ -36,7 +36,7 @@ func (r *databaseResolver) Info(ctx context.Context, obj *model.Database) (*mode
 // Table is the resolver for the table field.
 func (r *databaseResolver) Table(ctx context.Context, obj *model.Database, name string, first *int, after *cursor.Cursor, where *model.TableFilter) (*model.TableDataConnection, error) {
 	// TODO finalise logic implementation here
-	db, err := r.Providers.DB.Connection(ctx, obj.ID)
+	db, err := r.Providers.DB.Connection(ctx, "", obj.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -87,29 +87,44 @@ func (r *databaseResolver) Table(ctx context.Context, obj *model.Database, name 
 
 // Database is the resolver for the database field.
 func (r *environmentResolver) Database(ctx context.Context, obj *model.Environment, id string) (*model.Database, error) {
-	// TODO implement this stub
 	return &model.Database{
 		ID: id,
+	}, nil
+}
+
+// AddDatabase is the resolver for the addDatabase field.
+func (r *mutationResolver) AddDatabase(ctx context.Context, input model.AddDatabaseInput) (*model.AddDatabasePayload, error) {
+	info := conv.InputToInfo(input)
+
+	err := r.Providers.DB.Register(ctx, info)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.AddDatabasePayload{
+		MutationID: input.MutationID,
+		ID:         info.ID,
 	}, nil
 }
 
 // Database is the resolver for the database field.
 func (r *resourceGrantInputResolver) Database(ctx context.Context, obj *model.ResourceGrantInput, data []*model.DatabaseResource) error {
 	// TODO implement this
-	log.Printf("Database grant...")
+	event := r.Logger.Debug().Any("input", obj)
+
 	for _, d := range data {
 		if d.Info != nil {
 			switch *d.Info {
 			case model.AccessTypeReadOnly:
-				if err := r.Providers.DbRbac.ReadInfo(ctx, d.ID); err != nil {
-					log.Printf("Database grant - read info access denied!")
+				if err := r.Providers.DbRbac.ReadInfo(ctx, obj.Env, d.ID); err != nil {
+					event.Err(err).Msg("Database access denied")
 					return err
 				}
 			}
 		}
 	}
 
-	log.Printf("Database grant - access granted!")
+	event.Msg("Database access granted")
 	return nil
 }
 

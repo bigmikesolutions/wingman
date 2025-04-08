@@ -4,13 +4,16 @@ SET search_path TO provider_db;
 CREATE TABLE IF NOT EXISTS "user_role" (
     id TEXT PRIMARY KEY,
 
+    env         TEXT NOT NULL,
+    org_id      TEXT NOT NULL,
+    database_id TEXT NOT NULL,
+
     created_at TIMESTAMP WITH TIME ZONE,
     created_by TEXT,
     updated_at TIMESTAMP WITH TIME ZONE,
     updated_by TEXT,
 
     description TEXT,
-    database_id TEXT,
     info VARCHAR(50),
     tables JSONB
 );

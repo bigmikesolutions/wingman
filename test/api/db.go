@@ -4,10 +4,27 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bigmikesolutions/wingman/graphql/model/cursor"
-
 	"github.com/bigmikesolutions/wingman/graphql/model"
+	"github.com/bigmikesolutions/wingman/graphql/model/cursor"
 )
+
+func (s *HTTPServer) AddDatabaseMutation(
+	ctx context.Context,
+	input model.AddDatabaseInput,
+) (*model.AddDatabasePayload, error) {
+	var mutation struct {
+		model.AddDatabasePayload `graphql:"addDatabase(input: $input)"`
+	}
+
+	err := s.graphql.Mutate(ctx, &mutation, map[string]interface{}{
+		"input": input,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &mutation.AddDatabasePayload, nil
+}
 
 func (s *HTTPServer) DatabaseInfoQuery(ctx context.Context, env string, id string) (*model.Database, error) {
 	query := `
@@ -39,6 +56,10 @@ query($env: EnvironmentID!, $databaseID:String!) {
 
 	if len(response.Errors) > 0 {
 		return nil, fmt.Errorf("graphql error: %+v", response.Errors)
+	}
+
+	if response.Data.Environment == nil {
+		return nil, nil
 	}
 
 	return response.Data.Environment.Database, nil

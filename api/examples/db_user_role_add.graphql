@@ -1,6 +1,7 @@
 mutation {
     addDatabaseUserRole(input: {
         mutationId: "sample-db-create-user-role"
+        environment: "test"
         userRoles: [
             {
                 id: "db-read-only"

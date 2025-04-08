@@ -35,13 +35,14 @@ input DatabaseAccessInput  {
 }
 
 input AddDatabaseUserRole {
-    id: String
+    id: String!
     description: String
     databaseAccess: [DatabaseAccessInput]
 }
 
 input AddDatabaseUserRoleInput {
     mutationId: String
+    environment: EnvironmentID!
     userRoles: [AddDatabaseUserRole!]!
 }
 

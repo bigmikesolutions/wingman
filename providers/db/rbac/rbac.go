@@ -3,12 +3,15 @@ package rbac
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/bigmikesolutions/wingman/server/a10n"
 )
 
 type (
 	userRoleRepo interface {
 		CreateUserRole(ctx context.Context, role UserRole) error
-		FindUserRolesByDatabaseID(ctx context.Context, id string) ([]UserRole, error)
+		FindUserRolesByDatabaseID(ctx context.Context, orgID string, env string, id string) ([]UserRole, error)
 		Close() error
 	}
 
@@ -24,12 +27,29 @@ func New(repo userRoleRepo) *Service {
 }
 
 func (s *Service) CreateUserRole(ctx context.Context, role UserRole) error {
-	// TODO check user rights
+	user, err := a10n.GetIdentity(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := user.ContainsRole(a10n.AdminWrite); err != nil {
+		return err
+	}
+
+	role.OrgID = user.OrgID
+	role.CreatedBy = user.UserID
+	role.CreatedAt = time.Now()
+
 	return s.repo.CreateUserRole(ctx, role)
 }
 
-func (s *Service) ReadInfo(ctx context.Context, dbID string) error {
-	roles, err := s.repo.FindUserRolesByDatabaseID(ctx, dbID)
+func (s *Service) ReadInfo(ctx context.Context, env string, dbID string) error {
+	user, err := a10n.GetIdentity(ctx)
+	if err != nil {
+		return err
+	}
+
+	roles, err := s.repo.FindUserRolesByDatabaseID(ctx, user.OrgID, env, dbID)
 	if err != nil {
 		return ErrDatabaseAccessDenied
 	}
@@ -50,12 +70,16 @@ func (s *Service) ReadInfo(ctx context.Context, dbID string) error {
 }
 
 func (s *Service) WriteInfo(ctx context.Context) error {
-	// TODO check user rights
-	return nil
+	return a10n.UserAuthorized(ctx, a10n.AdminWrite)
 }
 
-func (s *Service) ReadConnection(ctx context.Context, dbID string) error {
-	roles, rolesErr := s.repo.FindUserRolesByDatabaseID(ctx, dbID)
+func (s *Service) ReadConnection(ctx context.Context, env string, dbID string) error {
+	user, err := a10n.GetIdentity(ctx)
+	if err != nil {
+		return err
+	}
+
+	roles, rolesErr := s.repo.FindUserRolesByDatabaseID(ctx, user.OrgID, env, dbID)
 	if rolesErr != nil {
 		return fmt.Errorf("check database roles: %w", rolesErr)
 	}
@@ -66,8 +90,13 @@ func (s *Service) ReadConnection(ctx context.Context, dbID string) error {
 	return nil
 }
 
-func (s *Service) ReadTable(ctx context.Context, dbID string, tableName string, columns ...string) error {
-	roles, err := s.repo.FindUserRolesByDatabaseID(ctx, dbID)
+func (s *Service) ReadTable(ctx context.Context, env string, dbID string, tableName string, columns ...string) error {
+	user, err := a10n.GetIdentity(ctx)
+	if err != nil {
+		return err
+	}
+
+	roles, err := s.repo.FindUserRolesByDatabaseID(ctx, user.OrgID, env, dbID)
 	if err != nil {
 		return ErrDatabaseAccessDenied
 	}

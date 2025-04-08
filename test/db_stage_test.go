@@ -12,9 +12,9 @@ import (
 
 	"github.com/bigmikesolutions/wingman/graphql/model"
 	"github.com/bigmikesolutions/wingman/graphql/model/cursor"
-	"github.com/bigmikesolutions/wingman/providers/db"
 	"github.com/bigmikesolutions/wingman/server/a10n"
 	"github.com/bigmikesolutions/wingman/test/api"
+	"github.com/bigmikesolutions/wingman/test/containers"
 )
 
 const (
@@ -50,8 +50,9 @@ type DatabaseStage struct {
 	server *api.HTTPServer
 	dbx    *sqlx.DB
 
-	queryDatabase *model.Database
-	err           error
+	addedDatabases map[string]model.AddDatabaseInput
+	queryDatabase  *model.Database
+	err            error
 }
 
 func NewDatabaseStage(t *testing.T) *DatabaseStage {
@@ -60,9 +61,10 @@ func NewDatabaseStage(t *testing.T) *DatabaseStage {
 	require.Nil(t, err, "api server")
 
 	return &DatabaseStage{
-		t:      t,
-		server: server,
-		dbx:    dbx,
+		t:              t,
+		server:         server,
+		dbx:            dbx,
+		addedDatabases: make(map[string]model.AddDatabaseInput),
 	}
 }
 
@@ -129,11 +131,14 @@ func (s *DatabaseStage) ClientErrorIs(expMsg string) *DatabaseStage {
 	return s
 }
 
-func (s *DatabaseStage) DatabaseIsProvided(database db.ConnectionInfo) *DatabaseStage {
+func (s *DatabaseStage) DatabaseHasBeenCreated(database model.AddDatabaseInput) *DatabaseStage {
 	ctx, cancel := testContext()
 	defer cancel()
-	err := s.server.Resolver.Providers.DB.Register(ctx, database)
-	require.Nilf(s.t, err, "register database: %+v", database)
+	payload, err := s.server.AddDatabaseMutation(ctx, database)
+	require.Nilf(s.t, err, "add database client error: %+v", database)
+	require.NotNil(s.t, payload, "add database - no payload")
+	require.Nil(s.t, payload.Error, "add database error")
+	s.addedDatabases[database.ID] = database
 	return s
 }
 
@@ -141,16 +146,18 @@ func (s *DatabaseStage) DatabaseStatement(dbID, statement string, args ...any) *
 	ctx, cancel := testContext()
 	defer cancel()
 
-	info, err := s.server.Resolver.Providers.DB.Info(ctx, dbID)
-	require.NoError(s.t, err, "db info error")
-	require.NotNil(s.t, info, "db info missing")
+	db, ok := s.addedDatabases[dbID]
+	require.True(s.t, ok, "db info missing: %s", dbID)
 
-	conn, err := sqlx.Connect(info.Driver, fmt.Sprintf(
-		"postgres://%s:%s@%s:%d/%s",
-		info.User, info.Pass,
-		info.Host, info.Port,
-		info.Name,
-	))
+	conn, err := sqlx.Connect(
+		containers.PostgresDriverName,
+		fmt.Sprintf(
+			"postgres://%s:%s@%s:%d/%s",
+			db.User, db.Password,
+			db.Host, db.Port,
+			db.Name,
+		),
+	)
 	require.Nilf(s.t, err, "db connection")
 
 	rows, err := conn.QueryxContext(ctx, statement, args...)
@@ -265,4 +272,17 @@ func (s *DatabaseStage) EnvironmentHasBeenCreated(env string) *DatabaseStage {
 func (s *DatabaseStage) UserIdentity(user a10n.UserIdentity) *DatabaseStage {
 	s.server.SetUser(user)
 	return s
+}
+
+func newAddDatabaseInput(env, id string, cfg containers.PostgresCfg) model.AddDatabaseInput {
+	return model.AddDatabaseInput{
+		Env:      env,
+		ID:       id,
+		Host:     containers.GetHost(),
+		Port:     cfg.Port,
+		Driver:   model.DriverTypePostgres,
+		Name:     cfg.Name,
+		User:     cfg.User,
+		Password: cfg.Pass,
+	}
 }

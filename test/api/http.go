@@ -21,8 +21,6 @@ type HTTPServer struct {
 	client     *http.Client
 	graphql    *gql.Client
 	graphqlURL string
-	Resolver   *graphql.Resolver
-	providers  *providers.Providers
 	rt         *a10nRoundTripper
 }
 
@@ -56,8 +54,6 @@ func New(dbx *sqlx.DB, prov *providers.Providers) (*HTTPServer, error) {
 			client,
 		),
 		graphqlURL: graphqlURL,
-		Resolver:   resolver,
-		providers:  prov,
 		rt:         rt,
 	}, nil
 }

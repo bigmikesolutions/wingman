@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/bigmikesolutions/wingman/server/a10n"
+
 	_ "github.com/jackc/pgx/v5/stdlib" // drivers
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // drivers
@@ -20,9 +22,9 @@ type (
 
 	rbac interface {
 		WriteInfo(ctx context.Context) error
-		ReadInfo(ctx context.Context, dbID string) error
-		ReadConnection(ctx context.Context, dbID string) error
-		ReadTable(ctx context.Context, dbID string, tableName string, columns ...string) error
+		ReadInfo(ctx context.Context, env string, dbID string) error
+		ReadConnection(ctx context.Context, env string, dbID string) error
+		ReadTable(ctx context.Context, env string, dbID string, tableName string, columns ...string) error
 		Close() error
 	}
 
@@ -45,17 +47,23 @@ func (s *Service) Register(ctx context.Context, db ConnectionInfo) error {
 	if err := s.rbac.WriteInfo(ctx); err != nil {
 		return err
 	}
-	return s.storage.Write(ctx, path(db.ID), db)
+
+	user, err := a10n.GetIdentity(ctx)
+	if err != nil {
+		return err
+	}
+
+	return s.storage.Write(ctx, path(user.OrgID, db.Env, db.ID), db)
 }
 
-func (s *Service) Connection(ctx context.Context, id ID) (*Connection, error) {
-	if err := s.rbac.ReadConnection(ctx, id); err != nil {
+func (s *Service) Connection(ctx context.Context, env string, id ID) (*Connection, error) {
+	if err := s.rbac.ReadConnection(ctx, env, id); err != nil {
 		return nil, err
 	}
 
 	conn, ok := s.conns[id]
 	if !ok {
-		dbInfo, err := s.Info(ctx, id)
+		dbInfo, err := s.Info(ctx, env, id)
 		if err != nil {
 			// TODO handle not found error
 			return nil, err
@@ -71,6 +79,7 @@ func (s *Service) Connection(ctx context.Context, id ID) (*Connection, error) {
 
 		conn = &Connection{
 			dbID: id,
+			env:  env,
 			db:   dbx,
 			rbac: s.rbac,
 		}
@@ -79,13 +88,18 @@ func (s *Service) Connection(ctx context.Context, id ID) (*Connection, error) {
 	return conn, nil
 }
 
-func (s *Service) Info(ctx context.Context, id ID) (*ConnectionInfo, error) {
-	if err := s.rbac.ReadInfo(ctx, id); err != nil {
+func (s *Service) Info(ctx context.Context, env string, id ID) (*ConnectionInfo, error) {
+	if err := s.rbac.ReadInfo(ctx, env, id); err != nil {
+		return nil, err
+	}
+
+	user, err := a10n.GetIdentity(ctx)
+	if err != nil {
 		return nil, err
 	}
 
 	conn := &ConnectionInfo{}
-	if err := s.storage.Read(ctx, path(id), &conn); err != nil {
+	if err := s.storage.Read(ctx, path(user.OrgID, env, id), &conn); err != nil {
 		return nil, err
 	}
 	return conn, nil
@@ -95,6 +109,9 @@ func (s *Service) Close() error {
 	return s.rbac.Close()
 }
 
-func path(id ID) string {
-	return fmt.Sprintf("/providers/db/connections/%s", id)
+func path(orgID, env string, id ID) string {
+	return fmt.Sprintf(
+		"/providers/db/organisations/%s/environments/%s/connections/%s",
+		orgID, env, id,
+	)
 }

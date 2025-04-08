@@ -26,13 +26,13 @@ func Test_Database_ShouldGetInfo(t *testing.T) {
 			Roles:  []a10n.Role{a10n.AdminWrite, a10n.AdminRead},
 		}).And().
 		EnvironmentHasBeenCreated(envID).And().
-		// User has env admin role
-		DatabaseIsProvided(connectionInfo(dbID, dbCfg)).And().
+		DatabaseHasBeenCreated(newAddDatabaseInput(envID, dbID, dbCfg)).And().
 		DatabaseUserRoleHasBeenCreated(model.AddDatabaseUserRoleInput{
-			MutationID: ptr(t.Name()),
+			MutationID:  ptr(t.Name()),
+			Environment: envID,
 			UserRoles: []*model.AddDatabaseUserRole{
 				{
-					ID:          ptr(roleID),
+					ID:          roleID,
 					Description: ptr("read-only info access"),
 					DatabaseAccess: []*model.DatabaseAccessInput{
 						{
@@ -78,13 +78,18 @@ func Test_Database_ShouldNotGetInfoForNonExistingEnv(t *testing.T) {
 
 	s.Given().
 		ServerIsUpAndRunning().And().
-		// User has env admin role
-		DatabaseIsProvided(connectionInfo(dbID, dbCfg)).And().
+		UserIdentity(a10n.UserIdentity{
+			UserID: "admin",
+			OrgID:  "bms",
+			Roles:  []a10n.Role{a10n.AdminWrite, a10n.AdminRead},
+		}).And().
+		DatabaseHasBeenCreated(newAddDatabaseInput(envID, dbID, dbCfg)).And().
 		DatabaseUserRoleHasBeenCreated(model.AddDatabaseUserRoleInput{
-			MutationID: ptr(t.Name()),
+			MutationID:  ptr(t.Name()),
+			Environment: envID,
 			UserRoles: []*model.AddDatabaseUserRole{
 				{
-					ID:          ptr(roleID),
+					ID:          roleID,
 					Description: ptr("read-only info access"),
 					DatabaseAccess: []*model.DatabaseAccessInput{
 						{
@@ -130,14 +135,20 @@ func Test_Database_ShouldGetTableData(t *testing.T) {
 
 	s.Given().
 		ServerIsUpAndRunning().And().
-		DatabaseIsProvided(connectionInfo(dbID, dbCfg)).
+		UserIdentity(a10n.UserIdentity{
+			UserID: "admin",
+			OrgID:  "bms",
+			Roles:  []a10n.Role{a10n.AdminWrite, a10n.AdminRead},
+		}).And().
+		DatabaseHasBeenCreated(newAddDatabaseInput(envID, dbID, dbCfg)).
 		DatabaseStatement(dbID, sqlCreateTableStudents).And().
 		DatabaseStatement(dbID, sqlInsertStudents).And().
 		DatabaseUserRoleHasBeenCreated(model.AddDatabaseUserRoleInput{
-			MutationID: ptr(t.Name()),
+			MutationID:  ptr(t.Name()),
+			Environment: envID,
 			UserRoles: []*model.AddDatabaseUserRole{
 				{
-					ID:          ptr(roleID),
+					ID:          roleID,
 					Description: ptr("read-only access"),
 					DatabaseAccess: []*model.DatabaseAccessInput{
 						{
@@ -196,14 +207,20 @@ func Test_Database_ShouldForbidGettingTableData(t *testing.T) {
 
 	s.Given().
 		ServerIsUpAndRunning().And().
-		DatabaseIsProvided(connectionInfo(dbID, dbCfg)).
+		UserIdentity(a10n.UserIdentity{
+			UserID: "admin",
+			OrgID:  "bms",
+			Roles:  []a10n.Role{a10n.AdminWrite, a10n.AdminRead},
+		}).And().
+		DatabaseHasBeenCreated(newAddDatabaseInput(envID, dbID, dbCfg)).
 		DatabaseStatement(dbID, sqlCreateTableStudents).And().
 		DatabaseStatement(dbID, sqlInsertStudents).And().
 		DatabaseUserRoleHasBeenCreated(model.AddDatabaseUserRoleInput{
-			MutationID: ptr(t.Name()),
+			MutationID:  ptr(t.Name()),
+			Environment: envID,
 			UserRoles: []*model.AddDatabaseUserRole{
 				{
-					ID:          ptr(roleID),
+					ID:          roleID,
 					Description: ptr("read-only access"),
 					DatabaseAccess: []*model.DatabaseAccessInput{
 						{

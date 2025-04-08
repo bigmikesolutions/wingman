@@ -7,7 +7,6 @@ package graphql
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/bigmikesolutions/wingman/graphql/generated"
 	"github.com/bigmikesolutions/wingman/graphql/model"
@@ -29,14 +28,10 @@ func (r *mutationResolver) AddK8sUserRole(ctx context.Context, input model.AddK8
 func (r *mutationResolver) AddDatabaseUserRole(ctx context.Context, input model.AddDatabaseUserRoleInput) (*model.AddDatabaseUserRolePayload, error) {
 	// TODO implement this
 	role := input.UserRoles[0]
-	now := time.Now().UTC()
 	newRole := rbac.UserRole{
-		ID:          *role.ID,
+		ID:          role.ID,
+		Env:         input.Environment,
 		Description: role.Description,
-		CreatedAt:   now,
-		UpdatedAt:   now,
-		CreatedBy:   "unknown", // TODO add this info
-		UpdatedBy:   "unknown",
 
 		DatabaseID: role.DatabaseAccess[0].ID,
 		Info:       conv.InternalAccessType(role.DatabaseAccess[0].Info),

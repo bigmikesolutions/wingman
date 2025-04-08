@@ -30,9 +30,9 @@ func (r *UserRoles) CreateUserRole(ctx context.Context, role rbac.UserRole) erro
 	return err
 }
 
-func (r *UserRoles) FindUserRolesByDatabaseID(ctx context.Context, id db.ID) ([]rbac.UserRole, error) {
+func (r *UserRoles) FindUserRolesByDatabaseID(ctx context.Context, orgID string, env string, id db.ID) ([]rbac.UserRole, error) {
 	result := make([]rbac.UserRole, 0)
-	err := r.db.SelectContext(ctx, &result, selectUserRolesByDatabaseID, id)
+	err := r.db.SelectContext(ctx, &result, selectUserRolesByDatabaseByFullID, orgID, env, id)
 	if err != nil {
 		return nil, err
 	}

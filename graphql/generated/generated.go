@@ -61,6 +61,17 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	AddDatabaseError struct {
+		Code    func(childComplexity int) int
+		Message func(childComplexity int) int
+	}
+
+	AddDatabasePayload struct {
+		Error      func(childComplexity int) int
+		ID         func(childComplexity int) int
+		MutationID func(childComplexity int) int
+	}
+
 	AddDatabaseUserRoleError struct {
 		Code    func(childComplexity int) int
 		Message func(childComplexity int) int
@@ -173,6 +184,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		AddDatabase         func(childComplexity int, input model.AddDatabaseInput) int
 		AddDatabaseUserRole func(childComplexity int, input model.AddDatabaseUserRoleInput) int
 		AddK8sUserRole      func(childComplexity int, input model.AddK8sUserRoleInput) int
 		AddUserRoleBinding  func(childComplexity int, input model.AddUserRoleBindingInput) int
@@ -292,6 +304,7 @@ type MutationResolver interface {
 	AddUserRoleBinding(ctx context.Context, input model.AddUserRoleBindingInput) (*model.AddUserRoleBindingPayload, error)
 	SignIn(ctx context.Context, input model.SignInInput) (*model.SignInOutput, error)
 	AddK8sUserRole(ctx context.Context, input model.AddK8sUserRoleInput) (*model.AddK8sUserRolePayload, error)
+	AddDatabase(ctx context.Context, input model.AddDatabaseInput) (*model.AddDatabasePayload, error)
 	AddDatabaseUserRole(ctx context.Context, input model.AddDatabaseUserRoleInput) (*model.AddDatabaseUserRolePayload, error)
 }
 type NamespaceResolver interface {
@@ -335,6 +348,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "AddDatabaseError.code":
+		if e.complexity.AddDatabaseError.Code == nil {
+			break
+		}
+
+		return e.complexity.AddDatabaseError.Code(childComplexity), true
+
+	case "AddDatabaseError.message":
+		if e.complexity.AddDatabaseError.Message == nil {
+			break
+		}
+
+		return e.complexity.AddDatabaseError.Message(childComplexity), true
+
+	case "AddDatabasePayload.error":
+		if e.complexity.AddDatabasePayload.Error == nil {
+			break
+		}
+
+		return e.complexity.AddDatabasePayload.Error(childComplexity), true
+
+	case "AddDatabasePayload.id":
+		if e.complexity.AddDatabasePayload.ID == nil {
+			break
+		}
+
+		return e.complexity.AddDatabasePayload.ID(childComplexity), true
+
+	case "AddDatabasePayload.mutationId":
+		if e.complexity.AddDatabasePayload.MutationID == nil {
+			break
+		}
+
+		return e.complexity.AddDatabasePayload.MutationID(childComplexity), true
 
 	case "AddDatabaseUserRoleError.code":
 		if e.complexity.AddDatabaseUserRoleError.Code == nil {
@@ -795,6 +843,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Environment.ModifiedAt(childComplexity), true
 
+	case "Mutation.addDatabase":
+		if e.complexity.Mutation.AddDatabase == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addDatabase_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddDatabase(childComplexity, args["input"].(model.AddDatabaseInput)), true
+
 	case "Mutation.addDatabaseUserRole":
 		if e.complexity.Mutation.AddDatabaseUserRole == nil {
 			break
@@ -1229,6 +1289,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputAddDatabaseInput,
 		ec.unmarshalInputAddDatabaseUserRole,
 		ec.unmarshalInputAddDatabaseUserRoleInput,
 		ec.unmarshalInputAddK8sUserRole,
@@ -1681,6 +1742,10 @@ extend type Environment {
     database(id: String!): Database @goField(forceResolver: true)
 }
 
+extend type Mutation {
+    addDatabase(input: AddDatabaseInput!): AddDatabasePayload!
+}
+
 type Database @key (fields: "id") {
     id: String!
     info: DatabaseInfo @goField(forceResolver: true)
@@ -1733,6 +1798,35 @@ type TableRow {
     index: Int
     values: [String]
 }
+
+input AddDatabaseInput  {
+    mutationId: ID
+    env: String!
+    id: String!
+    name: String!
+    user: String!
+    password: String!
+    host: String!
+    port: Int!
+    driver: DriverType!
+}
+
+type AddDatabasePayload {
+    mutationId: ID
+    id: String!
+    error: AddDatabaseError
+}
+
+type AddDatabaseError {
+    code: AddDatabaseClientErrorCode!
+    message: String
+}
+
+enum AddDatabaseClientErrorCode {
+    INVALID_INPUT
+    ALREADY_EXISTS
+}
+
 `, BuiltIn: false},
 	{Name: "../../api/providers/db/rbac.graphqls", Input: `extend schema
     @link(url: "https://specs.apollo.dev/federation/v2.4", import: ["@key", "@shareable"])
@@ -1771,13 +1865,14 @@ input DatabaseAccessInput  {
 }
 
 input AddDatabaseUserRole {
-    id: String
+    id: String!
     description: String
     databaseAccess: [DatabaseAccessInput]
 }
 
 input AddDatabaseUserRoleInput {
     mutationId: String
+    environment: EnvironmentID!
     userRoles: [AddDatabaseUserRole!]!
 }
 
@@ -2369,6 +2464,34 @@ func (ec *executionContext) field_Mutation_addDatabaseUserRole_argsInput(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Mutation_addDatabase_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Mutation_addDatabase_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_addDatabase_argsInput(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (model.AddDatabaseInput, error) {
+	if _, ok := rawArgs["input"]; !ok {
+		var zeroVal model.AddDatabaseInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNAddDatabaseInput2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐAddDatabaseInput(ctx, tmp)
+	}
+
+	var zeroVal model.AddDatabaseInput
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_addK8sUserRole_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -2870,6 +2993,208 @@ func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj any, next 
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _AddDatabaseError_code(ctx context.Context, field graphql.CollectedField, obj *model.AddDatabaseError) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AddDatabaseError_code(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Code, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.AddDatabaseClientErrorCode)
+	fc.Result = res
+	return ec.marshalNAddDatabaseClientErrorCode2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐAddDatabaseClientErrorCode(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AddDatabaseError_code(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AddDatabaseError",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type AddDatabaseClientErrorCode does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AddDatabaseError_message(ctx context.Context, field graphql.CollectedField, obj *model.AddDatabaseError) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AddDatabaseError_message(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AddDatabaseError_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AddDatabaseError",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AddDatabasePayload_mutationId(ctx context.Context, field graphql.CollectedField, obj *model.AddDatabasePayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AddDatabasePayload_mutationId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.MutationID, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AddDatabasePayload_mutationId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AddDatabasePayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AddDatabasePayload_id(ctx context.Context, field graphql.CollectedField, obj *model.AddDatabasePayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AddDatabasePayload_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AddDatabasePayload_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AddDatabasePayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AddDatabasePayload_error(ctx context.Context, field graphql.CollectedField, obj *model.AddDatabasePayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AddDatabasePayload_error(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Error, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.AddDatabaseError)
+	fc.Result = res
+	return ec.marshalOAddDatabaseError2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐAddDatabaseError(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AddDatabasePayload_error(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AddDatabasePayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "code":
+				return ec.fieldContext_AddDatabaseError_code(ctx, field)
+			case "message":
+				return ec.fieldContext_AddDatabaseError_message(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AddDatabaseError", field.Name)
+		},
+	}
+	return fc, nil
+}
 
 func (ec *executionContext) _AddDatabaseUserRoleError_code(ctx context.Context, field graphql.CollectedField, obj *model.AddDatabaseUserRoleError) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_AddDatabaseUserRoleError_code(ctx, field)
@@ -5932,6 +6257,66 @@ func (ec *executionContext) fieldContext_Mutation_addK8sUserRole(ctx context.Con
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_addK8sUserRole_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_addDatabase(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_addDatabase(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddDatabase(rctx, fc.Args["input"].(model.AddDatabaseInput))
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.AddDatabasePayload)
+	fc.Result = res
+	return ec.marshalNAddDatabasePayload2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐAddDatabasePayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_addDatabase(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "mutationId":
+				return ec.fieldContext_AddDatabasePayload_mutationId(ctx, field)
+			case "id":
+				return ec.fieldContext_AddDatabasePayload_id(ctx, field)
+			case "error":
+				return ec.fieldContext_AddDatabasePayload_error(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AddDatabasePayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_addDatabase_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -10033,6 +10418,89 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputAddDatabaseInput(ctx context.Context, obj any) (model.AddDatabaseInput, error) {
+	var it model.AddDatabaseInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"mutationId", "env", "id", "name", "user", "password", "host", "port", "driver"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "mutationId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("mutationId"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MutationID = data
+		case "env":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("env"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Env = data
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "user":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.User = data
+		case "password":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Password = data
+		case "host":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("host"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Host = data
+		case "port":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("port"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Port = data
+		case "driver":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("driver"))
+			data, err := ec.unmarshalNDriverType2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐDriverType(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Driver = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputAddDatabaseUserRole(ctx context.Context, obj any) (model.AddDatabaseUserRole, error) {
 	var it model.AddDatabaseUserRole
 	asMap := map[string]any{}
@@ -10049,7 +10517,7 @@ func (ec *executionContext) unmarshalInputAddDatabaseUserRole(ctx context.Contex
 		switch k {
 		case "id":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -10081,7 +10549,7 @@ func (ec *executionContext) unmarshalInputAddDatabaseUserRoleInput(ctx context.C
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"mutationId", "userRoles"}
+	fieldsInOrder := [...]string{"mutationId", "environment", "userRoles"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -10095,6 +10563,13 @@ func (ec *executionContext) unmarshalInputAddDatabaseUserRoleInput(ctx context.C
 				return it, err
 			}
 			it.MutationID = data
+		case "environment":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("environment"))
+			data, err := ec.unmarshalNEnvironmentID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Environment = data
 		case "userRoles":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userRoles"))
 			data, err := ec.unmarshalNAddDatabaseUserRole2ᚕᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐAddDatabaseUserRoleᚄ(ctx, v)
@@ -10778,6 +11253,90 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
+
+var addDatabaseErrorImplementors = []string{"AddDatabaseError"}
+
+func (ec *executionContext) _AddDatabaseError(ctx context.Context, sel ast.SelectionSet, obj *model.AddDatabaseError) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, addDatabaseErrorImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AddDatabaseError")
+		case "code":
+			out.Values[i] = ec._AddDatabaseError_code(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "message":
+			out.Values[i] = ec._AddDatabaseError_message(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var addDatabasePayloadImplementors = []string{"AddDatabasePayload"}
+
+func (ec *executionContext) _AddDatabasePayload(ctx context.Context, sel ast.SelectionSet, obj *model.AddDatabasePayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, addDatabasePayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AddDatabasePayload")
+		case "mutationId":
+			out.Values[i] = ec._AddDatabasePayload_mutationId(ctx, field, obj)
+		case "id":
+			out.Values[i] = ec._AddDatabasePayload_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "error":
+			out.Values[i] = ec._AddDatabasePayload_error(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
 
 var addDatabaseUserRoleErrorImplementors = []string{"AddDatabaseUserRoleError"}
 
@@ -11941,6 +12500,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "addK8sUserRole":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_addK8sUserRole(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "addDatabase":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_addDatabase(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -13115,6 +13681,35 @@ func (ec *executionContext) marshalNAccessType2githubᚗcomᚋbigmikesolutions�
 	return v
 }
 
+func (ec *executionContext) unmarshalNAddDatabaseClientErrorCode2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐAddDatabaseClientErrorCode(ctx context.Context, v any) (model.AddDatabaseClientErrorCode, error) {
+	var res model.AddDatabaseClientErrorCode
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNAddDatabaseClientErrorCode2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐAddDatabaseClientErrorCode(ctx context.Context, sel ast.SelectionSet, v model.AddDatabaseClientErrorCode) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNAddDatabaseInput2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐAddDatabaseInput(ctx context.Context, v any) (model.AddDatabaseInput, error) {
+	res, err := ec.unmarshalInputAddDatabaseInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNAddDatabasePayload2githubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐAddDatabasePayload(ctx context.Context, sel ast.SelectionSet, v model.AddDatabasePayload) graphql.Marshaler {
+	return ec._AddDatabasePayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNAddDatabasePayload2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐAddDatabasePayload(ctx context.Context, sel ast.SelectionSet, v *model.AddDatabasePayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._AddDatabasePayload(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNAddDatabaseUserRole2ᚕᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐAddDatabaseUserRoleᚄ(ctx context.Context, v any) ([]*model.AddDatabaseUserRole, error) {
 	var vSlice []any
 	vSlice = graphql.CoerceList(v)
@@ -14232,6 +14827,13 @@ func (ec *executionContext) marshalOAccessType2ᚖgithubᚗcomᚋbigmikesolution
 		return graphql.Null
 	}
 	return v
+}
+
+func (ec *executionContext) marshalOAddDatabaseError2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐAddDatabaseError(ctx context.Context, sel ast.SelectionSet, v *model.AddDatabaseError) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._AddDatabaseError(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOAddDatabaseUserRoleError2ᚖgithubᚗcomᚋbigmikesolutionsᚋwingmanᚋgraphqlᚋmodelᚐAddDatabaseUserRoleError(ctx context.Context, sel ast.SelectionSet, v *model.AddDatabaseUserRoleError) graphql.Marshaler {

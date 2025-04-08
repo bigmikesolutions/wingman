@@ -20,7 +20,9 @@ type (
 	TablesScopes []TableScope
 
 	UserRole struct {
-		ID RoleID `db:"id"`
+		ID    RoleID `db:"id"`
+		OrgID string `db:"org_id"`
+		Env   string `db:"env"`
 
 		CreatedAt time.Time `db:"created_at"`
 		CreatedBy string    `db:"created_by"`
@@ -42,6 +44,7 @@ const (
 )
 
 func (a *UserRole) CanReadTable(name string, columns ...string) bool {
+	// TODO add checks for columns here
 	for _, table := range a.Tables {
 		if table.Name == name {
 			// TODO check columns here

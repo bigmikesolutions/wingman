@@ -8,7 +8,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 
-	"github.com/bigmikesolutions/wingman/providers/db"
 	"github.com/bigmikesolutions/wingman/test/containers"
 )
 
@@ -21,18 +20,6 @@ const (
 
 func testContext() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), clientTimeout)
-}
-
-func connectionInfo(id string, cfg containers.PostgresCfg) db.ConnectionInfo {
-	return db.ConnectionInfo{
-		ID:     id,
-		Host:   containers.GetHost(),
-		Port:   cfg.Port,
-		Driver: containers.PostgresDriverName,
-		Name:   cfg.Name,
-		User:   cfg.User,
-		Pass:   cfg.Pass,
-	}
 }
 
 func cleanTables(dbx *sqlx.DB, tables []string) {
