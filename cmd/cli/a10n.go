@@ -2,32 +2,60 @@ package main
 
 import (
 	"context"
+	"errors"
 	"os"
-	"time"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
 	"github.com/bigmikesolutions/wingman/client/a10n"
+	"github.com/bigmikesolutions/wingman/client/vault"
 )
 
-var token *a10n.TokenResponse
+var authCmd = &cobra.Command{
+	Use:   "auth",
+	Short: "Authenticate device",
+
+	Run: func(cmd *cobra.Command, args []string) {
+		authenticate(cmd, args)
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(authCmd)
+}
+
+func checkAndAuthenticate(cmd *cobra.Command, args []string) {
+	store := vault.New()
+	var token a10n.TokenResponse
+	if err := store.GetAccessToken(&token); err != nil {
+		if !errors.Is(err, vault.ErrNotFound) {
+			log.Fatal().Err(err).Msg("store: get access token failed")
+		}
+	}
+
+	if token.HasExpired() {
+		authenticate(cmd, args)
+	}
+}
 
 func authenticate(cmd *cobra.Command, args []string) {
-	if token == nil {
-		cfg.A10N.ClientID = "wingman" // TODO: for debug purposes. to be removed!
+	cfg.A10N.ClientID = "wingman" // TODO: for debug purposes. to be removed!
 
-		a10nDev := a10n.NewDevice(cfg.A10N.Opts()...)
+	device := a10n.NewDevice(cfg.A10N.Opts()...)
 
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.A10N.MaxTime)
+	defer cancel()
 
-		t, err := a10nDev.Auth(ctx, os.Stdout)
-		if err != nil {
-			logger.Panic().Err(err).Msg("failed to authenticate")
-		}
+	t, err := device.Auth(ctx, os.Stdout)
+	if err != nil {
+		logger.Panic().Err(err).Msg("failed to authenticate")
+	}
 
-		log.Info().Any("token", t).Msg("authenticated")
-		token = &t
+	log.Debug().Msg("authenticated")
+
+	store := vault.New()
+	if err := store.SetAccessToken(t); err != nil {
+		logger.Fatal().Err(err).Msg("store: set access token failed")
 	}
 }

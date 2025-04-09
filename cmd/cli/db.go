@@ -9,7 +9,7 @@ var dbCmd = &cobra.Command{
 	Use:   "db",
 	Short: "Database access",
 
-	PreRun: authenticate,
+	PreRun: checkAndAuthenticate,
 
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Info().Msg("not implemented yet")

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/kelseyhightower/envconfig"
 
@@ -15,9 +16,10 @@ type (
 	}
 
 	A10Config struct {
-		KeycloakEndpoint string `envconfig:"A10N_KEYCLOAK" default:"http://localhost:8080/"`
-		Realm            string `envconfig:"A10N_REALM" default:"wingman"`
-		ClientID         string `envconfig:"A10N_CLIENT"`
+		KeycloakEndpoint string        `envconfig:"A10N_KEYCLOAK" default:"http://localhost:8080/"`
+		Realm            string        `envconfig:"A10N_REALM" default:"wingman"`
+		ClientID         string        `envconfig:"A10N_CLIENT"`
+		MaxTime          time.Duration `envconfig:"A10N_MAX_TIME" default:"30s"`
 	}
 )
 

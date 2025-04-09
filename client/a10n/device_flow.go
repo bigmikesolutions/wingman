@@ -30,11 +30,13 @@ type (
 	}
 
 	TokenResponse struct {
-		AccessToken string `json:"access_token"`
-		IDToken     string `json:"id_token"`
-		ExpiresIn   int    `json:"expires_in"`
-		TokenType   string `json:"token_type"`
-		Error       string `json:"error"`
+		AccessToken    string    `json:"access_token"`
+		IDToken        string    `json:"id_token"`
+		TokenType      string    `json:"token_type"`
+		Error          string    `json:"error"`
+		ExpiresIn      int       `json:"expires_in"`
+		IssuedAt       time.Time `json:"issued_at"`
+		ExpirationTime time.Time `json:"expiration_time"`
 	}
 
 	settings struct {
@@ -181,6 +183,9 @@ func (d *Device) requestToken(ctx context.Context, deviceCode string) (TokenResp
 		return TokenResponse{}, err
 	}
 
+	token.IssuedAt = time.Now()
+	token.ExpirationTime = token.IssuedAt.Add(time.Duration(token.ExpiresIn) * time.Second)
+
 	return token, nil
 }
 
@@ -222,4 +227,8 @@ func (d *Device) requestDeviceCode(ctx context.Context) (deviceCodeResponse, err
 		return deviceCodeResponse{}, fmt.Errorf("device code error: %w", err)
 	}
 	return res, nil
+}
+
+func (t TokenResponse) HasExpired() bool {
+	return time.Now().After(t.ExpirationTime)
 }
