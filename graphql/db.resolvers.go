@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/bigmikesolutions/wingman/graphql/generated"
+	"github.com/bigmikesolutions/wingman/graphql/graphqlctx"
 	"github.com/bigmikesolutions/wingman/graphql/model"
 	"github.com/bigmikesolutions/wingman/graphql/model/cursor"
 	"github.com/bigmikesolutions/wingman/providers/db/conv"
@@ -16,8 +17,12 @@ import (
 
 // Info is the resolver for the info field.
 func (r *databaseResolver) Info(ctx context.Context, obj *model.Database) (*model.DatabaseInfo, error) {
-	// TODO find env value here
-	info, err := r.Providers.DB.Info(ctx, "test-env", obj.ID)
+	env, err := graphqlctx.Environment(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	info, err := r.Providers.DB.Info(ctx, env, obj.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -35,8 +40,13 @@ func (r *databaseResolver) Info(ctx context.Context, obj *model.Database) (*mode
 
 // Table is the resolver for the table field.
 func (r *databaseResolver) Table(ctx context.Context, obj *model.Database, name string, first *int, after *cursor.Cursor, where *model.TableFilter) (*model.TableDataConnection, error) {
+	env, err := graphqlctx.Environment(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	// TODO finalise logic implementation here
-	db, err := r.Providers.DB.Connection(ctx, "", obj.ID)
+	db, err := r.Providers.DB.Connection(ctx, env, obj.ID)
 	if err != nil {
 		return nil, err
 	}

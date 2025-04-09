@@ -63,7 +63,7 @@ func (s *Service) ReadInfo(ctx context.Context, env string, dbID string) error {
 	}
 
 	if !canRead {
-		return ErrTableAccessDenied
+		return ErrDatabaseInfoDenied
 	}
 
 	return nil

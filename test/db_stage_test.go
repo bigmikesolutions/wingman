@@ -168,6 +168,11 @@ func (s *DatabaseStage) DatabaseStatement(dbID, statement string, args ...any) *
 	return s
 }
 
+func (s *DatabaseStage) NoDataIsReturned() *DatabaseStage {
+	assert.Nil(s.t, s.queryDatabase, "query database must be empty")
+	return s
+}
+
 func (s *DatabaseStage) DatabaseInfoIsReturned(dbID, driver string) *DatabaseStage {
 	require.NotNil(s.t, s.queryDatabase, "query database is nil")
 
@@ -176,6 +181,13 @@ func (s *DatabaseStage) DatabaseInfoIsReturned(dbID, driver string) *DatabaseSta
 	assert.Equal(s.t, driver, string(s.queryDatabase.Info.Driver), "database info: driver")
 	assert.Equal(s.t, "localhost", s.queryDatabase.Info.Host, "database info: host")
 	assert.NotEqual(s.t, 0, s.queryDatabase.Info.Port, "database info: port")
+	return s
+}
+
+func (s *DatabaseStage) DatabaseInfoIsEmpty() *DatabaseStage {
+	require.NotNil(s.t, s.queryDatabase, "query database is nil")
+
+	assert.Nil(s.t, s.queryDatabase.Info, "database info must be empty")
 	return s
 }
 

@@ -63,7 +63,7 @@ func (s *Service) Connection(ctx context.Context, env string, id ID) (*Connectio
 
 	conn, ok := s.conns[id]
 	if !ok {
-		dbInfo, err := s.Info(ctx, env, id)
+		dbInfo, err := s.info(ctx, env, id)
 		if err != nil {
 			// TODO handle not found error
 			return nil, err
@@ -93,6 +93,10 @@ func (s *Service) Info(ctx context.Context, env string, id ID) (*ConnectionInfo,
 		return nil, err
 	}
 
+	return s.info(ctx, env, id)
+}
+
+func (s *Service) info(ctx context.Context, env string, id ID) (*ConnectionInfo, error) {
 	user, err := a10n.GetIdentity(ctx)
 	if err != nil {
 		return nil, err

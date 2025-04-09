@@ -120,7 +120,7 @@ func Test_Database_ShouldNotGetInfoForNonExistingEnv(t *testing.T) {
 		DatabaseInfoQuery(envID, dbID)
 
 	s.Then().
-		ClientErrorIs("environment not found")
+		NoDataIsReturned()
 }
 
 func Test_Database_ShouldGetTableData(t *testing.T) {
@@ -140,6 +140,7 @@ func Test_Database_ShouldGetTableData(t *testing.T) {
 			OrgID:  "bms",
 			Roles:  []a10n.Role{a10n.AdminWrite, a10n.AdminRead},
 		}).And().
+		EnvironmentHasBeenCreated(envID).And().
 		DatabaseHasBeenCreated(newAddDatabaseInput(envID, dbID, dbCfg)).
 		DatabaseStatement(dbID, sqlCreateTableStudents).And().
 		DatabaseStatement(dbID, sqlInsertStudents).And().
@@ -163,6 +164,26 @@ func Test_Database_ShouldGetTableData(t *testing.T) {
 					},
 				},
 			},
+		}).And().
+		EnvGrantMutation(model.EnvGrantInput{
+			MutationID: ptr(t.Name()),
+			Reason:     ptr("testing..."),
+			Resource: []*model.ResourceGrantInput{
+				{
+					Env: envID,
+					Database: []*model.DatabaseResource{
+						{
+							ID: dbID,
+							Table: []*model.TableResource{
+								{
+									Name:       sqlTableStudents,
+									AccessType: ptr(model.AccessTypeReadOnly),
+								},
+							},
+						},
+					},
+				},
+			},
 		})
 
 	s.When().
@@ -177,7 +198,7 @@ func Test_Database_ShouldGetTableData(t *testing.T) {
 
 	s.Then().
 		NoClientError().And().
-		DatabaseInfoIsReturned(dbID, expDriverPostgres).And().
+		DatabaseInfoIsEmpty().And().
 		TableQueryHasNextPage(false).And().
 		TableHasRows(
 			model.TableRow{
@@ -248,5 +269,5 @@ func Test_Database_ShouldForbidGettingTableData(t *testing.T) {
 		)
 
 	s.Then().
-		ClientErrorIs("database access denied") // TODO make client errors user friendly
+		ClientErrorIs("no active environment session") // TODO make client errors user friendly
 }

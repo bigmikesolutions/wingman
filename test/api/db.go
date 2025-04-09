@@ -79,12 +79,6 @@ query($env: EnvironmentID!, $databaseID: String!, $tableName: String!, $first: I
 	environment(id: $env) {
 		database(id: $databaseID) {
 			id
-			info {
-				id
-                host
-                port
-                driver
-            }
 			table(name: $tableName, first: $first, after: $after, where: $where) {
 				connectionInfo {
 					endCursor
@@ -120,6 +114,10 @@ query($env: EnvironmentID!, $databaseID: String!, $tableName: String!, $first: I
 
 	if len(response.Errors) > 0 {
 		return nil, fmt.Errorf("graphql error: %+v", response.Errors)
+	}
+
+	if response.Data.Environment == nil {
+		return nil, nil
 	}
 
 	return response.Data.Environment.Database, nil
