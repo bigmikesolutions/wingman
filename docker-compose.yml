@@ -39,7 +39,7 @@ services:
       - "traefik.http.routers.wingman.rule=PathPrefix(`/`)"
       - "traefik.http.routers.wingman.entrypoints=web"
       - "traefik.http.services.wingman.loadbalancer.server.port=8080"
-      - "traefik.http.routers.wingman.middlewares=oauth2-proxy"
+      - "traefik.http.routers.wingman.service=oauth2-proxy"
 
   postgres:
     container_name: wingman_postgres
