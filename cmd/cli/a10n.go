@@ -25,7 +25,7 @@ func init() {
 	rootCmd.AddCommand(authCmd)
 }
 
-func checkAndAuthenticate(cmd *cobra.Command, args []string) {
+func getToken() a10n.TokenResponse {
 	store := vault.New()
 	var token a10n.TokenResponse
 	if err := store.GetAccessToken(&token); err != nil {
@@ -33,7 +33,11 @@ func checkAndAuthenticate(cmd *cobra.Command, args []string) {
 			log.Fatal().Err(err).Msg("store: get access token failed")
 		}
 	}
+	return token
+}
 
+func checkAndAuthenticate(cmd *cobra.Command, args []string) {
+	token := getToken()
 	if token.HasExpired() {
 		authenticate(cmd, args)
 	}

@@ -13,13 +13,19 @@ type (
 	Config struct {
 		LogLevel string `envconfig:"LOG_LEVEL" default:"info"`
 		A10N     A10Config
+		HTTP     HTTPConfig
 	}
 
 	A10Config struct {
-		KeycloakEndpoint string        `envconfig:"A10N_KEYCLOAK" default:"http://localhost:8080/"`
+		KeycloakEndpoint string        `envconfig:"A10N_KEYCLOAK" default:"http://keycloak:8080/"`
 		Realm            string        `envconfig:"A10N_REALM" default:"wingman"`
 		ClientID         string        `envconfig:"A10N_CLIENT"`
 		MaxTime          time.Duration `envconfig:"A10N_MAX_TIME" default:"30s"`
+	}
+
+	HTTPConfig struct {
+		Endpoint string        `envconfig:"HTTP_ENDPOINT" default:"http://localhost:8084"`
+		Timeout  time.Duration `envconfig:"HTTP_TIMEOUT" default:"30s"`
 	}
 )
 
