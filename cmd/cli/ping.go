@@ -17,7 +17,7 @@ var pingCmd = &cobra.Command{
 
 		if err := client().Healthcheck(ctx); err != nil {
 			log.Fatal().
-				Str("env", env).
+				Str("env", envName).
 				Err(err).
 				Msg("ping failed")
 		}

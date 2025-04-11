@@ -8,9 +8,9 @@ import (
 )
 
 var (
-	env    string
-	logger zerolog.Logger
-	cfg    Config
+	envName string
+	logger  zerolog.Logger
+	cfg     Config
 )
 
 var rootCmd = &cobra.Command{
@@ -41,5 +41,5 @@ func Execute(log zerolog.Logger) {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&env, "env", "e", "", "Environment name")
+	rootCmd.PersistentFlags().StringVarP(&envName, "env", "e", "", "Environment name")
 }

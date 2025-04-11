@@ -31,11 +31,11 @@ var (
 			ctx, cancel := newCtx()
 			defer cancel()
 
-			resp, err := dbClient().DatabaseInfoQuery(ctx, env, dbParams.Name)
+			resp, err := dbClient().DatabaseInfoQuery(ctx, envName, dbParams.Name)
 			if err != nil {
 				log.Fatal().
 					Str("name", dbParams.Name).
-					Str("env", env).
+					Str("env", envName).
 					Err(err).
 					Msg("database info query error")
 			}
