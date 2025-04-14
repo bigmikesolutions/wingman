@@ -53,7 +53,9 @@ func (s *Service) Register(ctx context.Context, db ConnectionInfo) error {
 		return err
 	}
 
-	return s.storage.Write(ctx, path(user.OrgID, db.Env, db.ID), db)
+	db.OrgID = user.OrgID
+
+	return s.storage.Write(ctx, path(db.OrgID, db.Env, db.ID), db)
 }
 
 func (s *Service) Connection(ctx context.Context, env string, id ID) (*Connection, error) {
