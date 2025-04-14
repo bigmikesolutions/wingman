@@ -120,21 +120,24 @@ func (r *mutationResolver) AddDatabase(ctx context.Context, input model.AddDatab
 // Database is the resolver for the database field.
 func (r *resourceGrantInputResolver) Database(ctx context.Context, obj *model.ResourceGrantInput, data []*model.DatabaseResource) error {
 	// TODO implement this
-	event := r.Logger.Debug().Any("input", obj)
+	event := r.reqLog(ctx).With().
+		Any("request.input", obj).
+		Any("request.data", data).
+		Logger()
 
 	for _, d := range data {
 		if d.Info != nil {
 			switch *d.Info {
 			case model.AccessTypeReadOnly:
 				if err := r.Providers.DbRbac.ReadInfo(ctx, obj.Env, d.ID); err != nil {
-					event.Err(err).Msg("Database access denied")
+					event.Info().Err(err).Msg("Database access denied")
 					return err
 				}
 			}
 		}
 	}
 
-	event.Msg("Database access granted")
+	event.Debug().Msg("Database access granted")
 	return nil
 }
 

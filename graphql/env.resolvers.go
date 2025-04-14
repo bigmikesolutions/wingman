@@ -16,7 +16,7 @@ import (
 func (r *mutationResolver) EnvGrant(ctx context.Context, input model.EnvGrantInput) (*model.EnvGrantPayload, error) {
 	token, err := r.Tokens.Create(map[string]any{})
 	if err != nil {
-		r.Logger.Error().Err(err).Msg("Env grant error")
+		r.reqLog(ctx).Error().Err(err).Msg("Env grant error")
 		return nil, err
 	}
 

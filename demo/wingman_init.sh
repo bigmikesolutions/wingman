@@ -3,7 +3,7 @@ set -e
 
 PGPASSWORD=pass psql -v ON_ERROR_STOP=1 -h localhost -p 5432 --username "admin" --dbname "wingman" <<-EOSQL
 
-DROP DATABASE "test-db-1";
+-- DROP DATABASE "test-db-1";
 CREATE DATABASE "test-db-1";
 GRANT ALL PRIVILEGES ON DATABASE "test-db-1" TO admin;
 

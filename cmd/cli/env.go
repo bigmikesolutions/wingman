@@ -67,7 +67,7 @@ The procedure looks like following:
 			ctx, cancel := newCtx()
 			defer cancel()
 
-			resp, err := envClient().EnvGrantMutation(ctx, model.EnvGrantInput{
+			input := model.EnvGrantInput{
 				Resource: []*model.ResourceGrantInput{
 					{
 						Env: envName,
@@ -79,11 +79,13 @@ The procedure looks like following:
 						},
 					},
 				},
-			})
+			}
+
+			resp, err := envClient().EnvGrantMutation(ctx, input)
 			if err != nil {
 				log.Fatal().
-					Str("name", dbParams.Name).
 					Str("env", envName).
+					Any("input", input).
 					Err(err).
 					Msg("environment grant server error")
 				return
