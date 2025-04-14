@@ -51,7 +51,7 @@ func (s *Service) ReadInfo(ctx context.Context, env string, dbID string) error {
 
 	roles, err := s.repo.FindUserRolesByDatabaseID(ctx, user.OrgID, env, dbID)
 	if err != nil {
-		return ErrDatabaseAccessDenied
+		return fmt.Errorf("%w: %s", ErrDatabaseAccessDenied, err.Error())
 	}
 
 	canRead := false
@@ -98,7 +98,7 @@ func (s *Service) ReadTable(ctx context.Context, env string, dbID string, tableN
 
 	roles, err := s.repo.FindUserRolesByDatabaseID(ctx, user.OrgID, env, dbID)
 	if err != nil {
-		return ErrDatabaseAccessDenied
+		return fmt.Errorf("%w: %s", ErrDatabaseAccessDenied, err.Error())
 	}
 
 	canRead := false

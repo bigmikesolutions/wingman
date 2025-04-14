@@ -24,10 +24,10 @@ type (
 		OrgID string `db:"org_id"`
 		Env   string `db:"env"`
 
-		CreatedAt time.Time `db:"created_at"`
-		CreatedBy string    `db:"created_by"`
-		UpdatedAt time.Time `db:"updated_at"`
-		UpdatedBy string    `db:"updated_by"`
+		CreatedAt time.Time  `db:"created_at"`
+		CreatedBy string     `db:"created_by"`
+		UpdatedAt *time.Time `db:"updated_at"`
+		UpdatedBy *string    `db:"updated_by"`
 
 		Description *string `db:"description"`
 		DatabaseID  string  `db:"database_id"`

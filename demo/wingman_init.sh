@@ -21,9 +21,9 @@ SET search_path TO provider_db;
 DELETE FROM user_role;
 
 INSERT INTO
-  user_role(id, org_id, env, database_id, info, tables)
+  user_role(id, org_id, env, database_id, info, tables, created_at, created_by)
 VALUES
-  ('test', 'bms', 'test', 'test-db-1', 'read_only', '[{"Name":"students", "Columns":[], "AccessType":"read_only"}]');
+  ('test', 'bms', 'test', 'test-db-1', 'read_only', '[{"Name":"students", "Columns":[], "AccessType":"read_only"}]', now(), 'scripts');
 
 
 EOSQL
