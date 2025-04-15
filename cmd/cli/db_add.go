@@ -1,10 +1,9 @@
 package main
 
 import (
-	"github.com/bigmikesolutions/wingman/graphql/model"
-
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
+
+	"github.com/bigmikesolutions/wingman/graphql/model"
 )
 
 var dbAddCmd = &cobra.Command{
@@ -30,7 +29,7 @@ var dbAddCmd = &cobra.Command{
 
 		resp, err := dbClient().AddDatabaseMutation(ctx, input)
 		if err != nil {
-			log.Fatal().
+			logger.Fatal().
 				Str("env", envName).
 				Any("input", input).
 				Err(err).
@@ -38,7 +37,7 @@ var dbAddCmd = &cobra.Command{
 		}
 
 		if resp.Error != nil {
-			log.Fatal().
+			logger.Fatal().
 				Str("env", envName).
 				Any("input", input).
 				Any("resp", resp).

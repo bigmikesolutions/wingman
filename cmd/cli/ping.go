@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -16,7 +15,7 @@ var pingCmd = &cobra.Command{
 		defer cancel()
 
 		if err := client().Healthcheck(ctx); err != nil {
-			log.Fatal().
+			logger.Fatal().
 				Str("env", envName).
 				Err(err).
 				Msg("ping failed")

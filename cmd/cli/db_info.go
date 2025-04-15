@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -19,7 +18,7 @@ var dbInfoCmd = &cobra.Command{
 
 		resp, err := dbClient().DatabaseInfoQuery(ctx, envName, dbParams.Name)
 		if err != nil {
-			log.Fatal().
+			logger.Fatal().
 				Str("name", dbParams.Name).
 				Str("env", envName).
 				Err(err).

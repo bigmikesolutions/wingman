@@ -117,7 +117,7 @@ func (s *Service) Close() error {
 
 func path(orgID, env string, id ID) string {
 	return fmt.Sprintf(
-		"/providers/db/organisations/%s/environments/%s/connections/%s",
+		"secret/providers/db/organisations/%s/environments/%s/connections/%s",
 		orgID, env, id,
 	)
 }

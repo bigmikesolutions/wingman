@@ -3,7 +3,7 @@ set -e
 
 PGPASSWORD=pass psql -v ON_ERROR_STOP=1 -h localhost -p 5432 --username "admin" --dbname "wingman" <<-EOSQL
 
-DROP DATABASE "test-db-1";
+-- DROP DATABASE "test-db-1";
 CREATE DATABASE "test-db-1";
 GRANT ALL PRIVILEGES ON DATABASE "test-db-1" TO admin;
 
@@ -50,12 +50,4 @@ export VAULT_ADDR=http://127.0.0.1:8200
 vault login root
 vault kv put \
   secret/providers/db/organisations/bms/environments/test/connections/test-db-1 \
-    id="test-db-1" \
-    env="test-env" \
-    org_id="bms" \
-    driver="pgx" \
-    host="localhost" \
-    name="test-db-1" \
-    port=5432 \
-    user="admin" \
-    pass="pass"
+  value='{"id":"test-db-1","env":"test-env","org_id":"bms","driver":"pgx","host":"localhost","name":"test-db-1","port":5432,"user":"admin","pass":"pass"}'

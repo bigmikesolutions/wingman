@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
 	"github.com/bigmikesolutions/wingman/client/vault"
@@ -50,7 +49,7 @@ The procedure looks like following:
 
 			resp, err := envClient().EnvGrantMutation(ctx, input)
 			if err != nil {
-				log.Fatal().
+				logger.Fatal().
 					Str("env", envName).
 					Any("input", input).
 					Err(err).
@@ -59,7 +58,7 @@ The procedure looks like following:
 			}
 
 			if resp.Error != nil {
-				log.Fatal().
+				logger.Fatal().
 					Any("error", resp.Error.Message).
 					Str("error_code", string(resp.Error.Code)).
 					Msg("environment grant client error")
