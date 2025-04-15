@@ -2,15 +2,26 @@ package main
 
 import (
 	"context"
+	"time"
 
+	"github.com/bigmikesolutions/wingman/client/a10n"
 	"github.com/bigmikesolutions/wingman/client/graphqlclient"
 )
 
 func client() *graphqlclient.Client {
-	token := getToken()
+	accessToken := getToken()
+	envToken := getEnvToken()
 
 	a10nRoundTrip := &graphqlclient.A10NRoundTrip{}
-	a10nRoundTrip.SetAccessToken(token.TokenType, token.AccessToken)
+	a10nRoundTrip.SetAccessToken(accessToken.TokenType, accessToken.AccessToken)
+
+	if envToken != nil {
+		if expTime, err := a10n.GetExpirationDate(*envToken.Token); err != nil {
+			logger.Debug().Err(err).Msg("GraphQL client - unable to get expiration date for env token")
+		} else if expTime.After(time.Now()) {
+			a10nRoundTrip.SetEnvToken(*envToken.Token)
+		}
+	}
 
 	c, err := graphqlclient.New(
 		cfg.HTTP.Endpoint,

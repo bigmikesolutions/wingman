@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hashicorp/vault-client-go"
 	"github.com/hashicorp/vault-client-go/schema"
+
+	"github.com/hashicorp/vault-client-go"
 	"github.com/rs/zerolog"
 )
 
@@ -51,7 +52,7 @@ func (s *Secrets) Read(ctx context.Context, path string, v any) error {
 	t := s.logger.Trace()
 	if t.Enabled() {
 		t.Str("path", path).
-			Any("secret", sv.Data.Data).
+			Any("secret", sv.Data).
 			Msg("read secret")
 	}
 
@@ -71,7 +72,7 @@ func (s *Secrets) Write(ctx context.Context, path string, v any) error {
 	t := s.logger.Trace()
 	if t.Enabled() {
 		t.Str("path", path).
-			Any("secret", v).
+			Any("secret", sv).
 			Msg("write secret")
 	}
 

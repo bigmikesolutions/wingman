@@ -3,7 +3,7 @@ set -e
 
 PGPASSWORD=pass psql -v ON_ERROR_STOP=1 -h localhost -p 5432 --username "admin" --dbname "wingman" <<-EOSQL
 
--- DROP DATABASE "test-db-1";
+DROP DATABASE "test-db-1";
 CREATE DATABASE "test-db-1";
 GRANT ALL PRIVILEGES ON DATABASE "test-db-1" TO admin;
 
@@ -12,18 +12,18 @@ SET search_path TO wingman;
 DELETE FROM environments;
 
 INSERT INTO
-  environments(id, org_id, description, created_at, created_by)
+  environments(id, org_id, description, created_at, created_by, updated_by)
 VALUES
-  ('test', 'bms', 'demo', now(), 'scripts');
+  ('test', 'bms', 'demo', now(), 'scripts', '');
 
 SET search_path TO provider_db;
 
 DELETE FROM user_role;
 
 INSERT INTO
-  user_role(id, org_id, env, database_id, info, tables, created_at, created_by)
+  user_role(id, org_id, env, database_id, info, tables, created_at, created_by, updated_by)
 VALUES
-  ('test', 'bms', 'test', 'test-db-1', 'read_only', '[{"Name":"students", "Columns":[], "AccessType":"read_only"}]', now(), 'scripts');
+  ('test', 'bms', 'test', 'test-db-1', 'read_only', '[{"Name":"students", "Columns":[], "AccessType":"read_only"}]', now(), 'scripts', '');
 
 
 EOSQL
@@ -49,5 +49,13 @@ EOSQL
 export VAULT_ADDR=http://127.0.0.1:8200
 vault login root
 vault kv put \
-  secret/providers/db/organisations/bms/environments/test-env/connections/test-db-1 \
-  value='{"id":"test-db-1","env":"test-env","org_id":"bms","driver":"pgx","host":"localhost","name":"test-db-1","port":5432,"user":"admin","pass":"pass"}'
+  secret/providers/db/organisations/bms/environments/test/connections/test-db-1 \
+    id="test-db-1" \
+    env="test-env" \
+    org_id="bms" \
+    driver="pgx" \
+    host="localhost" \
+    name="test-db-1" \
+    port=5432 \
+    user="admin" \
+    pass="pass"

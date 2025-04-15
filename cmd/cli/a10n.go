@@ -12,6 +12,10 @@ import (
 	"github.com/bigmikesolutions/wingman/client/vault"
 )
 
+const (
+	secretAccessToken = "wingman/access_token"
+)
+
 var authCmd = &cobra.Command{
 	Use:   "auth",
 	Short: "Authenticate device",
@@ -28,9 +32,9 @@ func init() {
 func getToken() a10n.TokenResponse {
 	store := vault.New()
 	var token a10n.TokenResponse
-	if err := store.GetAccessToken(&token); err != nil {
+	if err := store.GetValue(secretAccessToken, &token); err != nil {
 		if !errors.Is(err, vault.ErrNotFound) {
-			log.Fatal().Err(err).Msg("store: get access token failed")
+			logger.Fatal().Err(err).Msg("store: get access token failed")
 		}
 	}
 	return token
@@ -59,7 +63,7 @@ func authenticate(cmd *cobra.Command, args []string) {
 	log.Debug().Msg("authenticated")
 
 	store := vault.New()
-	if err := store.SetAccessToken(t); err != nil {
+	if err := store.SetValue(secretAccessToken, t); err != nil {
 		logger.Fatal().Err(err).Msg("store: set access token failed")
 	}
 }

@@ -9,8 +9,7 @@ import (
 )
 
 const (
-	service           = "wingman"
-	secretAccessToken = "wingman/access_token"
+	service = "wingman"
 )
 
 var ErrNotFound = errors.New("not found")
@@ -21,17 +20,17 @@ func New() *Store {
 	return &Store{}
 }
 
-func (s Store) SetAccessToken(token any) error {
+func (s Store) SetValue(key string, token any) error {
 	b, err := json.Marshal(&token)
 	if err != nil {
 		return err
 	}
 
-	return keyring.Set(service, secretAccessToken, string(b))
+	return keyring.Set(service, key, string(b))
 }
 
-func (s Store) GetAccessToken(token any) error {
-	v, err := keyring.Get(service, secretAccessToken)
+func (s Store) GetValue(key string, token any) error {
+	v, err := keyring.Get(service, key)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			return ErrNotFound
